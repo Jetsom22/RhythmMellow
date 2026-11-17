@@ -70,4 +70,5 @@ export interface GameState {
   /** Offsets (ms) of the most recent dodges, for the debug view. */
   dodgeLog: number[];
   flags: { god: boolean };
+  attack: import('./attack').AttackModule;
 }

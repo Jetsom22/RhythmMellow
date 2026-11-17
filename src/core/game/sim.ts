@@ -3,6 +3,7 @@ import { generateSong } from '../music/song';
 import { Tunables } from '../tunables';
 import { createPlayer, equip, movePlayer, switchInstrument, tryDodge } from './player';
 import { GameEvent, GameState, Input, World } from './types';
+import { autoAttack, Target } from './attack';
 import { stepGimmicks } from './gimmicks';
 import { buildWorld, findTile, isSolid } from './world';
 
@@ -19,7 +20,7 @@ export function createGame(seed: number, tun: Tunables, world: World = buildWorl
     player: createPlayer(start.x, start.y, tun.playerHp),
     started: false, step: 0, time: 0,
     doorOpen: false, boss: null, leadOwner: null,
-    dodgeLog: [], flags: { god: false },
+    dodgeLog: [], flags: { god: false }, attack: autoAttack,
   };
 }
 
@@ -28,7 +29,17 @@ function advance(s: GameState, input: Input, dt: number, stepF: number, ev: Game
   stepGimmicks(s, stepF, ev);
 }
 
-function onStep(_s: GameState, _absStep: number, _ev: GameEvent[]): void {}
+/** Everything the player's attack could aim at right now. */
+function targetsOf(s: GameState): Target[] {
+  const out: Target[] = [];
+  const t = findTile(s.world, 'T');
+  if (t) out.push({ x: t.x, y: t.y, r: 12, takeDamage: () => {} });
+  return out;
+}
+
+function onStep(s: GameState, absStep: number, ev: GameEvent[]): void {
+  ev.push(...s.attack.onStep(s, absStep, targetsOf(s)));
+}
 
 /**
  * Advance the game to song time `heardT`. Every whole step crossed on the way
