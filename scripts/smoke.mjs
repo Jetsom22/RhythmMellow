@@ -51,6 +51,27 @@ const open = async (query) => {
   await page.waitForTimeout(150);
   check('tunables panel opens', await page.isVisible('#panel'));
   check('panel lists every tunable', (await page.locator('#panel input').count()) === Object.keys(await page.evaluate(() => window.__rm.tun)).length);
+  // Hiding and showing the tab must not stack up frame loops.
+  const drawsPerFrame = () => page.evaluate(() => new Promise(res => {
+    const r = window.__rm.renderer, orig = r.draw.bind(r);
+    let draws = 0, frames = 0;
+    r.draw = (...a) => { draws++; return orig(...a); };
+    const tick = () => { if (++frames < 20) requestAnimationFrame(tick); else { r.draw = orig; res(draws / frames); } };
+    requestAnimationFrame(tick);
+  }));
+  await page.evaluate(async () => {
+    for (let i = 0; i < 3; i++) {
+      for (const hidden of [true, false]) {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+        document.dispatchEvent(new Event('visibilitychange'));
+      }
+      // A really hidden tab runs no frames, so the pending frame is still queued on return.
+      await new Promise(r => setTimeout(r, 60));
+    }
+  });
+  await page.waitForTimeout(300);
+  const dpf = await drawsPerFrame();
+  check('one draw per frame after tab switches', dpf > 0.8 && dpf < 1.3, `draws per frame ${dpf.toFixed(2)}`);
   if (SHOTS) await page.screenshot({ path: SHOTS + '/walk.png' });
   await page.keyboard.press('Tab');
   check('tunables panel closes', !(await page.isVisible('#panel')));

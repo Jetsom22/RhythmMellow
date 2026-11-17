@@ -122,3 +122,18 @@ describe('instrument switching', () => {
     expect(s.player.equipped).toBe('drum');
   });
 });
+
+describe('one-shot inputs on a frame where the audio clock did not advance', () => {
+  it('still performs the dodge', () => {
+    const s = gameOn(OPEN_ROOM);
+    const ev = stepGame(s, idle({ dodgeAt: 1.0 }), s.time, GRID);
+    expect(ev.filter(e => e.type === 'dodge')).toHaveLength(1);
+    expect(s.player.dash).not.toBeNull();
+  });
+  it('still switches instrument', () => {
+    const s = gameOn(OPEN_ROOM);
+    s.player.owned = ['drum', 'hat']; s.player.equipped = 'drum';
+    stepGame(s, idle({ switchDir: 1 }), s.time, GRID);
+    expect(s.player.equipped).toBe('hat');
+  });
+});

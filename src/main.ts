@@ -54,9 +54,15 @@ function sound(e: GameEvent): OneShot | null {
 
 let running = false;
 let lastFrame = 0;
+let rafId = 0;
+/** The only way frames are requested: at most one is ever pending. */
+function schedule(): void {
+  cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(frame);
+}
 function frame(now: number): void {
   if (!running) return;
-  if (calibrating) { requestAnimationFrame(frame); return; }
+  if (calibrating) { schedule(); return; }
   rm.fps = rm.fps * 0.9 + (1000 / Math.max(1, now - lastFrame)) * 0.1;
   lastFrame = now;
   const heard = heardTime(engine.now(), tun);
@@ -73,7 +79,7 @@ function frame(now: number): void {
   const beat = stepF / 4;
   renderer.draw(state, beat - Math.floor(beat), stepF, events);
   if (debugOn) drawDebug(renderer.ctx, state, engine.grid, heard, rm.fps, engine.outputLatencyMs(), renderer.width, renderer.height);
-  requestAnimationFrame(frame);
+  schedule();
 }
 
 async function calibrate(): Promise<void> {
@@ -95,7 +101,7 @@ async function boot(withCalibration: boolean): Promise<void> {
   document.getElementById('overlay')!.remove();
   if (params.get('jam')) return jam();
   running = true;
-  requestAnimationFrame(frame);
+  schedule();
   if (withCalibration) await calibrate();
 }
 document.getElementById('start')!.addEventListener('click', () => void boot(false));
@@ -109,8 +115,8 @@ kb.onPress = code => {
 
 document.addEventListener('visibilitychange', () => {
   if (!engine.ctx) return;
-  if (document.hidden) { running = false; engine.suspend(); }
-  else if (!params.get('jam')) { engine.resume(); running = true; requestAnimationFrame(frame); }
+  if (document.hidden) { running = false; cancelAnimationFrame(rafId); engine.suspend(); }
+  else if (!params.get('jam')) { engine.resume(); running = true; schedule(); }
   else engine.resume();
 });
 

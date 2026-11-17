@@ -6,7 +6,7 @@ import { GameEvent, GameState, Input, World } from './types';
 import { autoAttack, Target } from './attack';
 import { bossOnDodge, bossTarget, stepBoss, updateBoss } from './boss';
 import { stepGimmicks } from './gimmicks';
-import { buildWorld, findTile, isSolid } from './world';
+import { buildWorld, findTile, isSolid, roomAt } from './world';
 
 /** Movement is integrated in slices this long, so a slow frame stays accurate. */
 const SLICE = 1 / 120;
@@ -34,10 +34,11 @@ function advance(s: GameState, input: Input, dt: number, t: number, stepF: numbe
 /** Everything the player's attack could aim at right now. */
 function targetsOf(s: GameState): Target[] {
   const out: Target[] = [];
-  const t = findTile(s.world, 'T');
-  if (t) out.push({ x: t.x, y: t.y, r: 12, takeDamage: () => {} });
   const boss = bossTarget(s);
   if (boss) out.push(boss);
+  // The practice target only counts from inside the hub: attacks do not aim through walls.
+  const t = findTile(s.world, 'T');
+  if (t && roomAt(s.world, s.player.x, s.player.y) === 'hub') out.push({ x: t.x, y: t.y, r: 12, takeDamage: () => {} });
   return out;
 }
 
@@ -58,8 +59,8 @@ export function stepGame(s: GameState, input: Input, heardT: number, grid: BeatG
     s.step = Math.floor(timeToStep(grid, heardT) + 1e-9);
     return ev;
   }
-  if (heardT <= s.time) return ev;
-
+  // Presses are handled even on a frame where the audio clock has not moved:
+  // the clock advances in buffer-sized jumps, and a press must never be lost to one.
   if (input.switchTo) equip(s.player, input.switchTo);
   if (input.switchDir !== 0) switchInstrument(s.player, input.switchDir);
   const dodge = tryDodge(s, input, grid);
@@ -67,6 +68,7 @@ export function stepGame(s: GameState, input: Input, heardT: number, grid: BeatG
     ev.push(dodge);
     if (dodge.type === 'dodge') bossOnDodge(s, dodge.beat, dodge.grade);
   }
+  if (heardT <= s.time) return ev;
 
   const simFrom = Math.max(s.time, heardT - MAX_SIM);
   let t = s.time;

@@ -224,3 +224,17 @@ describe('a whole fight', () => {
     expect(after.some(e => e.type === 'hurt' || e.type === 'phrase')).toBe(false);
   });
 });
+
+describe('aiming inside the arena', () => {
+  it.each([[-14, -240], [276, -148], [300, 200]])('hits the boss, not the practice target in the hub, from offset %i,%i', (dx, dy) => {
+    const { s } = fight({ god: true });
+    const b = s.boss!;
+    s.player.equipped = 'hat';
+    s.player.x = b.x + dx; s.player.y = b.y + dy;
+    const hp = b.hp;
+    const ev = runTo(s, s.time + 2).filter(e => e.type === 'attack');
+    expect(ev.length).toBeGreaterThan(0);
+    expect(ev.every(e => e.type === 'attack' && e.hit)).toBe(true);
+    expect(b.hp).toBeLessThan(hp);
+  });
+});
