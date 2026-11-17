@@ -10,12 +10,23 @@ canvas{display:block;width:100vw;height:100vh}
 #overlay{position:fixed;inset:0;display:grid;place-items:center;background:#101114}
 #overlay>div{display:grid;gap:12px;justify-items:center}
 button{font:inherit;padding:12px 28px;background:#e8e6df;color:#101114;border:0;border-radius:2px;cursor:pointer}
+#overlay .keys{color:#6b6a66;text-align:center;margin:8px 0 0}
+#panel{position:fixed;right:0;top:0;bottom:0;width:260px;overflow:auto;background:rgba(12,13,16,.94);padding:12px;box-sizing:border-box}
+#panel .grid{display:grid;grid-template-columns:1fr 84px;gap:4px 8px;align-items:center;font:12px ui-monospace,monospace}
+#panel input{width:100%;box-sizing:border-box;background:#1b1d22;color:#e8e6df;border:1px solid #2c2f38;padding:3px 4px;font:inherit}
+#panel .row{display:flex;gap:8px;margin-top:12px}
+#panel button{padding:6px 10px;font-size:12px}
+#calibrate{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:16px;background:rgba(12,13,16,.9)}
+#calibrate .dots{display:flex;gap:8px}
+#calibrate .dots i{width:14px;height:14px;background:#2c2f38}
+#calibrate .dots i.on{background:#e8e6df}
+#calibrate p{color:#8a8880;margin:0}
 button.ghost{background:none;color:#8a8880;padding:6px 12px}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-<div id="overlay"><div><button id="start">시작</button></div></div>
+<div id="overlay"><div><button id="start">시작</button><button id="calibrate-btn" class="ghost">박자 맞추기부터</button><p class="keys">WASD 이동 · Space 박자 회피 · Q/E 악기 전환<br>Tab 조절판 · ` 디버그 · C 박자 맞추기</p></div></div>
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

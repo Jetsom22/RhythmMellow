@@ -7,11 +7,15 @@ import { computeMix, MixState, mixStateOf } from './core/music/mix';
 import { LayerId } from './core/music/song';
 import { defaultTunables } from './core/tunables';
 import { Keyboard } from './input/keyboard';
+import { drawDebug } from './render/debug';
 import { Renderer } from './render/renderer';
+import { runCalibration } from './ui/calibrate';
+import { loadTunables, mountPanel, saveTunables } from './ui/panel';
 
 const params = new URLSearchParams(location.search);
 const seed = Number(params.get('seed') ?? 7);
 const tun = defaultTunables();
+const stored = loadTunables(tun);
 const state = createGame(seed, tun);
 const engine = new AudioEngine(state.song, tun);
 const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -28,6 +32,10 @@ if (params.get('skip') === 'boss') {
   state.player.y = entry.y;
 }
 if (params.get('god')) state.flags.god = true;
+
+const panel = mountPanel(tun, (key, value) => { if (key === 'bpm') engine.setBpm(value); });
+let debugOn = !!params.get('debug');
+let calibrating = false;
 
 const rm = { state, engine, tun, renderer, kb, eventLog: [] as GameEvent[], fps: 0 };
 (window as any).__rm = rm;
@@ -48,6 +56,7 @@ let running = false;
 let lastFrame = 0;
 function frame(now: number): void {
   if (!running) return;
+  if (calibrating) { requestAnimationFrame(frame); return; }
   rm.fps = rm.fps * 0.9 + (1000 / Math.max(1, now - lastFrame)) * 0.1;
   lastFrame = now;
   const heard = heardTime(engine.now(), tun);
@@ -63,16 +72,40 @@ function frame(now: number): void {
   const stepF = timeToStep(engine.grid, heard);
   const beat = stepF / 4;
   renderer.draw(state, beat - Math.floor(beat), stepF, events);
+  if (debugOn) drawDebug(renderer.ctx, state, engine.grid, heard, rm.fps, engine.outputLatencyMs(), renderer.width, renderer.height);
   requestAnimationFrame(frame);
 }
 
-document.getElementById('start')!.addEventListener('click', async () => {
+async function calibrate(): Promise<void> {
+  if (calibrating || !engine.ctx) return;
+  calibrating = true;
+  const ms = await runCalibration(engine, kb, tun.audioOffsetMs);
+  if (ms !== null) {
+    tun.inputOffsetMs = ms;
+    saveTunables(tun);
+    panel.refresh();
+  }
+  kb.poll();
+  calibrating = false;
+}
+
+async function boot(withCalibration: boolean): Promise<void> {
   await engine.start();
+  if (!stored.hadAudioOffset) tun.audioOffsetMs = engine.outputLatencyMs();
   document.getElementById('overlay')!.remove();
   if (params.get('jam')) return jam();
   running = true;
   requestAnimationFrame(frame);
-});
+  if (withCalibration) await calibrate();
+}
+document.getElementById('start')!.addEventListener('click', () => void boot(false));
+document.getElementById('calibrate-btn')!.addEventListener('click', () => void boot(true));
+
+kb.onPress = code => {
+  if (code === 'Tab') panel.toggle();
+  else if (code === 'Backquote') debugOn = !debugOn;
+  else if (code === 'KeyC') void calibrate();
+};
 
 document.addEventListener('visibilitychange', () => {
   if (!engine.ctx) return;

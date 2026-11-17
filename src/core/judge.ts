@@ -19,3 +19,10 @@ export function judgeDodge(g: BeatGrid, tPress: number, tun: Tunables): { grade:
   const grade: Grade = a <= tun.perfectMs ? 'perfect' : a <= tun.nearMs ? 'near' : 'miss';
   return { grade, offsetMs, beat };
 }
+
+/** Typical tap offset: the mean after dropping the earliest and the latest tap. 0 if too few taps. */
+export function estimateInputOffset(offsetsMs: number[]): number {
+  if (offsetsMs.length < 4) return 0;
+  const mid = [...offsetsMs].sort((a, b) => a - b).slice(1, -1);
+  return Math.round(mid.reduce((a, b) => a + b, 0) / mid.length);
+}

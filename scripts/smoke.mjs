@@ -46,7 +46,14 @@ const open = async (query) => {
   check('player walks', r.x > x0 + 5, `${x0.toFixed(0)} -> ${r.x.toFixed(0)}`);
   check('dodge is judged', r.dodges === 1, `dodges ${r.dodges}`);
   check('game follows the beat', r.step > 2, `step ${r.step}`);
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Backquote');
+  await page.waitForTimeout(150);
+  check('tunables panel opens', await page.isVisible('#panel'));
+  check('panel lists every tunable', (await page.locator('#panel input').count()) === Object.keys(await page.evaluate(() => window.__rm.tun)).length);
   if (SHOTS) await page.screenshot({ path: SHOTS + '/walk.png' });
+  await page.keyboard.press('Tab');
+  check('tunables panel closes', !(await page.isVisible('#panel')));
   await page.close();
 }
 

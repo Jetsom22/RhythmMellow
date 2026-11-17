@@ -28,3 +28,16 @@ describe('dodge judgement', () => {
     expect(inputTime(5, t)).toBeCloseTo(4.95);
   });
 });
+
+import { estimateInputOffset } from '../src/core/judge';
+
+describe('input offset estimate', () => {
+  it('averages the taps after dropping the two extremes', () => {
+    expect(estimateInputOffset([40, 42, 38, 41, 200, -90])).toBe(40);
+    expect(estimateInputOffset([30, 30, 30, 30])).toBe(30);
+  });
+  it('refuses to guess from fewer than four taps', () => {
+    expect(estimateInputOffset([10, 20])).toBe(0);
+    expect(estimateInputOffset([])).toBe(0);
+  });
+});
