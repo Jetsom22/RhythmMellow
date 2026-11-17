@@ -40,7 +40,7 @@ describe('beat dodge', () => {
   it('reports the grade of a press', () => {
     const s = gameOn(OPEN_ROOM);
     const ev = run(s, 1.4, { dodgeAt: 1.0 }).filter(e => e.type === 'dodge');
-    expect(ev).toEqual([{ type: 'dodge', grade: 'perfect', offsetMs: expect.closeTo(0, 3) }]);
+    expect(ev).toEqual([{ type: 'dodge', grade: 'perfect', offsetMs: expect.closeTo(0, 3), beat: 2 }]);
     expect(s.dodgeLog).toHaveLength(1);
   });
   it('covers the dash distance for each grade', () => {

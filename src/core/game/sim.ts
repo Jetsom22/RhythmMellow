@@ -4,6 +4,7 @@ import { Tunables } from '../tunables';
 import { createPlayer, equip, movePlayer, switchInstrument, tryDodge } from './player';
 import { GameEvent, GameState, Input, World } from './types';
 import { autoAttack, Target } from './attack';
+import { bossOnDodge, bossTarget, stepBoss, updateBoss } from './boss';
 import { stepGimmicks } from './gimmicks';
 import { buildWorld, findTile, isSolid } from './world';
 
@@ -24,9 +25,10 @@ export function createGame(seed: number, tun: Tunables, world: World = buildWorl
   };
 }
 
-function advance(s: GameState, input: Input, dt: number, stepF: number, ev: GameEvent[]): void {
+function advance(s: GameState, input: Input, dt: number, t: number, stepF: number, ev: GameEvent[]): void {
   movePlayer(s, input, dt, (x, y) => isSolid(s.world, x, y, s.doorOpen));
   stepGimmicks(s, stepF, ev);
+  updateBoss(s, t, ev);
 }
 
 /** Everything the player's attack could aim at right now. */
@@ -34,10 +36,13 @@ function targetsOf(s: GameState): Target[] {
   const out: Target[] = [];
   const t = findTile(s.world, 'T');
   if (t) out.push({ x: t.x, y: t.y, r: 12, takeDamage: () => {} });
+  const boss = bossTarget(s);
+  if (boss) out.push(boss);
   return out;
 }
 
-function onStep(s: GameState, absStep: number, ev: GameEvent[]): void {
+function onStep(s: GameState, absStep: number, grid: BeatGrid, ev: GameEvent[]): void {
+  stepBoss(s, absStep, grid, ev);
   ev.push(...s.attack.onStep(s, absStep, targetsOf(s)));
 }
 
@@ -58,18 +63,21 @@ export function stepGame(s: GameState, input: Input, heardT: number, grid: BeatG
   if (input.switchTo) equip(s.player, input.switchTo);
   if (input.switchDir !== 0) switchInstrument(s.player, input.switchDir);
   const dodge = tryDodge(s, input, grid);
-  if (dodge) ev.push(dodge);
+  if (dodge) {
+    ev.push(dodge);
+    if (dodge.type === 'dodge') bossOnDodge(s, dodge.beat, dodge.grade);
+  }
 
   const simFrom = Math.max(s.time, heardT - MAX_SIM);
   let t = s.time;
   while (t < heardT - 1e-12) {
     const nextStepT = stepToTime(grid, s.step + 1);
     const tn = Math.min(heardT, nextStepT, t < simFrom ? simFrom : t + SLICE);
-    if (tn > simFrom) advance(s, input, tn - Math.max(t, simFrom), timeToStep(grid, tn), ev);
+    if (tn > simFrom) advance(s, input, tn - Math.max(t, simFrom), tn, timeToStep(grid, tn), ev);
     t = tn;
     if (t >= nextStepT - 1e-12) {
       s.step++;
-      onStep(s, s.step, ev);
+      onStep(s, s.step, grid, ev);
     }
   }
   s.time = heardT;

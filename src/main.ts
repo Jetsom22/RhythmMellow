@@ -18,6 +18,17 @@ const canvas = document.getElementById('game') as HTMLCanvasElement;
 const renderer = new Renderer(canvas);
 const kb = new Keyboard(window, () => engine.now());
 
+if (params.get('skip') === 'boss') {
+  // Dev shortcut: all instruments in hand, standing at the boss door.
+  const entry = state.world.rooms.boss!.entry;
+  state.player.owned = ['drum', 'hat', 'bass'];
+  state.player.equipped = 'drum';
+  state.doorOpen = true;
+  state.player.x = entry.x;
+  state.player.y = entry.y;
+}
+if (params.get('god')) state.flags.god = true;
+
 const rm = { state, engine, tun, renderer, kb, eventLog: [] as GameEvent[], fps: 0 };
 (window as any).__rm = rm;
 
@@ -44,6 +55,8 @@ function frame(now: number): void {
   for (const e of events) {
     const k = sound(e);
     if (k) engine.oneShot(k);
+    if (e.type === 'phrase') engine.setVariation(e.advanced ? 0 : e.repeat);
+    if (e.type === 'death' || e.type === 'bossDefeated') engine.setVariation(0);
     if (e.type !== 'attack') { rm.eventLog.push(e); if (rm.eventLog.length > 200) rm.eventLog.shift(); }
   }
   engine.setMix(computeMix(mixStateOf(state)));
@@ -70,7 +83,7 @@ document.addEventListener('visibilitychange', () => {
 
 /** Dev page: toggle layers by ear. */
 function jam(): void {
-  const st: MixState = { owned: [], equipped: null, previewLayer: null, leadOn: false, harmony: 0, harmonyMax: 3, muffled: false, intensity: 0 };
+  const st: MixState = { owned: [], equipped: null, previewLayer: null, leadOn: false, harmony: 0, harmonyMax: 3, muffled: false, intensity: 0, focus: null };
   const box = document.createElement('div');
   box.id = 'jam';
   box.style.cssText = 'position:fixed;left:16px;top:16px;display:grid;gap:6px';

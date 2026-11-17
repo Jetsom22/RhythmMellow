@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { computeMix, MixState } from '../src/core/music/mix';
 
-const base: MixState = { owned: [], equipped: null, previewLayer: null, leadOn: false, harmony: 0, harmonyMax: 3, muffled: false, intensity: 0 };
+const base: MixState = { owned: [], equipped: null, previewLayer: null, leadOn: false, harmony: 0, harmonyMax: 3, muffled: false, intensity: 0, focus: null };
 
 describe('mix', () => {
   it('plays only the base pulse when nothing is owned', () => {
@@ -40,5 +40,12 @@ describe('mix state from the game', () => {
     expect(m.owned).toEqual(['drum']);
     expect(m.equipped).toBe('drum');
     expect(m.leadOn).toBe(false);
+  });
+});
+
+describe('phrase focus', () => {
+  it('pulls owned layers back when the phrase does not feature them, except the equipped one', () => {
+    const m = computeMix({ ...base, owned: ['drum', 'hat', 'bass'], equipped: 'hat', focus: ['lead', 'drum'] });
+    expect(m.gain).toMatchObject({ drum: 0.8, hat: 1.0, bass: 0.25 });
   });
 });

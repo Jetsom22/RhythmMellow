@@ -20,7 +20,7 @@ export function defaultTunables(): Tunables {
     dashPerfect: 170, dashNear: 120, dashMiss: 50, dashTime: 0.16,
     iframePerfect: 0.30, iframeNear: 0.18, iframeMiss: 0.03, dodgeCooldown: 0.25,
     playerHp: 3, hitInvuln: 1.0,
-    bossHp: 600, weakMult: 2, otherMult: 0.5, callOpenMult: 1.5, callClosedMult: 0.5,
+    bossHp: 900, weakMult: 2, otherMult: 0.5, callOpenMult: 1.5, callClosedMult: 0.5,
     dmgDrum: 10, dmgHat: 3, dmgBass: 2,
     rangeDrum: 70, rangeHat: 400, rangeBass: 220,
     harmonyMax: 3, muffleBars: 2,

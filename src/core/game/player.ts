@@ -52,7 +52,7 @@ export function tryDodge(s: GameState, input: Input, grid: BeatGrid): GameEvent 
   p.cooldown = tun.dodgeCooldown;
   s.dodgeLog.push(j.offsetMs);
   if (s.dodgeLog.length > 64) s.dodgeLog.shift();
-  return { type: 'dodge', grade: j.grade, offsetMs: j.offsetMs };
+  return { type: 'dodge', grade: j.grade, offsetMs: j.offsetMs, beat: j.beat };
 }
 
 export function switchInstrument(p: Player, dir: -1 | 1): void {
