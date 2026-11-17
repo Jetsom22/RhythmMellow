@@ -98,8 +98,8 @@ export class Renderer {
   protected drawTile(s: GameState, ch: string, x: number, y: number, T: number, stepF: number, pulse: number): void {
     const c = this.ctx, cx = x + T / 2, cy = y + T / 2;
     const frac = stepF - Math.floor(stepF);
-    const deadly = gimmickDeadly(s.world, s.song, stepF, cx, cy);
-    const soon = !deadly && gimmickDeadly(s.world, s.song, Math.floor(stepF) + 1, cx, cy);
+    const deadly = gimmickDeadly(s.world, s.song, stepF, cx, cy, s.tun);
+    const soon = !deadly && gimmickDeadly(s.world, s.song, ch === 'w' ? Math.floor(stepF) + 1 : stepF + 0.6, cx, cy, s.tun);
     if (ch === 'g') {
       if (deadly) {
         c.fillStyle = COLORS.drum;
@@ -122,8 +122,8 @@ export class Renderer {
         c.fillStyle = COLORS.floor;
         c.fillRect(x, y, T + 0.5, T + 0.5);
         c.fillStyle = COLORS.hat;
-        c.globalAlpha = soon ? 0.9 * (1 - frac) : 0.75;
-        const m = soon ? 3 + 9 * frac : 3;
+        c.globalAlpha = soon ? 0.4 : 0.75;
+        const m = soon ? 8 : 3;
         c.fillRect(x + m, y + m, T - 2 * m, T - 2 * m);
         c.globalAlpha = 1;
       }

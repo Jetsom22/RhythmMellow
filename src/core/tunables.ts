@@ -9,6 +9,7 @@ export interface Tunables {
   bossHp: number; weakMult: number; otherMult: number; callOpenMult: number; callClosedMult: number;
   dmgDrum: number; dmgHat: number; dmgBass: number;
   rangeDrum: number; rangeHat: number; rangeBass: number;
+  hatGapStart: number; hatGapLen: number;
   harmonyMax: number; muffleBars: number;
 }
 
@@ -23,6 +24,7 @@ export function defaultTunables(): Tunables {
     bossHp: 900, weakMult: 2, otherMult: 0.5, callOpenMult: 1.5, callClosedMult: 0.5,
     dmgDrum: 10, dmgHat: 3, dmgBass: 2,
     rangeDrum: 70, rangeHat: 400, rangeBass: 220,
+    hatGapStart: 0.68, hatGapLen: 0.2,
     harmonyMax: 3, muffleBars: 2,
   };
 }

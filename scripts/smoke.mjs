@@ -57,6 +57,29 @@ const open = async (query) => {
   await page.close();
 }
 
+// 3. The boss fight starts, phrases turn over, and the clock does not drift.
+{
+  const page = await open('?skip=boss&god=1');
+  await page.keyboard.down('KeyS');
+  await page.waitForTimeout(1400);
+  await page.keyboard.up('KeyS');
+  await page.waitForFunction(() => window.__rm.eventLog.some(e => e.type === 'phrase'), null, { timeout: 20000 });
+  const r = await page.evaluate(() => ({ boss: !!window.__rm.state.boss, lead: window.__rm.state.leadOwner, id: window.__rm.state.boss?.conductor.current.id }));
+  check('boss fight is running', r.boss && r.lead === 'boss', JSON.stringify(r));
+  if (SHOTS) await page.screenshot({ path: SHOTS + '/boss.png' });
+  for (let i = 1; i <= 3; i++) {
+    await page.waitForTimeout(20000);
+    const d = await page.evaluate(() => {
+      const e = window.__rm.engine, sps = 60 / e.grid.bpm / 4;
+      const nowStep = (e.now() - e.grid.t0) / sps;
+      return { ahead: (e.scheduler.lastScheduled - nowStep) * sps, gameBehind: nowStep - window.__rm.state.step, state: e.ctx.state };
+    });
+    check(`after ${i * 20}s the scheduler is still just ahead of the clock`, d.state === 'running' && d.ahead > -0.05 && d.ahead < 0.3, `ahead ${d.ahead.toFixed(3)}s`);
+    check(`after ${i * 20}s the game is on the same step as the music`, d.gameBehind >= 0 && d.gameBehind < 3, `behind ${d.gameBehind.toFixed(2)} steps`);
+  }
+  await page.close();
+}
+
 check('no console errors', errors.length === 0, errors.join(' | '));
 await browser.close();
 process.exit(failed ? 1 : 0);

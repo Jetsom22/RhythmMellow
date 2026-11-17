@@ -7,6 +7,7 @@ import { GameState, Instrument } from '../src/core/game/types';
 import { GRID, idle } from './helpers';
 
 const w = buildWorld();
+const tun = defaultTunables();
 const centre = (ch: string, nth = 0): { x: number; y: number; col: number } => {
   const hits: { x: number; y: number; col: number }[] = [];
   w.cells.forEach((row, r) => [...row].forEach((c, col) => { if (c === ch) hits.push({ x: (col + 0.5) * w.tile, y: (r + 0.5) * w.tile, col }); }));
@@ -20,7 +21,7 @@ describe('drum room gates', () => {
   it('slam shut on alternate quarter beats, neighbours out of phase', () => {
     const g0 = centre('g', 0);
     const song = createGame(7, defaultTunables()).song;
-    const closedAt = (x: number, y: number, step: number) => gimmickDeadly(w, song, step, x, y);
+    const closedAt = (x: number, y: number, step: number) => gimmickDeadly(w, song, step, x, y, tun);
     const a = closedAt(g0.x, g0.y, 0), b = closedAt(g0.x, g0.y, 4);
     expect(a).not.toBe(b);
     expect(closedAt(g0.x, g0.y, 3.9)).toBe(a);
@@ -32,13 +33,12 @@ describe('drum room gates', () => {
 
 describe('hat room platforms', () => {
   const song = createGame(7, defaultTunables()).song;
-  it('platform A is missing only on the last 16th of the beat', () => {
-    const p = centre('p');
-    expect([0, 1, 2, 3].map(st => gimmickDeadly(w, song, st + 0.5, p.x, p.y))).toEqual([false, false, false, true]);
+  const at = (ch: string, phase: number) => { const c = centre(ch); return gimmickDeadly(w, song, phase * 4, c.x, c.y, tun); };
+  it('platform A blinks out just before the beat and is solid on it', () => {
+    expect([0, 0.25, 0.5, 0.78, 0.95, 4.78].map(ph => at('p', ph))).toEqual([false, false, false, true, false, true]);
   });
-  it('platform B is missing only on the second 16th, so both exist on the beat and the off-beat', () => {
-    const q = centre('q');
-    expect([0, 1, 2, 3].map(st => gimmickDeadly(w, song, st + 0.5, q.x, q.y))).toEqual([false, true, false, false]);
+  it('platform B does the same half a beat later, so both are solid on the beat and the off-beat', () => {
+    expect([0, 0.28, 0.5, 0.78].map(ph => at('q', ph))).toEqual([false, true, false, false]);
   });
 });
 
@@ -47,8 +47,8 @@ describe('bass room wave', () => {
   it('fills the lane while a bass note sounds and spares the safe cells', () => {
     const lane = centre('w'), safe = centre('s');
     for (let st = 0; st < song.loopSteps; st++) {
-      expect(gimmickDeadly(w, song, st + 0.5, lane.x, lane.y)).toBe(bassSounding(song, st));
-      expect(gimmickDeadly(w, song, st + 0.5, safe.x, safe.y)).toBe(false);
+      expect(gimmickDeadly(w, song, st + 0.5, lane.x, lane.y, tun)).toBe(bassSounding(song, st));
+      expect(gimmickDeadly(w, song, st + 0.5, safe.x, safe.y, tun)).toBe(false);
     }
     expect(bassSounding(song, song.layers.bass[0].step)).toBe(true);
   });

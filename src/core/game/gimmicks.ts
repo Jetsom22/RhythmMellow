@@ -1,4 +1,5 @@
 import { Song } from '../music/song';
+import { Tunables } from '../tunables';
 import { GameEvent, GameState, Instrument, World } from './types';
 import { roomAt, tileAt } from './world';
 
@@ -19,17 +20,18 @@ export function bassSounding(song: Song, step: number): boolean {
 /**
  * Does standing here, now, send the player back to the room entry?
  *  g  drum gate: shut on alternate quarter beats, neighbouring gates out of phase
- *  p  hat platform A: gone on the last 16th of each beat
- *  q  hat platform B: gone on the second 16th of each beat
+ *  p  hat platform A: blinks out just before each beat, so it is solid on the beat
+ *  q  hat platform B: the same, half a beat later, so it is solid on the off-beat
  *  w  bass lane: flooded while a bass note sounds
  */
-export function gimmickDeadly(w: World, song: Song, stepF: number, x: number, y: number): boolean {
+export function gimmickDeadly(w: World, song: Song, stepF: number, x: number, y: number, tun: Tunables): boolean {
   const step = Math.floor(stepF);
-  const sub = ((step % 4) + 4) % 4;
+  const phase = (((stepF / 4) % 1) + 1) % 1;
+  const inGap = (offset: number): boolean => ((((phase - tun.hatGapStart - offset) % 1) + 1) % 1) < tun.hatGapLen;
   switch (tileAt(w, x, y)) {
     case 'g': return (((Math.floor(step / 4) + Math.floor(x / w.tile)) % 2) + 2) % 2 === 1;
-    case 'p': return sub === 3;
-    case 'q': return sub === 1;
+    case 'p': return inGap(0);
+    case 'q': return inGap(0.5);
     case 'w': return bassSounding(song, step);
     default: return false;
   }
@@ -54,7 +56,7 @@ export function stepGimmicks(s: GameState, stepF: number, ev: GameEvent[]): void
   }
 
   // A dash carries the player over anything on the floor.
-  if (!p.dash && (tileAt(w, p.x, p.y) === '~' || gimmickDeadly(w, s.song, stepF, p.x, p.y))) {
+  if (!p.dash && (tileAt(w, p.x, p.y) === '~' || gimmickDeadly(w, s.song, stepF, p.x, p.y, s.tun))) {
     sendBack(s, ev);
     return;
   }
