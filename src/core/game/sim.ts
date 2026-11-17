@@ -3,7 +3,8 @@ import { generateSong } from '../music/song';
 import { Tunables } from '../tunables';
 import { createPlayer, equip, movePlayer, switchInstrument, tryDodge } from './player';
 import { GameEvent, GameState, Input, World } from './types';
-import { buildWorld, findTile, isSolid, roomAt, tileAt } from './world';
+import { stepGimmicks } from './gimmicks';
+import { buildWorld, findTile, isSolid } from './world';
 
 /** Movement is integrated in slices this long, so a slow frame stays accurate. */
 const SLICE = 1 / 120;
@@ -22,19 +23,9 @@ export function createGame(seed: number, tun: Tunables, world: World = buildWorl
   };
 }
 
-function sendBack(s: GameState, ev: GameEvent[]): void {
-  const p = s.player;
-  const room = roomAt(s.world, p.x, p.y);
-  p.x = p.respawn.x;
-  p.y = p.respawn.y;
-  p.dash = null;
-  ev.push({ type: 'respawn', room: room ?? '' });
-}
-
-function advance(s: GameState, input: Input, dt: number, ev: GameEvent[]): void {
-  const p = s.player;
+function advance(s: GameState, input: Input, dt: number, stepF: number, ev: GameEvent[]): void {
   movePlayer(s, input, dt, (x, y) => isSolid(s.world, x, y, s.doorOpen));
-  if (!p.dash && tileAt(s.world, p.x, p.y) === '~') sendBack(s, ev);
+  stepGimmicks(s, stepF, ev);
 }
 
 function onStep(_s: GameState, _absStep: number, _ev: GameEvent[]): void {}
@@ -63,7 +54,7 @@ export function stepGame(s: GameState, input: Input, heardT: number, grid: BeatG
   while (t < heardT - 1e-12) {
     const nextStepT = stepToTime(grid, s.step + 1);
     const tn = Math.min(heardT, nextStepT, t < simFrom ? simFrom : t + SLICE);
-    if (tn > simFrom) advance(s, input, tn - Math.max(t, simFrom), ev);
+    if (tn > simFrom) advance(s, input, tn - Math.max(t, simFrom), timeToStep(grid, tn), ev);
     t = tn;
     if (t >= nextStepT - 1e-12) {
       s.step++;

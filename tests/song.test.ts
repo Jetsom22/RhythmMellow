@@ -20,7 +20,7 @@ describe('song generation', () => {
     expect(s.layers.hat.every(n => n.step % 4 !== 0)).toBe(true);
     expect([2, 6, 10, 14, 18, 22, 26, 30].every(st => s.layers.hat.some(n => n.step === st))).toBe(true);
   });
-  it('gives the bass long notes with a rest of 4+ steps in every bar', () => {
+  it('gives the bass long notes with a rest of 6+ steps in every bar', () => {
     for (let seed = 1; seed <= 30; seed++) {
       const song = generateSong(seed, 2);
       expect(song.layers.bass.every(n => n.len >= 4)).toBe(true);
@@ -29,7 +29,7 @@ describe('song generation', () => {
         for (const n of song.layers.bass) for (let i = 0; i < n.len; i++) sounding.add(n.step + i);
         let best = 0, run = 0;
         for (let st = bar * 16; st < bar * 16 + 16; st++) { run = sounding.has(st) ? 0 : run + 1; best = Math.max(best, run); }
-        expect(best).toBeGreaterThanOrEqual(4);
+        expect(best).toBeGreaterThanOrEqual(6);
         expect(song.layers.bass.some(n => n.step >= bar * 16 && n.step < bar * 16 + 16)).toBe(true);
       }
     }

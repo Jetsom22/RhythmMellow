@@ -1,3 +1,4 @@
+import { bassSounding, gimmickDeadly } from '../core/game/gimmicks';
 import { GameEvent, GameState, Instrument } from '../core/game/types';
 
 export const COLORS = {
@@ -75,7 +76,7 @@ export class Renderer {
     }
   }
 
-  protected drawTiles(s: GameState, _stepF: number, _pulse: number): void {
+  protected drawTiles(s: GameState, stepF: number, pulse: number): void {
     const c = this.ctx, wd = s.world, T = wd.tile;
     const c0 = Math.max(0, Math.floor(this.camX / T)), c1 = Math.min(wd.cols - 1, Math.floor((this.camX + this.width) / T));
     const r0 = Math.max(0, Math.floor(this.camY / T)), r1 = Math.min(wd.rows - 1, Math.floor((this.camY + this.height) / T));
@@ -84,13 +85,88 @@ export class Renderer {
         const ch = wd.cells[r][col];
         c.fillStyle = ch === '#' ? COLORS.wall : ch === '~' ? COLORS.chasm : COLORS.floor;
         c.fillRect(col * T, r * T, T + 0.5, T + 0.5);
-        this.drawTile(s, ch, col * T, r * T, T, col, r);
+        if (ch !== '#' && ch !== '.' && ch !== '~') this.drawTile(s, ch, col * T, r * T, T, stepF, pulse);
       }
     }
   }
 
-  /** Per-tile extras; filled in as gimmicks arrive. */
-  protected drawTile(_s: GameState, _ch: string, _x: number, _y: number, _T: number, _col: number, _row: number): void {}
+  /** Gimmick tiles: everything here moves on the beat. */
+  protected drawTile(s: GameState, ch: string, x: number, y: number, T: number, stepF: number, pulse: number): void {
+    const c = this.ctx, cx = x + T / 2, cy = y + T / 2;
+    const frac = stepF - Math.floor(stepF);
+    const deadly = gimmickDeadly(s.world, s.song, stepF, cx, cy);
+    const soon = !deadly && gimmickDeadly(s.world, s.song, Math.floor(stepF) + 1, cx, cy);
+    if (ch === 'g') {
+      if (deadly) {
+        c.fillStyle = COLORS.drum;
+        c.fillRect(x + 2, y, T - 4, T + 0.5);
+      } else {
+        // The gate closes in from both sides over the beat it is open.
+        const k = ((stepF / 4) % 1 + 1) % 1;
+        c.fillStyle = COLORS.drum;
+        c.globalAlpha = 0.25 + 0.5 * k * k;
+        const wdt = (T / 2 - 2) * k * k;
+        c.fillRect(x, y, wdt, T + 0.5);
+        c.fillRect(x + T - wdt, y, wdt, T + 0.5);
+        c.globalAlpha = 1;
+      }
+    } else if (ch === 'p' || ch === 'q') {
+      if (deadly) {
+        c.fillStyle = COLORS.chasm;
+        c.fillRect(x, y, T + 0.5, T + 0.5);
+      } else {
+        c.fillStyle = COLORS.floor;
+        c.fillRect(x, y, T + 0.5, T + 0.5);
+        c.fillStyle = COLORS.hat;
+        c.globalAlpha = soon ? 0.9 * (1 - frac) : 0.75;
+        const m = soon ? 3 + 9 * frac : 3;
+        c.fillRect(x + m, y + m, T - 2 * m, T - 2 * m);
+        c.globalAlpha = 1;
+      }
+    } else if (ch === 'w') {
+      if (deadly) {
+        c.fillStyle = COLORS.bass;
+        c.globalAlpha = 0.75;
+        c.fillRect(x, y, T + 0.5, T + 0.5);
+      } else {
+        // Count-in: the lane brightens during the last two 16ths of a rest.
+        const in2 = bassSounding(s.song, Math.floor(stepF) + 2);
+        c.fillStyle = COLORS.bass;
+        c.globalAlpha = soon ? 0.2 + 0.3 * frac : in2 ? 0.08 + 0.12 * frac : 0.06;
+        c.fillRect(x, y, T + 0.5, T + 0.5);
+      }
+      c.globalAlpha = 1;
+    } else if (ch === 's') {
+      c.strokeStyle = COLORS.bass;
+      c.globalAlpha = 0.5;
+      c.lineWidth = 1;
+      c.strokeRect(x + 4.5, y + 4.5, T - 9, T - 9);
+      c.globalAlpha = 1;
+    } else if (ch === 'd' || ch === 'h' || ch === 'b') {
+      const inst = ch === 'd' ? 'drum' : ch === 'h' ? 'hat' : 'bass';
+      if (s.player.owned.includes(inst)) return;
+      const r = 9 + 4 * pulse;
+      c.fillStyle = COLORS[inst];
+      c.beginPath();
+      if (inst === 'drum') c.arc(cx, cy, r, 0, Math.PI * 2);
+      else if (inst === 'hat') { c.moveTo(cx, cy - r); c.lineTo(cx + r, cy + r); c.lineTo(cx - r, cy + r); }
+      else c.rect(cx - r * 1.3, cy - r * 0.6, r * 2.6, r * 1.2);
+      c.fill();
+    } else if (ch === 'D') {
+      if (s.doorOpen) return;
+      c.fillStyle = COLORS.wall;
+      c.fillRect(x, y, T + 0.5, T + 0.5);
+      (['drum', 'hat', 'bass'] as Instrument[]).forEach((inst, i) => {
+        c.fillStyle = s.player.owned.includes(inst) ? COLORS[inst] : COLORS.bg;
+        c.fillRect(x + 5 + i * 8, cy - 3, 6, 6);
+      });
+    } else if (ch === 'T') {
+      c.strokeStyle = COLORS.dim;
+      c.lineWidth = 2;
+      c.beginPath(); c.arc(cx, cy, 12, 0, Math.PI * 2); c.stroke();
+      c.beginPath(); c.arc(cx, cy, 4, 0, Math.PI * 2); c.stroke();
+    }
+  }
   protected drawWorld(_s: GameState, _stepF: number, _pulse: number): void {}
   protected drawHud(_s: GameState, _pulse: number): void {}
 

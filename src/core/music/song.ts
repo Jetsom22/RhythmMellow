@@ -65,9 +65,9 @@ export function generateSong(seed: number, loopBars: number): Song {
       else if (i % 4 !== 0 && hat16[i]) hat.push({ step: o + i, len: 1, midi: 90, vel: 0.4, voice: 'hat' });
     }
 
-    // Bass: long notes on the chord root, always leaving a rest of 4+ steps.
+    // Bass: long notes on the chord root, always leaving a rest of 6+ steps (the bass room needs it).
     const rootPitch = rootMidi - 12 + chordRoots[b];
-    const shape = pick([[[0, 8]], [[0, 6], [8, 4]], [[0, 4], [6, 6]], [[0, 10]]]);
+    const shape = pick([[[0, 8]], [[0, 4], [6, 4]], [[0, 10]], [[0, 6]]]);
     shape.forEach(([st, len], i) => bass.push({ step: o + st, len, midi: rootPitch + (i === 1 && rnd() < 0.5 ? 12 : 0), vel: 0.9, voice: 'bass' }));
 
     // Lead: a note on every bar start, then a wandering line on the 8th grid.
