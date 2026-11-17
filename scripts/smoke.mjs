@@ -32,6 +32,24 @@ const open = async (query) => {
   await page.close();
 }
 
+// 2. Walking and dodging reach the game state.
+{
+  const page = await open('');
+  await page.waitForTimeout(400);
+  const x0 = await page.evaluate(() => window.__rm.state.player.x);
+  await page.keyboard.down('KeyD');
+  await page.waitForTimeout(150);
+  await page.keyboard.up('KeyD');
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(300);
+  const r = await page.evaluate(() => ({ x: window.__rm.state.player.x, dodges: window.__rm.state.dodgeLog.length, step: window.__rm.state.step }));
+  check('player walks', r.x > x0 + 5, `${x0.toFixed(0)} -> ${r.x.toFixed(0)}`);
+  check('dodge is judged', r.dodges === 1, `dodges ${r.dodges}`);
+  check('game follows the beat', r.step > 2, `step ${r.step}`);
+  if (SHOTS) await page.screenshot({ path: SHOTS + '/walk.png' });
+  await page.close();
+}
+
 check('no console errors', errors.length === 0, errors.join(' | '));
 await browser.close();
 process.exit(failed ? 1 : 0);

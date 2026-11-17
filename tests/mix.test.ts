@@ -21,3 +21,24 @@ describe('mix', () => {
     expect(computeMix({ ...base, intensity: 0.5 }).brightness).toBe(0.5);
   });
 });
+
+import { mixStateOf } from '../src/core/music/mix';
+import { createGame } from '../src/core/game/sim';
+import { parseWorld } from '../src/core/game/world';
+import { defaultTunables } from '../src/core/tunables';
+
+describe('mix state from the game', () => {
+  const world = () => parseWorld(['######', '#P...#', '######'], 32, { drum: { x: 96, y: 32, w: 64, h: 32, entry: { x: 112, y: 48 } } });
+  it('previews the layer of the room the player is in until it is owned', () => {
+    const s = createGame(7, defaultTunables(), world());
+    expect(mixStateOf(s).previewLayer).toBeNull();
+    s.player.x = 120;
+    expect(mixStateOf(s).previewLayer).toBe('drum');
+    s.player.owned = ['drum']; s.player.equipped = 'drum';
+    const m = mixStateOf(s);
+    expect(m.previewLayer).toBeNull();
+    expect(m.owned).toEqual(['drum']);
+    expect(m.equipped).toBe('drum');
+    expect(m.leadOn).toBe(false);
+  });
+});

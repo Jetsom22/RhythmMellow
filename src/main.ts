@@ -1,25 +1,71 @@
-import { AudioEngine } from './audio/engine';
-import { computeMix, MixState } from './core/music/mix';
-import { generateSong, LayerId } from './core/music/song';
+import { AudioEngine, OneShot } from './audio/engine';
+import { timeToStep } from './core/beat';
+import { createGame, stepGame } from './core/game/sim';
+import { GameEvent } from './core/game/types';
+import { heardTime } from './core/judge';
+import { computeMix, MixState, mixStateOf } from './core/music/mix';
+import { LayerId } from './core/music/song';
 import { defaultTunables } from './core/tunables';
+import { Keyboard } from './input/keyboard';
+import { Renderer } from './render/renderer';
 
 const params = new URLSearchParams(location.search);
 const seed = Number(params.get('seed') ?? 7);
 const tun = defaultTunables();
-const song = generateSong(seed, tun.loopBars);
-const engine = new AudioEngine(song, tun);
-
+const state = createGame(seed, tun);
+const engine = new AudioEngine(state.song, tun);
 const canvas = document.getElementById('game') as HTMLCanvasElement;
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+const renderer = new Renderer(canvas);
+const kb = new Keyboard(window, () => engine.now());
 
-(window as any).__rm = { engine, tun, song };
+const rm = { state, engine, tun, renderer, kb, eventLog: [] as GameEvent[], fps: 0 };
+(window as any).__rm = rm;
 
-const startBtn = document.getElementById('start') as HTMLButtonElement;
-startBtn.addEventListener('click', async () => {
+function sound(e: GameEvent): OneShot | null {
+  switch (e.type) {
+    case 'dodge': return e.grade === 'perfect' ? 'dodgePerfect' : e.grade === 'near' ? 'dodgeNear' : 'dodgeMiss';
+    case 'collect': return 'collect';
+    case 'hurt': return 'hit';
+    case 'phrase': return e.advanced ? 'fill' : null;
+    case 'solved': return 'resolve';
+    case 'bossDefeated': return 'victory';
+    default: return null;
+  }
+}
+
+let running = false;
+let lastFrame = 0;
+function frame(now: number): void {
+  if (!running) return;
+  rm.fps = rm.fps * 0.9 + (1000 / Math.max(1, now - lastFrame)) * 0.1;
+  lastFrame = now;
+  const heard = heardTime(engine.now(), tun);
+  const events = stepGame(state, kb.poll(), heard, engine.grid);
+  for (const e of events) {
+    const k = sound(e);
+    if (k) engine.oneShot(k);
+    if (e.type !== 'attack') { rm.eventLog.push(e); if (rm.eventLog.length > 200) rm.eventLog.shift(); }
+  }
+  engine.setMix(computeMix(mixStateOf(state)));
+  const stepF = timeToStep(engine.grid, heard);
+  const beat = stepF / 4;
+  renderer.draw(state, beat - Math.floor(beat), stepF, events);
+  requestAnimationFrame(frame);
+}
+
+document.getElementById('start')!.addEventListener('click', async () => {
   await engine.start();
   document.getElementById('overlay')!.remove();
-  if (params.get('jam')) jam();
+  if (params.get('jam')) return jam();
+  running = true;
+  requestAnimationFrame(frame);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!engine.ctx) return;
+  if (document.hidden) { running = false; engine.suspend(); }
+  else if (!params.get('jam')) { engine.resume(); running = true; requestAnimationFrame(frame); }
+  else engine.resume();
 });
 
 /** Dev page: toggle layers by ear. */

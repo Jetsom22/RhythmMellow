@@ -1,3 +1,5 @@
+import { GameState } from '../game/types';
+import { roomAt } from '../game/world';
 import { LayerId } from './song';
 
 /** What the game tells the music about itself. */
@@ -28,5 +30,21 @@ export function computeMix(m: MixState): Mix {
     },
     cutoffHz: m.muffled ? 700 : 18000,
     brightness: m.intensity,
+  };
+}
+
+export function mixStateOf(s: GameState): MixState {
+  const p = s.player;
+  const room = roomAt(s.world, p.x, p.y);
+  const roomLayer = room === 'drum' || room === 'hat' || room === 'bass' ? room : null;
+  return {
+    owned: p.owned.slice(),
+    equipped: p.equipped,
+    previewLayer: roomLayer && !p.owned.includes(roomLayer) ? roomLayer : null,
+    leadOn: s.leadOwner !== null,
+    harmony: 0,
+    harmonyMax: s.tun.harmonyMax,
+    muffled: false,
+    intensity: 0,
   };
 }
