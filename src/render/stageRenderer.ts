@@ -190,19 +190,19 @@ export class StageRenderer {
         else if (e.layer === 'hat') this.pfx.push({ kind: 'hat', at: stepF, x: e.from.x, y: e.from.y, tx, ty });
         else this.bassLine = { until: stepF + 1.4, tx, ty };
       } else if (e.type === 'hurt' || e.type === 'gameover') {
+        // The camera pulls back to the whole map only when the lives ran out and the player starts again from the save.
+        // A hit with lives left re-forms at a checkpoint and the camera keeps following.
         const spb = s.meter.stepsPerBeat;
-        this.overviews.push([stepF + .3 * spb, stepF + 8 + .8 * spb]);
+        if (e.type === 'gameover') this.overviews.push([stepF + .3 * spb, stepF + 8 + .8 * spb]);
         this.pfx.push({ kind: 'dust', at: stepF, from: e.from, to: e.to, dur: 8 });
         this.pfx.push({ kind: 'ring', at: stepF, x: e.from.x, y: e.from.y, color: this.pal.danger });
         this.pfx.push({ kind: 'ring', at: stepF + 8, x: e.to.x, y: e.to.y, color: eq });
       } else if (e.type === 'part' || e.type === 'plate') {
-        if (e.type === 'part') this.overviews.push([stepF + .2 * s.meter.stepsPerBeat, stepF + 4.2 * s.meter.stepsPerBeat]);
         this.pfx.push({ kind: 'ring', at: stepF, x: s.x, y: s.y, color: this.pal.player[e.layer] });
       } else if (e.type === 'broken') {
         this.pfx.push({ kind: 'ring', at: stepF, x: e.pos.x, y: e.pos.y, color: this.pal.ink });
       } else if (e.type === 'gate') {
-        // A way that was waiting for plates has opened: show where.
-        if (s.gates.find(g => g.id === e.id)?.requires.flags?.length) this.overviews.push([stepF + .5 * s.meter.stepsPerBeat, stepF + 4 * s.meter.stepsPerBeat]);
+        // A way has opened. The camera keeps following (it pulls back only after the lives run out).
       } else if (e.type === 'strike') {
         // An attack has just landed: flash it and send out its echo.
         const a = e.inst;
