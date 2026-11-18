@@ -23,6 +23,10 @@
   </div>
 </div>
 
+<h2>정해진 방식 · 갑에 병을 섞어</h2>
+<p>화면은 갑(가는 선, 따라가는 카메라)으로 그린다. 지금 맵을 넓게 봐야 하는 순간에만 병(한눈에 보는 지도)으로 물러났다가 돌아온다. 이 한 바퀴에서는 세 번이다. 몬스터에 맞아 흩어졌다가 체크포인트에서 다시 뭉칠 때, 수호자를 넘고 베이스를 얻었을 때(세이브), 베이스로 문을 열어 보스로 가는 길이 열렸을 때다. 지도로 물러나면 구역 사이의 길과 세이브 자리가 드러난다. 목숨이 다해 세이브로 돌아갈 때도 같은 방식을 쓴다.</p>
+<canvas class="big" data-style="mix" width="1920" height="1080"></canvas>
+
 <h2>갑 · 가는 선, 따라가는 카메라</h2>
 <p>글리피카처럼 아주 가는 선과 작은 기호로만 그린다. 카메라는 플레이어를 부드럽게 따라가고, 대결장에 들어서면 대결장을 액자처럼 잡는다. 장치·몬스터·수호자는 작은 기호이고, 그것이 닿는 범위를 머리카락 굵기의 점선 원으로 보여 준다. 연출도 선으로만 한다.</p>
 <canvas class="big" data-style="line" width="1920" height="1080"></canvas>
@@ -109,18 +113,19 @@ const CONTOUR = LEVELS.map(lv => {
   return seg;
 });
 /* 여운의 한 점을 d만큼 보낸다. 어떤 모양의 벽이든 거리장의 기울기로 튕긴다 */
-function travel(x, y, vx, vy, d) {
-  for (let n = 0; n < 80 && d > 0; n++) {
+function travel(x, y, vx, vy, d) {                 // [x, y, 튕긴 횟수]
+  let hits = 0;
+  for (let n = 0; n < 120 && d > 0; n++) {
     const s = Math.min(5, d), nx = x + vx * s, ny = y + vy * s;
     if (sdf(nx, ny) > 0) {                       // 벽을 넘는 지점을 반으로 나눠 찾고, 거기서 튕긴다
       let lo = 0, hi = s; for (let i = 0; i < 6; i++) { const m = (lo + hi) / 2; sdf(x + vx * m, y + vy * m) > 0 ? hi = m : lo = m; }
       x += vx * lo; y += vy * lo; d -= lo;
-      const [gx, gy] = grad(x, y), dot = vx * gx + vy * gy; if (dot > 0) { vx -= 2 * dot * gx; vy -= 2 * dot * gy; }
+      const [gx, gy] = grad(x, y), dot = vx * gx + vy * gy; if (dot > 0) { vx -= 2 * dot * gx; vy -= 2 * dot * gy; hits++; }
       x -= gx * .3; y -= gy * .3; continue;
     }
     x = nx; y = ny; d -= s;
   }
-  return [x, y];
+  return [x, y, hits];
 }
 
 /* ════ 놓인 것들 (명세 6.6~6.8) ════ */
@@ -207,9 +212,11 @@ function echo(a, e) {                                // 여운: 하이햇은 좁
     for (let k = 0; k < 2; k++) {
       const te = (e - k * .2) / 1.3; if (te <= 0 || te >= 1) continue;
       const d = 2 + easeOut(te) * dist * (1 + k * .12);
-      g.globalAlpha = .7 * (1 - te) ** 1.4; g.lineWidth = LW(1.3 * (1 - te * .35)); g.beginPath();
-      for (const [r, sg] of rings) { let pen = false, lx = 0, ly = 0; for (let i = 0; i <= 72; i++) { const th = i / 72 * TAU, [qx, qy] = travel(s.x + r * Math.cos(th), s.y + r * Math.sin(th), sg * Math.cos(th), sg * Math.sin(th), d); if (pen && Math.hypot(qx - lx, qy - ly) < 30) g.lineTo(qx, qy); else g.moveTo(qx, qy); lx = qx; ly = qy; pen = true; } }
-      g.stroke();
+      for (const [r, sg] of rings) {                 // 파면: 끊지 않고, 벌어진 만큼 옅게, 튕길 때마다 약하게
+        const N = 160, f = [];
+        for (let i = 0; i < N; i++) { const th = i / N * TAU; f.push(travel(s.x + r * Math.cos(th), s.y + r * Math.sin(th), sg * Math.cos(th), sg * Math.sin(th), d)); }
+        K.wave(g, [f], color, .7 * (1 - te) ** 1.4, 1.3 * (1 - te * .35), TAU * Math.max(6, Math.abs(r + sg * d)) / N);
+      }
     }
   }
   g.restore();
@@ -247,7 +254,12 @@ const guardAlive = b => b < FIGHT.to;
 /* ════ 카메라 ════ */
 function avgCam(fn, b, span, n = 8) { let x = 0, y = 0, w = 0; for (let i = 0; i < n; i++) { const c = fn(b - span * i / (n - 1)); x += c.x; y += c.y; w += c.w; } return { x: x / n, y: y / n, w: w / n }; }
 const inFight = b => b > 16.5 && b < PICK + 3;
+/* 정해진 방식: 평소엔 갑(따라가는 카메라), 특정 순간엔 병(한눈에 보는 지도)으로 물러난다.
+   맞고 다시 뭉칠 때, 악기를 얻었을 때, 보스로 가는 문이 열릴 때 */
+const OVERVIEW = [[HIT + .3, REFORM + .8], [PICK + .2, PICK + 4.2], [45, 48.5]];
+const overviewAt = t => OVERVIEW.some(([a, z]) => t >= a && t < z);
 const CAM = {
+  mix: b => avgCam(t => overviewAt(t) ? { x: 1230, y: 560, w: 2360 } : CAM.line(t), b, 1.8, 10),
   line: b => avgCam(t => {
     if (inFight(t)) return { x: ARENA.x, y: ARENA.y + 10, w: 600 };
     if (t > 49) return { x: BOSS.cx - 60, y: BOSS.cy + 10, w: 860 };
@@ -420,25 +432,27 @@ function compose(style) {
   g.beginPath(); g.moveTo(-200, 984); g.lineTo(1100, 984); g.stroke();
   g.restore();
 }
-function routes(style, b) {
-  if (style !== 'map') return;
-  g.save(); g.strokeStyle = col.ink; g.globalAlpha = .22; g.lineWidth = LW(1); g.setLineDash([LW(2), LW(6)]);
+function routes(style, b, k = 1) {
+  if (style !== 'map' || k <= 0) return;
+  g.save(); g.strokeStyle = col.ink; g.globalAlpha = .22 * k; g.lineWidth = LW(1); g.setLineDash([LW(2), LW(6)]);
   for (const r of ROUTES) { g.beginPath(); g.moveTo(r[0], r[1]); g.lineTo(r[2], r[3]); g.stroke(); }
   g.restore();
 }
 function drawStyle(cv, style, b) {
   g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.fillStyle = col.bg; g.fillRect(0, 0, cv.width, cv.height);
   const cam = CAM[style](b); camApply(cam);
+  const mix = style === 'mix', zk = mix ? clamp((cam.w - 900) / 1200) : 0;   // 섞은 방식: 지도로 물러난 정도
+  if (mix) style = 'line';
   const p = playerPos(b), pickTint = style === 'poster' ? clamp(1 - Math.abs((b - PICK - .8) / 1.2)) : 0;
-  compose(style); routes(style, b);
+  compose(style); routes(mix ? 'map' : style, b, mix ? zk : 1);
   groundLines(p, pickTint > 0 ? col.p3 : col.ink, .7 + .3 * pickTint);
   stageFight(style, b);
   devices(style, b); gates(style, b);
   enemyAttacks(b, { reach: style === 'line' });
-  guardian(style, b); part(style, b); boss(style, b); saveMark(style, b);
+  guardian(style, b); part(style, b); boss(style, b); saveMark(mix && zk > .3 ? 'map' : style, b);
   playerFx(b, col[PCOL[held(b)]]);
-  body(b, col[PCOL[held(b)]], style === 'map' && cam.w > 1500 ? 1.3 : 1);
-  stagePick(style, b, cam);
+  body(b, col[PCOL[held(b)]], style === 'map' && cam.w > 1500 ? 1.3 : 1 + .6 * zk);
+  stagePick(style, b, cam); if (mix && zk > .5) stagePick('map', b, cam);
   hud(style, b);
   if (b > LOOP - 1.2) { g.globalAlpha = clamp((b - LOOP + 1.2) / 1.2); g.fillStyle = col.bg; g.fillRect(0, 0, VW, VH); g.globalAlpha = 1; }
 }

@@ -20,6 +20,13 @@
   </div>
 </div>
 
+<h2>정해진 것</h2>
+<ul class="notes">
+  <li><b>땅</b> · 덩어리. 땅 전체가 하나의 물렁한 덩어리가 되고, 끝은 보통 색의 가는 선 하나다</li>
+  <li><b>보스와 수호자</b> · 가 · 겹친 면. 적의 색 계열과 잉크색 덩어리가 겹쳐 흐른다</li>
+  <li><b>여운</b> · 벽에 닿으면 자연스러운 음파처럼 반사된다. 아래 4에서 따로 크게 보여 준다</li>
+</ul>
+
 <h2>1 · 땅 — 각진 것에서 물렁한 것까지</h2>
 <p>같은 도형들(통로 캡슐, 둥근 마당, 북쪽 길, 기운 비탈, 가운데 구덩이)을 이어 붙이는 방식만 바꿨다. 왼쪽은 그냥 겹친 것, 가운데와 오른쪽은 이음매가 녹아 붙은 것이다. 플레이어가 벽에 다가가면 안쪽의 옅은 두 줄과 바깥의 점이 드러나고, 드럼 공격의 여운은 벽을 따라 튕긴다. 오른쪽은 아래 막대로 물렁함을 바꿔 볼 수 있다.</p>
 <div class="row">
@@ -38,18 +45,20 @@
 </div>
 
 <h2>3 · 합쳐 보면</h2>
-<p>녹은 이음매의 대결장에 덩어리 보스를 놓은 열여섯 박짜리 악구다. 드럼 고리, 하이햇 띠, 머무는 베이스가 차례로 온다. 아래에서 몸의 갈래를 바꿀 수 있다.</p>
+<p>덩어리 땅의 대결장에 겹친 면의 보스를 놓은 열여섯 박짜리 악구다. 드럼 고리, 하이햇 띠, 머무는 베이스가 차례로 온다. 아래에서 몸의 갈래를 바꿀 수 있다.</p>
 <div class="grp" role="group" aria-label="몸" id="bodyv" style="margin-bottom:12px">
-  <button data-b="layers" aria-pressed="false">가 · 겹친 면</button><button data-b="core" aria-pressed="false">나 · 덩어리와 심장</button><button data-b="contour" aria-pressed="true">다 · 등고선 덩어리</button>
+  <button data-b="layers" aria-pressed="true">가 · 겹친 면</button><button data-b="core" aria-pressed="false">나 · 덩어리와 심장</button><button data-b="contour" aria-pressed="false">다 · 등고선 덩어리</button>
 </div>
 <canvas id="big" width="1920" height="1080"></canvas>
 
-<h2>까미의 생각</h2>
+<h2>4 · 여운의 반사</h2>
+<p>공격이 떨어진 뒤의 여운(외곽선)이 벽에 닿아 반사되는 모습만 크게 그렸다. 파면은 끊기지 않는다. 벽을 따라 꺾여 돌아오는 자리에서 파면이 넓게 벌어지면 그만큼 옅어지고, 벽에 한 번 튕길 때마다 세기가 줄어든다. 판단하기 쉽게 실제 게임보다 멀리, 오래 퍼지게 했다. ¼×로 보면 반사의 모양이 잘 보인다.</p>
+<canvas id="wave" width="1920" height="1080"></canvas>
+
+<h2>확인한 것과 못 한 것</h2>
 <ul class="notes">
-  <li><b>땅</b> · "녹은 이음매"를 권한다. 레퍼런스의 물렁함은 살리면서 마당과 길이 구분되고, 명세의 도형 맵(원, 캡슐, 다각형)을 그대로 쓴다. 이음매를 얼마나 녹일지는 도형마다 값 하나로 줄 수 있다</li>
-  <li><b>몸</b> · "다 · 등고선 덩어리"를 권한다. 굵은 면이 늘 화면에 있으면 적의 예고(면)와 몸(면)이 다투는데, 선으로 된 몸은 예고를 가리지 않는다. 그리고 "공격을 품는 동안 색이 찬다"가 그 자체로 예고가 된다. 수호자는 같은 문법에 등고선 수만 줄인다</li>
-  <li><b>가</b>는 타이틀이나 챕터 표지 같은 정지 화면에 어울린다. 싸움 화면에는 너무 무겁다</li>
-  <li><b>확인한 것과 못 한 것</b> · 헤드리스 브라우저로 찍어 모양과 색을 확인했다. 덩어리의 출렁임이 1×에서 너무 크거나 작게 느껴지는지는 직접 봐 주셔야 한다</li>
+  <li><b>확인한 것</b> · 헤드리스 브라우저로 찍어 모양과 색, 여운이 끊기지 않고 이어지는 것을 확인했다</li>
+  <li><b>못 한 것</b> · 덩어리의 출렁임과 여운의 속도가 1×에서 자연스러운지는 직접 봐 주셔야 한다</li>
 </ul>
 </main>
 <script src="kit8.js"></script>
@@ -83,13 +92,14 @@ function makeGround(ground, holes, k, W, H) {
     }
     return seg;
   });
-  g.travel = (x, y, vx, vy, d) => {
-    for (let n = 0; n < 80 && d > 0; n++) {
+  g.travel = (x, y, vx, vy, d) => {                  // [x, y, 튕긴 횟수]
+    let hits = 0;
+    for (let n = 0; n < 120 && d > 0; n++) {
       const s = Math.min(4, d), nx2 = x + vx * s, ny2 = y + vy * s;
-      if (g.sdf(nx2, ny2) > 0) { let lo = 0, hi = s; for (let i = 0; i < 6; i++) { const m = (lo + hi) / 2; g.sdf(x + vx * m, y + vy * m) > 0 ? hi = m : lo = m; } x += vx * lo; y += vy * lo; d -= lo; const [gx, gy] = g.grad(x, y), dot = vx * gx + vy * gy; if (dot > 0) { vx -= 2 * dot * gx; vy -= 2 * dot * gy; } x -= gx * .3; y -= gy * .3; continue; }
+      if (g.sdf(nx2, ny2) > 0) { let lo = 0, hi = s; for (let i = 0; i < 6; i++) { const m = (lo + hi) / 2; g.sdf(x + vx * m, y + vy * m) > 0 ? hi = m : lo = m; } x += vx * lo; y += vy * lo; d -= lo; const [gx, gy] = g.grad(x, y), dot = vx * gx + vy * gy; if (dot > 0) { vx -= 2 * dot * gx; vy -= 2 * dot * gy; hits++; } x -= gx * .3; y -= gy * .3; continue; }
       x = nx2; y = ny2; d -= s;
     }
-    return [x, y];
+    return [x, y, hits];
   };
   return g;
 }
@@ -111,9 +121,11 @@ function drumEcho(g, G, s, e, color, dist = 80) {
   for (let k = 0; k < 2; k++) {
     const te = (e - k * .2) / 1.3; if (te <= 0 || te >= 1) continue;
     const d = 2 + easeOut(te) * dist * (1 + k * .12);
-    g.globalAlpha = .7 * (1 - te) ** 1.4; g.lineWidth = 1.3 * (1 - te * .35); g.beginPath();
-    for (const [r, sg] of rings) { let pen = false, lx = 0, ly = 0; for (let i = 0; i <= 80; i++) { const th = i / 80 * TAU, [qx, qy] = G.travel(s.x + r * Math.cos(th), s.y + r * Math.sin(th), sg * Math.cos(th), sg * Math.sin(th), d); if (pen && Math.hypot(qx - lx, qy - ly) < 24) g.lineTo(qx, qy); else g.moveTo(qx, qy); lx = qx; ly = qy; pen = true; } }
-    g.stroke();
+    for (const [r, sg] of rings) {                   // 파면: 끊지 않고, 벌어진 만큼 옅게, 튕길 때마다 약하게
+      const N = 160, f = [];
+      for (let i = 0; i < N; i++) { const th = i / N * TAU; f.push(G.travel(s.x + r * Math.cos(th), s.y + r * Math.sin(th), sg * Math.cos(th), sg * Math.sin(th), d)); }
+      K.wave(g, [f], color, .7 * (1 - te) ** 1.4, 1.3 * (1 - te * .35), TAU * Math.max(6, Math.abs(r + sg * d)) / N);
+    }
   }
   g.restore();
 }
@@ -232,9 +244,9 @@ const VW = 960, VH = 540, BOSS = { x: 490, y: 245 };
 const aG = makeGround([
   { k: 'circle', x: 480, y: 265, r: 190 }, { k: 'circle', x: 295, y: 330, r: 118 }, { k: 'circle', x: 680, y: 190, r: 125 },
   { k: 'capsule', x1: 470, y1: 440, x2: 470, y2: 600, r: 46 }, { k: 'circle', x: 760, y: 360, r: 60 },
-], [], 46, VW, VH);
+], [], 90, VW, VH);
 const bigCv = document.getElementById('big'); K.watch(bigCv); const bigS = K.surface(bigCv, VW, VH);
-let bodyV = 'contour';
+let bodyV = 'layers';
 const PHR = 16;
 const AHITS = [
   { T: 2, tele: 1, kind: 'ring' }, { T: 4, tele: 1, kind: 'band', a: 0 }, { T: 4.5, tele: .5, kind: 'band', a: 1 },
@@ -292,17 +304,34 @@ function drawBig(b) {
   K.player(g, p.x, p.y, col.p1, { pulse: age < .2 ? 1 - age / .2 : 0 });
 }
 
+/* ════ 4. 여운의 반사 ════ */
+const waveCv = document.getElementById('wave'); K.watch(waveCv); const waveS = K.surface(waveCv, VW, VH);
+const WSRC = [{ x: 330, y: 330, kind: 'disc', r: 30 }, { x: 640, y: 210, kind: 'ring', r1: 40, r2: 70 }, { x: 480, y: 160, kind: 'disc', r: 24 }];
+function drawWave(b) {
+  const g = waveS.g; waveS.begin();
+  drawGround(g, aG, { x: -999, y: -999 });
+  const k = Math.floor(b / 4), e = b - k * 4, src = WSRC[((k % 3) + 3) % 3];
+  const s = src.kind === 'disc' ? { kind: 'disc', x: src.x, y: src.y, r: src.r } : { kind: 'ring', x: src.x, y: src.y, r1: src.r1, r2: src.r2 };
+  if (e < .7) K.attack(g, s, col.e1, 1, e, 4);
+  const rings = s.kind === 'ring' ? [[s.r2, 1], [s.r1, -1]] : [[s.r, 1]];
+  for (let j = 0; j < 2; j++) {
+    const te = (e - j * .25) / 3.6; if (te <= 0 || te >= 1) continue;
+    const d = 2 + easeOut(te) * 420;
+    for (const [r, sg] of rings) { const N = 220, f = []; for (let i = 0; i < N; i++) { const th = i / N * TAU; f.push(aG.travel(s.x + r * Math.cos(th), s.y + r * Math.sin(th), sg * Math.cos(th), sg * Math.sin(th), d)); } K.wave(g, [f], col.e1, .85 * (1 - te) ** 1.2, 1.4 * (1 - te * .4), TAU * Math.max(6, Math.abs(r + sg * d)) / N); }
+  }
+}
 K.bindPalette(document.getElementById('pal'));
 K.bindSpeed(document.getElementById('speed'));
 K.choice(document.getElementById('bodyv'), 'b', v => { bodyV = v; });
 const params = new URLSearchParams(location.search);
-window.__orgAt = b => { for (const t of gtiles) drawGTile(t, b); for (const t of btiles) drawBTile(t, b); drawBig(b); };
+window.__orgAt = b => { for (const t of gtiles) drawGTile(t, b); for (const t of btiles) drawBTile(t, b); drawBig(b); drawWave(b); };
 function frame(now) {
   K.tick(now); const b = clock.beat;
   if (!params.has('freeze')) {
     for (const t of gtiles) if (K.isVisible(t.cv)) drawGTile(t, b);
     for (const t of btiles) if (K.isVisible(t.cv)) drawBTile(t, b);
     if (K.isVisible(bigCv)) drawBig(b);
+    if (K.isVisible(waveCv)) drawWave(b);
   }
   requestAnimationFrame(frame);
 }

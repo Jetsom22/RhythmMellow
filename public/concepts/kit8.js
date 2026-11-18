@@ -139,6 +139,29 @@ const K = (() => {
     g.restore();
   }
 
+  /* ── 여운의 파면: 벽에 튕기는 음파 ──
+     front: 같은 순간의 파면 위 점들 [x, y, 튕긴 횟수]. s0: 벽이 없었다면 이웃한 두 점이 떨어져 있을 간격.
+     그보다 더 벌어진 자리(볼록한 벽을 돌아 퍼진 자리)는 벌어진 만큼 옅게 그린다. 선을 끊지 않는다.
+     벽에 한 번 튕길 때마다 세기가 BOUNCE 배로 준다. */
+  const BOUNCE = .62;
+  function wave(g, fronts, color, alpha, width, s0, closed = true) {
+    const buckets = new Map();
+    for (const f of fronts) {
+      const n = f.length, last = closed ? n : n - 1;
+      for (let i = 0; i < last; i++) {
+        const p = f[i], q = f[(i + 1) % n], L = Math.hypot(q[0] - p[0], q[1] - p[1]), stretch = L / s0;
+        if (stretch > 14) continue;                               // 장애물을 돌아 아주 멀리 갈라진 점끼리는 잇지 않는다(어차피 거의 보이지 않는다)
+        const a = alpha * Math.min(1, 1.3 / Math.max(stretch, .01)) * BOUNCE ** Math.max(p[2], q[2]);
+        const k = Math.round(a * 40); if (k <= 0) continue;
+        let path = buckets.get(k); if (!path) buckets.set(k, path = new Path2D());
+        path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]);
+      }
+    }
+    g.save(); g.strokeStyle = color; g.lineCap = 'round'; g.lineWidth = width * (g.__lw || 1);
+    for (const [k, path] of buckets) { g.globalAlpha = k / 40; g.stroke(path); }
+    g.restore();
+  }
+
   /* ── 캔버스: 논리 크기로 그리고 2배로 찍는다 ── */
   function surface(cv, w, h) {
     const g = cv.getContext('2d'); const s = cv.width / w;
@@ -167,5 +190,5 @@ const K = (() => {
     btn.addEventListener('click', () => { setAudio(!audio.on); btn.setAttribute('aria-pressed', audio.on ? 'true' : 'false'); });
   }
 
-  return { TAU, BPM, SPB, clamp, easeOut, easeInOut, lerp, col, readColors, alpha, METERS, barLen, around, crossed, clock, tick, schedule, setAudio, audio, path, attack, player, dash, surface, watch, isVisible, choice, bindPalette, bindSpeed, bindSound };
+  return { TAU, BPM, SPB, clamp, easeOut, easeInOut, lerp, col, readColors, alpha, METERS, barLen, around, crossed, clock, tick, schedule, setAudio, audio, path, attack, player, dash, wave, surface, watch, isVisible, choice, bindPalette, bindSpeed, bindSound };
 })();
