@@ -129,6 +129,11 @@ func _try_dash(move: Vector2, pressed_at: float) -> void:
 	if not dash.is_empty() or cooldown > 0.0 or not reform.is_empty():
 		return
 	var j := meter.judge(pressed_at - input_offset_ms / 1000.0)
+	# Off the beat there is no dash at all.
+	if j["grade"] == "miss":
+		cooldown = 0.08
+		events.append({"type": "fizzle", "offset_ms": j["offset_ms"]})
+		return
 	var dir := move.normalized() if move.length() > 0.01 else face
 	# Just exists only against an attack: the press is on the beat, and an attack lands on that beat where the player stands.
 	# Pressed a moment early, the attack is still on its way; a moment late, its hit is waiting to be confirmed.
@@ -322,7 +327,7 @@ func _spawn(em: Dictionary, ev: Dictionary, at_step: int) -> void:
 	active.append({
 		"def": def, "id": ev["attack"], "origin": origin, "rot": deg_to_rad(float(ev.get("rot", 0.0))),
 		"start": at_step, "hit_step": at_step + int(def["tele"]), "hold": int(def.get("hold", 0)),
-		"layer": def.get("layer", "lead"), "src": em["id"], "src_kind": em["kind"],
+		"layer": def.get("layer", "lead"), "src": em["id"], "src_kind": em["kind"], "src_pos": em["pos"],
 	})
 
 ## An attack lands. The player is safe if outside it, or inside a just dash.
