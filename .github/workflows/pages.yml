@@ -10,6 +10,9 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  GODOT_VERSION: 4.7.2
+
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -26,6 +29,34 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+
+      # The Godot build is exported next to the web prototype, at /godot/.
+      - name: Restore Godot and its web templates
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-bin
+            ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable
+          key: godot-${{ env.GODOT_VERSION }}-web
+      - name: Download Godot and its web templates
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          base=https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable
+          mkdir -p ~/godot-bin ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          curl -sSL --retry 3 -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q -o godot.zip -d ~/godot-bin
+          curl -sSL --retry 3 -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q -o -j templates.tpz 'templates/web_*' 'templates/version.txt' -d ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          rm -f godot.zip templates.tpz
+      - name: Check and export the Godot build
+        run: |
+          godot=~/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          "$godot" --headless --path godot --import
+          "$godot" --headless --path godot -s res://tools/run_tests.gd
+          mkdir -p dist/godot
+          "$godot" --headless --path godot --export-release Web ../dist/godot/index.html
+          test -s dist/godot/index.wasm
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
