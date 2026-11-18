@@ -18,6 +18,8 @@ var presses: Array[float] = []
 var last := {}
 var last_at := -10.0
 var seed_value := 7
+## Which bass and lead timbre is in use. B and L step through them.
+var timbre := {"bass": 0, "lead": 0}
 var _push := 0.0
 
 func _ready() -> void:
@@ -25,6 +27,10 @@ func _ready() -> void:
 		var q: Variant = JavaScriptBridge.eval("new URLSearchParams(location.search).get('seed') || ''", true)
 		if str(q).is_valid_int():
 			seed_value = int(str(q))
+		for id in ["bass", "lead"]:
+			var v: Variant = JavaScriptBridge.eval("new URLSearchParams(location.search).get('%s') || ''" % id, true)
+			if str(v).is_valid_int():
+				timbre[id] = clampi(int(str(v)), 0, 3)
 	song = Song.generate(seed_value, 2)
 	mixer = LayerMixer.new()
 	add_child(mixer)
@@ -48,6 +54,14 @@ func _unhandled_input(e: InputEvent) -> void:
 			_apply()
 		elif k == KEY_SPACE:
 			_press(now)
+		elif k == KEY_B or k == KEY_L:
+			var which := "bass" if k == KEY_B else "lead"
+			var count := Synth.BASS_PRESETS.size() if which == "bass" else Synth.LEAD_PRESETS.size()
+			timbre[which] = (int(timbre[which]) + 1) % count
+			mixer.rebake(song, which, Beat.bpm, timbre)
+			if not on[which]:
+				on[which] = true
+				_apply()
 		elif k == KEY_BRACKETLEFT:
 			Beat.input_offset_ms -= 5.0
 		elif k == KEY_BRACKETRIGHT:
@@ -89,7 +103,7 @@ func _process(delta: float) -> void:
 			state = "playing"
 			_apply()
 		else:
-			mixer.bake(song, bake_queue.pop_front(), Beat.bpm)
+			mixer.bake(song, bake_queue.pop_front(), Beat.bpm, timbre)
 	_push += delta
 	if _push > 0.2 and OS.has_feature("web"):
 		_push = 0.0
@@ -101,7 +115,7 @@ func _report() -> Dictionary:
 	return {
 		"state": state, "step": Beat.step_f() if Beat.running else -1.0, "latencyMs": mixer.delay_ms(),
 		"bakeMs": mixer.bake_ms, "presses": presses, "last": last, "inputOffsetMs": Beat.input_offset_ms,
-		"fps": Engine.get_frames_per_second(), "seed": seed_value, "audio": mixer.backend,
+		"fps": Engine.get_frames_per_second(), "seed": seed_value, "timbre": timbre, "audio": mixer.backend,
 	}
 
 func _draw() -> void:
@@ -144,6 +158,10 @@ func _draw() -> void:
 		else:
 			draw_arc(p, 14.0, 0, TAU, 32, Color(INK, 0.45), 1.5, true)
 		_text(font, p + Vector2(0, 40), "%d  %s" % [i + 1, id.to_upper()], 12, Color(INK, 0.7), true)
+		if id == "bass":
+			_text(font, p + Vector2(0, 58), "B: %s" % Synth.BASS_PRESETS[int(timbre["bass"])], 12, INK, true)
+		elif id == "lead":
+			_text(font, p + Vector2(0, 58), "L: %s" % Synth.LEAD_PRESETS[int(timbre["lead"])], 12, INK, true)
 
 	# The last press and the spread of recent ones.
 	var bx := c.x - 200.0
@@ -173,7 +191,7 @@ func _draw() -> void:
 	sd = sqrt(sd / presses.size()) if presses.size() > 0 else 0.0
 
 	var lines := [
-		"SPACE / CLICK  tap on the beat      1-5  layers      C  calibrate      [ ]  offset",
+		"SPACE / CLICK  tap on the beat      1-5  layers      B  next bass sound      L  next lead sound      C  calibrate      [ ]  offset",
 		"taps %d   mean %+.0f ms   sd %.0f ms   input offset %+.0f ms" % [presses.size(), mean, sd, Beat.input_offset_ms],
 		"audio: %s   output delay %.0f ms   fps %d   bake %s ms   seed %d   %d bpm" % [mixer.backend, mixer.delay_ms(), Engine.get_frames_per_second(), _bake_text(), seed_value, int(Beat.bpm)],
 	]
