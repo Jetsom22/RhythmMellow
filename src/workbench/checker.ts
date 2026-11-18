@@ -191,6 +191,7 @@ export function check(m: Model): Finding[] {
       { label: '시작 위치', ...start },
     ];
     for (const g2 of sim.gates) g2.open = true;
+    sim.field.setWays(sim.gates.map(g2 => g2.shape));
     for (const t of things) if (!sim.isGround(t.x, t.y)) { bad.push(`${t.label} 가 낭떠러지 위에 있다`); where.push(t); }
     add('on-ground', '모든 것이 땅 위에 있는가', bad, where, `장치·몬스터·수호자·악기·공명판·체크포인트 ${things.length}개가 모두 땅 위에 있다`);
   }
@@ -199,7 +200,7 @@ export function check(m: Model): Finding[] {
   {
     const bad: string[] = [], where: { x: number; y: number }[] = [];
     const g4 = makeGrid(m, 0.25);
-    const centre = sim.ground.find(s => s.kind === 'circle');
+    const centre = sim.field.ground.find(s => s.kind === 'circle');
     const inCentre = (k: number): boolean => !!centre && centre.kind === 'circle' && Math.hypot(g4.x(k % g4.n) - centre.x, g4.y(Math.floor(k / g4.n)) - centre.y) <= centre.r + sim.dashU * m.u;
     const areaCells = new Map<Instrument, number[]>();
     for (let k = 0; k < g4.n * g4.n; k++) {
@@ -320,6 +321,7 @@ export function check(m: Model): Finding[] {
   }
 
   for (const gt of sim.gates) gt.open = false;
+  sim.field.setWays([]);
   sim.openGates();
   return out;
 }
@@ -347,5 +349,5 @@ export function appearanceTable(m: Model): { kind: Kind; emitters: { label: stri
 
 /** Is the point inside a ground shape that is not one of the instrument areas? (used to draw areas) */
 export function inCentre(m: Model, x: number, y: number): boolean {
-  return m.sim.ground.some(s => s.kind === 'circle' && contains(s, x, y));
+  return m.sim.field.ground.some(s => s.kind === 'circle' && contains(s, x, y));
 }

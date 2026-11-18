@@ -1,5 +1,5 @@
 import { paletteOf } from '../render/theme';
-import { outline, Shape } from '../core/stage/shapes';
+import { Shape } from '../core/stage/shapes';
 import { bitsToKinds, Grid, KIND_BIT, Live, liveAt, Model } from './model';
 
 export interface ViewState {
@@ -21,6 +21,24 @@ const rgba = (c: string, a: number): string => {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 };
 
+const edges = new Map<string, number[][]>();
+/** Line segments along the edge of the ground, from the game's own ground field. */
+function edgeOf(m: Model, open: boolean): number[][] {
+  const key = `${m.data.id}|${open}`;
+  let e = edges.get(key);
+  if (!e) {
+    const R = 33 * m.u, chunk = 2 * m.u;
+    e = [];
+    for (let y = -R; y < R; y += chunk) for (let x = -R; x < R; x += chunk) {
+      const mid = m.sim.field.sd(x + chunk / 2, y + chunk / 2);
+      if (Math.abs(mid) > chunk) continue;
+      e.push(...m.sim.field.contour(x, y, chunk, [0], 8)[0]);
+    }
+    edges.set(key, e);
+  }
+  return e;
+}
+
 export function palette(m: Model) {
   const p = paletteOf(m.data.palette);
   return { ...p, enemyOf: (layer: string): string => (p.enemy as Record<string, string>)[layer] ?? p.danger };
@@ -32,6 +50,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: number, h: number, m: Mod
   const Y = (y: number): number => h / 2 + (y - v.cy) * s;
 
   for (const g of sim.gates) g.open = v.gatesOpen || (!g.requires.layer && !g.requires.flag && !g.requires.flags && g.requires.parts === undefined);
+  sim.field.setWays(sim.gates.filter(g => g.open).map(g => g.shape));
 
   ctx.fillStyle = c.bg;
   ctx.fillRect(0, 0, w, h);
@@ -72,33 +91,16 @@ export function draw(ctx: CanvasRenderingContext2D, w: number, h: number, m: Mod
 
   // ground, holes, open gates, then the edge line where ground meets the void
   ctx.fillStyle = c.bg;
-  for (const g of sim.ground) { path(g); ctx.fill('evenodd'); }
+  for (const g of sim.field.ground) { path(g); ctx.fill('evenodd'); }
   ctx.fillStyle = rgba(c.danger, 0.1);
-  for (const hl of sim.holes) { path(hl); ctx.fill('evenodd'); }
+  for (const hl of sim.field.holes) { path(hl); ctx.fill('evenodd'); }
   ctx.fillStyle = c.bg;
   for (const g of sim.gates) if (g.open) { path(g.shape); ctx.fill(); }
-  // the edge: points of every outline where ground is on one side and void on the other, joined into lines
+  // the edge of the ground as the game computes it (shapes melt together where they meet), worked out once per gate state
   ctx.strokeStyle = c.ink; ctx.lineWidth = 1.2;
-  const eps = 3 / Math.max(s, 0.01);
-  for (const sh of [...sim.ground, ...sim.holes, ...sim.gates.filter(g => g.open).map(g => g.shape)]) {
-    const step = 5 / Math.max(s, 0.01), raw = outline(sh, step), pts: [number, number, number, number][] = [];
-    // fill in straight runs (a sector's sides) so their edges are tested too
-    for (let i = 0; i < raw.length; i++) {
-      pts.push(raw[i]);
-      const q = raw[i + 1];
-      if (!q) break;
-      const [x0, y0] = raw[i], dx = q[0] - x0, dy = q[1] - y0, L = Math.hypot(dx, dy);
-      for (let t = step; t < L - step / 2; t += step) pts.push([x0 + (dx * t) / L, y0 + (dy * t) / L, -dy / L, dx / L]);
-    }
-    let prev: [number, number] | null = null;
-    ctx.beginPath();
-    for (const [x, y, nx, ny] of pts) {
-      const edge = sim.isGround(x - nx * eps, y - ny * eps) !== sim.isGround(x + nx * eps, y + ny * eps);
-      if (edge && prev) ctx.lineTo(X(x), Y(y)); else if (edge) ctx.moveTo(X(x), Y(y));
-      prev = edge ? [x, y] : null;
-    }
-    ctx.stroke();
-  }
+  ctx.beginPath();
+  for (const [x1, y1, x2, y2] of edgeOf(m, v.gatesOpen)) { ctx.moveTo(X(x1), Y(y1)); ctx.lineTo(X(x2), Y(y2)); }
+  ctx.stroke();
   ctx.setLineDash([4, 4]); ctx.strokeStyle = rgba(c.ink, 0.45); ctx.lineWidth = 1;
   for (const g of sim.gates) if (!g.open) { path(g.shape); ctx.stroke(); }
   ctx.setLineDash([]);

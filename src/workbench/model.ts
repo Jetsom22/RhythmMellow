@@ -37,7 +37,7 @@ export function loadModel(data: StageData): Model {
   const song = generateSong(data.seed ?? 7, 2);
   // An instrument area is a ground sector that holds that instrument's part.
   const sectors: { layer: Instrument; shape: Shape }[] = [];
-  for (const g of sim.ground) {
+  for (const g of sim.field.ground) {
     if (g.kind !== 'sector') continue;
     const part = sim.parts.find(p => contains(g, p.x, p.y));
     if (part) sectors.push({ layer: part.layer, shape: g });
@@ -183,6 +183,7 @@ export function setGates(m: Model, parts: Instrument[]): void {
     for (const f of r.flags ?? []) if (!lit(f)) ok = false;
     g.open = ok;
   }
+  m.sim.field.setWays(m.sim.gates.filter(g => g.open).map(g => g.shape));
 }
 
 /** Walkable cells for a set of parts. */
