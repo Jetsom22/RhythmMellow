@@ -280,7 +280,7 @@ const PHRASE = [
   { inst: 'drum', hit: 4, tele: 2, shape: { kind: 'ring', x: AR.x, y: AR.y, r1: 150, r2: 204 } },
   { inst: 'hat', hit: 5, tele: 1, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 1.07, w: 14, len: 232 } },
   { inst: 'hat', hit: 5, tele: 1, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 4.21, w: 14, len: 232 } },
-  { inst: 'bass', hit: 7, tele: 3, hold: 1, shape: { kind: 'half', x: AR.x, y: AR.y, r: AR.r } },
+  { inst: 'bass', hit: 7, tele: 3, shape: { kind: 'half', x: AR.x, y: AR.y, r: AR.r } },
 ];
 const scene = document.getElementById('scene'), sg = scene.getContext('2d');
 const pl = { x: 330, y: 400, tx: 330, ty: 400, touched: false, ang: 2.4, lastX: 330, lastY: 400 };
@@ -343,7 +343,7 @@ const TW = { x: 200, y: 122, r: 104 };
 const ETILE = {
   drum: { loop: 4, list: [{ inst: 'drum', hit: 2, tele: 2, shape: { kind: 'ring', x: 200, y: 122, r1: 26, r2: 56 } }] },
   hat: { loop: 4, list: [{ inst: 'hat', hit: 2, tele: 1, shape: { kind: 'band', x: 200, y: 122, ang: -.4, w: 10, len: 104 } }, { inst: 'hat', hit: 2, tele: 1, shape: { kind: 'band', x: 200, y: 122, ang: 2.74, w: 10, len: 104 } }] },
-  bass: { loop: 8, list: [{ inst: 'bass', hit: 3, tele: 3, hold: 1, shape: { kind: 'half', x: 200, y: 122, r: 104 } }] },
+  bass: { loop: 8, list: [{ inst: 'bass', hit: 3, tele: 3, shape: { kind: 'half', x: 200, y: 122, r: 104 } }] },
 };
 function drawETile(cv, beat) {
   const g = cv.getContext('2d'), def = ETILE[cv.dataset.inst], b = beat % def.loop;
