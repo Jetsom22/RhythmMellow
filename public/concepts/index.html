@@ -73,7 +73,7 @@ a{color:inherit}
 <h2>4 · 피격과 부활</h2>
 <p>맞으면 플레이어가 가루로 흩어진다. 빠르게 튀어 나가 천천히 느려지고, 그대로 천천히 빨라져 되살아날 자리로 빠르게 모인다. 서는 순간 없이 하나로 이어진 움직임이다. 여덟 박에 한 번씩 되풀이된다.</p>
 <canvas id="dust" width="1920" height="640"></canvas>
-<div class="lg" style="margin-top:12px;gap:12px"><label for="dustDur">흩어져서 다시 뭉치기까지</label><input id="dustDur" type="range" min="0.8" max="4" step="0.1" value="1.7" style="width:220px;accent-color:var(--chrome)"><output id="dustOut" style="min-width:11em"></output></div>
+<div class="lg" style="margin-top:12px;gap:12px"><label for="dustDur">흩어져서 다시 뭉치기까지</label><input id="dustDur" type="range" min="0.8" max="4" step="0.1" value="2" style="width:220px;accent-color:var(--chrome)"><output id="dustOut" style="min-width:11em"></output></div>
 <ul class="notes">
   <li><b>색</b> · 붉은 계열은 적, 푸른 계열은 플레이어. 계열 안에서 밝기와 색조로 악기 셋을 가른다</li>
   <li><b>땅의 끝</b> · 보통 색의 선 하나. 다가가면 안쪽으로 옅은 선 두 줄만 더 보인다. 바깥의 점은 가까울 때만</li>
@@ -432,7 +432,7 @@ function drawGrains(g, hx, hy, rx, ry, kx, ky, age, dur, beat, t) {
   g.restore();
 }
 const dustCv = document.getElementById('dust');
-let dustDur = 1.7;        // 박. 110 BPM에서 한 박은 약 0.55초
+let dustDur = 2;          // 박. 110 BPM에서 한 박은 약 0.55초
 {
   const input = document.getElementById('dustDur'), out = document.getElementById('dustOut');
   const show = () => { dustDur = +input.value; out.textContent = `${dustDur.toFixed(1)}박 · ${(dustDur * 60 / BPM).toFixed(2)}초`; };
