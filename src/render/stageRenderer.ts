@@ -63,6 +63,10 @@ export class StageRenderer {
   private flashes: Flash[] = [];
   private pfx: PlayerFx[] = [];
   private bassLine = { until: -1, tx: 0, ty: 0 };
+  /** Steps of the dodge beats that were answered with a just dodge, for the clock. */
+  private justs: number[] = [];
+  /** The clock at the bottom centre. Its shape is still being chosen by the planner: dial, arch or strip. */
+  clock: 'dial' | 'arch' | 'strip' = 'dial';
   /** The edge of the ground as long lines, and as points with the direction that leads into the ground. */
   private runs: { x0: number; y0: number; x1: number; y1: number; pts: number[] }[] = [];
   private edgePts: [number, number, number, number][] = [];
@@ -105,8 +109,10 @@ export class StageRenderer {
     this.drawEmitters(s, stepF, pulse);
     this.drawPlayerFx(s, stepF);
     this.drawPlayer(s, stepF, pulse);
+    this.drawApproach(s, stepF);
     c.restore();
     this.drawHud(s, pulse);
+    this.drawClock(s, stepF);
   }
 
   private visible(x: number, y: number, pad = 60): boolean {
@@ -120,6 +126,7 @@ export class StageRenderer {
     for (const e of events) {
       if (e.type === 'dash') {
         this.pfx.push({ kind: 'dash', at: stepF, x: e.from.x, y: e.from.y, x1: e.to.x, y1: e.to.y, strong: true });
+        if (e.just) this.justs.push(Math.round(stepF - (e.offsetMs / 1000) / s.meter.secPerStep));
       } else if (e.type === 'absorb') {
         this.pfx.push({ kind: 'ring', at: stepF, x: s.x, y: s.y, color: eq });
       } else if (e.type === 'attack') {
@@ -154,6 +161,7 @@ export class StageRenderer {
     this.echoes = this.echoes.filter(e => (stepF - e.at) / 4 < ECHO[e.inst.layer].life + .8);
     this.flashes = this.flashes.filter(f => stepF - f.at < 2.6);
     this.pfx = this.pfx.filter(f => stepF - f.at < (f.kind === 'dust' ? f.dur + .5 : 6));
+    this.justs = this.justs.filter(j => stepF - j < 8);
   }
 
   /* ───────── shapes ───────── */
@@ -373,7 +381,11 @@ export class StageRenderer {
         const k = Math.min(span, Math.floor(pr * span) + 1);
         c.globalAlpha = .1; this.shapePath(a); c.fill('evenodd');
         c.globalAlpha = .16 + .44 * (k / span); this.shapePath(a, pr); c.fill('evenodd');
-        c.globalAlpha = .5; c.lineWidth = 1.25; this.shapeOutline(a); c.stroke();
+        // A strike that does not fall on a dodge beat cannot be dodged: its outline is dotted, walk out of it.
+        const bar = s.meter.stepsPerBar, off = !s.meter.dodgeSteps.includes(((a.hitStep % bar) + bar) % bar);
+        if (off) c.setLineDash([3, 4]);
+        c.globalAlpha = off ? .9 : .5; c.lineWidth = off ? 1.3 : 1.25; this.shapeOutline(a); c.stroke();
+        c.setLineDash([]);
       } else if (a.hold > 0) {
         // Held zones do not just sit there: they dip, then climb again toward the next beat, when they strike again.
         const u = (((stepF - a.hitStep) / 4) % 1 + 1) % 1, k = Math.floor(u * 4) + 1;
@@ -569,17 +581,102 @@ export class StageRenderer {
     c.globalAlpha = 1;
   }
 
-  private drawPlayer(s: StageSim, stepF: number, pulse: number): void {
+  private drawPlayer(s: StageSim, _stepF: number, pulse: number): void {
     const c = this.ctx, pal = this.pal;
     if (s.reform) return;       // scattered: the dust is the player
-    const r = PLAYER_R * .8 * (1 + .12 * pulse);
+    const r = PLAYER_R * .8 * (1 + .12 * pulse), R = PLAYER_R + 4;
     c.save();
-    c.globalAlpha = (s.iframe > 0 || s.step < s.graceUntil) && !s.dash && Math.floor(stepF * 2) % 2 === 0 ? .4 : 1;
-    c.strokeStyle = s.equipped ? pal.player[s.equipped] : pal.ink;
-    c.lineWidth = s.equipped ? 1.5 : 1;
-    c.beginPath(); c.arc(s.x, s.y, PLAYER_R + 4, 0, TAU); c.stroke();
-    c.fillStyle = pal.ink;
-    c.beginPath(); c.arc(s.x, s.y, r, 0, TAU); c.fill();
+    if (s.dash?.just || s.iframe > 0 || s.step < s.graceUntil) {
+      // Invulnerable: the body goes transparent and takes the just colour. A just dodge stays so for the whole dash, any other only for an instant.
+      c.strokeStyle = c.fillStyle = pal.just;
+      c.lineWidth = 1.6; c.beginPath(); c.arc(s.x, s.y, R, 0, TAU); c.stroke();
+      c.globalAlpha = .22; c.beginPath(); c.arc(s.x, s.y, r, 0, TAU); c.fill();
+      c.globalAlpha = .9; c.lineWidth = 1.2; c.beginPath(); c.arc(s.x, s.y, r, 0, TAU); c.stroke();
+    } else {
+      c.strokeStyle = s.equipped ? pal.player[s.equipped] : pal.ink;
+      c.lineWidth = s.equipped ? 1.5 : 1;
+      c.beginPath(); c.arc(s.x, s.y, R, 0, TAU); c.stroke();
+      c.fillStyle = pal.ink;
+      c.beginPath(); c.arc(s.x, s.y, r, 0, TAU); c.fill();
+    }
+    c.restore();
+  }
+
+  /* ───────── the beat ───────── */
+
+  /** Dodge beats near step b: the one just passed and those within the next beat. */
+  private dodgeBeats(s: StageSim, from: number, to: number): number[] {
+    const bar = s.meter.stepsPerBar, out: number[] = [];
+    for (let k = Math.floor(from / bar) - 1; k <= Math.floor(to / bar) + 1; k++) for (const d of s.meter.dodgeSteps) { const t = k * bar + d; if (t > from && t <= to) out.push(t); }
+    return out;
+  }
+
+  /** Around the body: for every dodge beat a ring closes in from one beat away, darkening one step per 16th. The enemy spreads as planes; the player's beat closes in as a line. */
+  private drawApproach(s: StageSim, stepF: number): void {
+    if (s.reform) return;
+    const c = this.ctx, spb = s.meter.stepsPerBeat, R = PLAYER_R + 5;
+    c.save();
+    c.strokeStyle = this.pal.player[s.equipped ?? 'drum'];
+    for (const t of this.dodgeBeats(s, stepF, stepF + spb)) {
+      const left = (t - stepF) / spb, k = Math.floor((1 - left) * 4) + 1;
+      c.globalAlpha = .12 + (.5 * k) / 4; c.lineWidth = 1.1;
+      c.beginPath(); c.arc(s.x, s.y, R + 44 * left, 0, TAU); c.stroke();
+    }
+    const prev = this.dodgeBeats(s, stepF - spb, stepF).pop();
+    if (prev !== undefined) {
+      const since = (stepF - prev) / spb;
+      if (since < .3) { c.globalAlpha = .85 * (1 - since / .3); c.lineWidth = 2; c.beginPath(); c.arc(s.x, s.y, R + 10 * easeOut(since / .3), 0, TAU); c.stroke(); }
+    }
+    c.restore();
+  }
+
+  /** Bottom centre: one whole bar. Where the dodge beats sit in it, how far the next one is, and which were answered with a just. */
+  private drawClock(s: StageSim, stepF: number): void {
+    const c = this.ctx, pal = this.pal, m = s.meter, bar = m.stepsPerBar, w = this.width, h = this.height;
+    const k = Math.max(1.4, Math.min(2.2, Math.min(w / 640, h / 360)));     // drawn in the mock-up's units, then scaled
+    const barIx = Math.floor(stepF / bar), ph = (stepF - barIx * bar) / bar, p1 = pal.player[s.equipped ?? 'drum'];
+    const fill = (t: number): number => { const j = this.justs.find(q => q === t); return j === undefined ? 0 : Math.max(0, 1 - (stepF - j) / (1.5 * m.stepsPerBeat)); };
+    const marks = m.dodgeSteps.map(d => ({ t: barIx * bar + d, u: d / bar }));
+    const next = marks.find(q => q.t > stepF);
+    const mark = (px: number, py: number, t: number, isNext: boolean, edge = 1): void => {
+      const f = fill(t);
+      c.globalAlpha = 1; c.fillStyle = pal.bg; c.beginPath(); c.arc(px, py, 4, 0, TAU); c.fill();
+      c.fillStyle = f > 0 ? pal.just : p1; c.globalAlpha = edge * (f > 0 ? .4 + .6 * f : t < stepF ? .35 : .9);
+      c.beginPath(); c.arc(px, py, f > 0 ? 4 : 3, 0, TAU); c.fill();
+      if (isNext) { c.strokeStyle = p1; c.globalAlpha = .7; c.lineWidth = 1; c.beginPath(); c.arc(px, py, 6.5, 0, TAU); c.stroke(); }
+    };
+    c.save();
+    c.translate(w / 2, h);
+    c.scale(k, k);
+    c.strokeStyle = c.fillStyle = pal.ink;
+    if (this.clock === 'dial') {
+      const y = -38, R = 26, ang = (u: number): number => -Math.PI / 2 + u * TAU;
+      c.globalAlpha = .6; c.lineWidth = 1; c.beginPath(); c.arc(0, y, R, 0, TAU); c.stroke();
+      c.globalAlpha = .1; c.beginPath(); c.moveTo(0, y); c.arc(0, y, R, ang(0), ang(ph)); c.closePath(); c.fill();
+      for (let b = 0; b < m.beatsPerBar; b++) { const a = ang(b / m.beatsPerBar); c.globalAlpha = .4; c.beginPath(); c.moveTo(Math.cos(a) * (R - 3), y + Math.sin(a) * (R - 3)); c.lineTo(Math.cos(a) * R, y + Math.sin(a) * R); c.stroke(); }
+      for (const q of marks) mark(Math.cos(ang(q.u)) * R, y + Math.sin(ang(q.u)) * R, q.t, q === next);
+      c.strokeStyle = c.fillStyle = pal.ink; c.globalAlpha = .85; c.lineWidth = 1.3;
+      c.beginPath(); c.moveTo(0, y); c.lineTo(Math.cos(ang(ph)) * (R - 5), y + Math.sin(ang(ph)) * (R - 5)); c.stroke();
+      c.beginPath(); c.arc(0, y, 1.8, 0, TAU); c.fill();
+    } else if (this.clock === 'arch') {
+      const y = -4, R = 48, ang = (u: number): number => Math.PI + u * Math.PI;
+      c.lineWidth = 1;
+      for (const [r, a] of [[R, .6], [R - 6, .22], [R - 12, .12]]) { c.globalAlpha = a; c.beginPath(); c.arc(0, y, r, Math.PI, TAU); c.stroke(); }
+      c.globalAlpha = .1; c.beginPath(); c.moveTo(0, y); c.arc(0, y, R, Math.PI, ang(ph)); c.closePath(); c.fill();
+      for (const q of marks) mark(Math.cos(ang(q.u)) * R, y + Math.sin(ang(q.u)) * R, q.t, q === next);
+      c.strokeStyle = pal.ink; c.globalAlpha = .85; c.lineWidth = 1.3;
+      c.beginPath(); c.moveTo(Math.cos(ang(ph)) * (R - 14), y + Math.sin(ang(ph)) * (R - 14)); c.lineTo(Math.cos(ang(ph)) * R, y + Math.sin(ang(ph)) * R); c.stroke();
+    } else {
+      const y = -30, x0 = -120, x1 = 120, cx = -70, per = 240 / (bar * 1.6);
+      c.globalAlpha = .55; c.lineWidth = 1; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke();
+      for (let n = -1; n <= 2; n++) { const bx = cx + ((barIx + n) * bar - stepF) * per; if (bx > x0 && bx < x1) { c.globalAlpha = .35; c.beginPath(); c.moveTo(bx, y - 5); c.lineTo(bx, y + 5); c.stroke(); } }
+      for (let n = -1; n <= 2; n++) for (const d of m.dodgeSteps) {
+        const t = (barIx + n) * bar + d, px = cx + (t - stepF) * per;
+        if (px < x0 || px > x1) continue;
+        mark(px, y, t, false, Math.min(1, (px - x0) / 20, (x1 - px) / 20));
+      }
+      c.strokeStyle = pal.ink; c.globalAlpha = .85; c.lineWidth = 1.3; c.beginPath(); c.moveTo(cx, y - 9); c.lineTo(cx, y + 9); c.stroke();
+    }
     c.restore();
   }
 

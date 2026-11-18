@@ -18,6 +18,7 @@ import { loadTunables, mountPanel, saveTunables } from './ui/panel';
  *   ?at=x,y          start there (U)          ?parts=drum,hat   start holding these
  *   ?god=1           cannot be hurt           ?palette=rust|mid|navy|ochre
  *   ?zoom=0.3        look from further away   ?seed=7
+ *   ?clock=dial|arch|strip   the shape of the clock (V steps through them while playing)
  */
 const stages = import.meta.glob<StageData>('./data/stages/*.json', { eager: true, import: 'default' });
 const params = new URLSearchParams(location.search);
@@ -47,6 +48,8 @@ const canvas = document.getElementById('game') as HTMLCanvasElement;
 const renderer = new StageRenderer(canvas);
 renderer.setPalette(params.get('palette') ?? data.palette);
 renderer.zoom = Math.max(0.1, Math.min(1, Number(params.get('zoom') ?? 1) || 1));
+const clocks = ['dial', 'arch', 'strip'] as const;
+renderer.clock = clocks.find(c => c === params.get('clock')) ?? 'dial';
 document.body.style.background = renderer.pal.bg;
 const kb = new Keyboard(window, () => engine.now());
 const panel = mountPanel(tun, (key, value) => { if (key === 'bpm') engine.setBpm(value); });
@@ -134,6 +137,7 @@ document.getElementById('calibrate-btn')!.addEventListener('click', () => void b
 kb.onPress = code => {
   if (code === 'Tab') panel.toggle();
   else if (code === 'KeyC') void calibrate();
+  else if (code === 'KeyV') renderer.clock = clocks[(clocks.indexOf(renderer.clock) + 1) % clocks.length];   // look at the three clock shapes
   else if (code === 'Minus') renderer.zoom = Math.max(0.1, renderer.zoom - 0.1);
   else if (code === 'Equal') renderer.zoom = Math.min(1, renderer.zoom + 0.1);
 };
