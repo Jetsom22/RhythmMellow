@@ -38,16 +38,16 @@ a{color:inherit}
 <h1>비주얼 시안 6 — 선으로 그린 땅</h1>
 <p class="lede">바닥은 배경색 그대로 두고, 땅의 끝을 선으로 긋는다. 가장자리에 다가가면 그 선에서 가는 선이 퍼져 나온다. 예고는 번지되 불투명도만 계단으로 오르고, 여운의 선은 공격의 크기만큼만 퍼진다. <a href="round5.html">이전 시안</a></p>
 <div class="bar">
-  <div class="grp" id="legend" style="font:400 12px Jost,sans-serif;letter-spacing:.14em;gap:16px;order:2"><span><i style="display:inline-block;width:14px;height:2px;background:var(--d);margin-right:6px;vertical-align:middle"></i>위험</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--a);margin-right:6px"></i>드럼</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--b);margin-right:6px"></i>하이햇</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--c);margin-right:6px"></i>베이스</span></div>
+  <div class="grp" id="legend" style="font:400 12px Jost,sans-serif;letter-spacing:.14em;gap:16px;order:2"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--d);margin-right:6px"></i>위험(가까울 때만)</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--a);margin-right:6px"></i>드럼</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--b);margin-right:6px"></i>하이햇</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--c);margin-right:6px"></i>베이스</span></div>
   <div class="grp" role="group" aria-label="팔레트" id="pal">
     <button data-p="rust" aria-pressed="true">RUST</button><button data-p="mid" aria-pressed="false">MID-CENTURY</button><button data-p="navy" aria-pressed="false">NAVY</button><button data-p="ochre" aria-pressed="false">OCHRE</button>
   </div>
 </div>
 
 <h2>1 · 땅의 끝</h2>
-<p>드럼의 방. 바닥에는 색이 없고 테두리 선만 있다. 플레이어를 가장자리로 가져가면 선이 바깥으로 퍼져 나온다. 마우스나 손가락으로 움직여 보면 된다.</p>
+<p>드럼의 방. 바닥에는 색이 없고, 땅의 끝은 보통 색의 가는 선이다. 플레이어를 가장자리로 가져가면 위험색의 선과 점이 바깥에서 드러난다. 평소엔 보이지 않는다. 마우스나 손가락으로 움직여 보면 된다.</p>
 <div class="grp" role="group" aria-label="점" id="dotsOpt" style="margin-bottom:12px">
-  <button data-dots="0" aria-pressed="true">선만</button><button data-dots="1" aria-pressed="false">선 + 점</button>
+  <button data-dots="1" aria-pressed="true">선 + 점</button><button data-dots="0" aria-pressed="false">선만</button>
 </div>
 <canvas id="room" width="1920" height="1080"></canvas>
 
@@ -60,11 +60,11 @@ a{color:inherit}
 </div>
 
 <h2>3 · 보스전에 얹어 보면</h2>
-<p>여덟 박짜리 악구가 되풀이된다. 경기장도 선 하나로만 그렸다.</p>
+<p>여덟 박짜리 악구가 되풀이된다. 경기장도 선 하나로만 그렸다. 베이스의 여운은 면의 네 변에서 퍼진다.</p>
 <canvas id="scene" width="1920" height="1080"></canvas>
 <ul class="notes">
   <li><b>바닥</b> · 배경색 그대로. 땅은 색이 아니라 테두리로 읽는다</li>
-  <li><b>위험선</b> · 땅의 끝. 전용 위험색으로 항상 보이고, 다가가면 가는 선이 퍼져 나온다</li>
+  <li><b>땅의 끝</b> · 평소엔 구도선과 같은 보통 색의 가는 선 하나. 다가가면 위험색의 가는 선과 점이 바깥으로 퍼져 나온다. 평소엔 보이지 않는다</li>
   <li><b>예고</b> · 번지는 면. 불투명도는 16분음 계단</li>
   <li><b>여운</b> · 외곽선이 옅어지며 퍼진다. 겹 수와 거리는 모양의 두께를 따른다</li>
 </ul>
@@ -89,7 +89,7 @@ function outline(g, s, off) {
   g.beginPath();
   if (s.kind === 'ring') { g.arc(s.x, s.y, s.r2 + off, 0, TAU); if (s.r1 - off > 2) { g.moveTo(s.x + s.r1 - off, s.y); g.arc(s.x, s.y, s.r1 - off, 0, TAU); } }
   else if (s.kind === 'band') { const c = Math.cos(s.ang), n = Math.sin(s.ang); for (const sg of [1, -1]) { const h = (s.w / 2 + off) * sg; g.moveTo(s.x + n * h, s.y - c * h); g.lineTo(s.x + c * s.len + n * h, s.y + n * s.len - c * h); } }
-  else { const x = s.dir > 0 ? s.x + s.w + off : s.x - off; g.moveTo(x, s.y); g.lineTo(x, s.y + s.h); if (off < 1) g.rect(s.x, s.y, s.w, s.h); }
+  else g.rect(s.x - off, s.y - off, s.w + off * 2, s.h + off * 2);
 }
 /* 모양의 두께: 여운이 얼마나, 몇 겹으로 퍼질지를 정한다 */
 const thickness = s => s.kind === 'ring' ? s.r2 - s.r1 : s.kind === 'band' ? s.w : Math.min(s.w, s.h);
@@ -142,7 +142,7 @@ function proximity(g, shape, x, y, reach) {
 function drawEdge(g, shapes, pl, withDots, bounds) {
   // 늘 보이는 테두리
   g.save();
-  g.strokeStyle = col.d; g.lineWidth = 1.5; g.globalAlpha = .9;
+  g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .75;
   for (const sh of shapes) g.stroke(sh);
   g.restore();
   let prox = 0;
@@ -218,7 +218,7 @@ const hall = new Path2D(); hall.moveTo(400, 205); hall.lineTo(684.8, 205); hall.
 const roomShapes = [alcove, hall];
 const inRoom = (x, y) => (x >= 180 && x <= 330 && y >= 200 && y <= 340) || Math.hypot(x - 180, y - 270) <= 70 || (x >= 400 && x <= 700 && y >= 205 && y <= 335) || Math.hypot(x - 820, y - 270) <= 150;
 const rp = { x: 560, y: 270, tx: 560, ty: 270, touched: false };
-let roomDots = 0;
+let roomDots = 1;
 const GATES = [{ x: 640, ph: 0 }, { x: 560, ph: 1 }, { x: 480, ph: 0 }];
 function drawRoom(beat, t) {
   const g = rg;
@@ -293,7 +293,7 @@ function drawScene(beat, t) {
   const b = beat % 8;
   for (const atk of PHRASE) { drawAttack(g, atk, b); drawAttack(g, atk, b + 8); }
   g.restore();
-  drawEdge(g, [arena], pl, 0, () => true);
+  drawEdge(g, [arena], pl, roomDots, (x, y) => Math.hypot(x - AR.x, y - AR.y) < AR.r + 3);
   g.strokeStyle = col.ink; g.lineWidth = 1;
   [56, 64, 72].forEach((r, i) => { g.globalAlpha = .42 - i * .1; g.beginPath(); g.arc(AR.x, AR.y, r + pulse * 2, 0, TAU); g.stroke(); });
   g.globalAlpha = 1;
