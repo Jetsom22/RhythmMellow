@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RhythmMellow 비주얼 시안 3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
+<style>
+body{--bg:#f1e9d8;--ink:#232524;--a:#b8371a;--a2:#86190f;--b:#cf9535;--c:#7e8686;--soft:#e6d9bf;--line:#232524;--chrome:#232524}
+body[data-p="mid"]{--bg:#efe3c2;--ink:#0d0d12;--a:#e0603a;--a2:#b9452a;--b:#d9a441;--c:#8fb0a6;--soft:#e3d5a9;--line:#0d0d12;--chrome:#0d0d12}
+body[data-p="navy"]{--bg:#12303f;--ink:#f3ede0;--a:#f7931e;--a2:#d9701a;--b:#f3ede0;--c:#3fa9f5;--soft:#1b4051;--line:#8fc8f0;--chrome:#f3ede0}
+body[data-p="ochre"]{--bg:#ead7ad;--ink:#1a1a1a;--a:#1a1a1a;--a2:#3a3a3a;--b:#b9791c;--c:#ce9535;--soft:#dcc48f;--line:#1a1a1a;--chrome:#1a1a1a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--chrome);font:15px/1.65 "Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:background .25s,color .25s}
+main{max-width:1240px;margin:0 auto;padding:48px 24px 96px}
+h1{font:300 34px/1.1 Jost,"Apple SD Gothic Neo",sans-serif;letter-spacing:.04em;margin:0 0 10px}
+h2{font:400 13px Jost,sans-serif;letter-spacing:.22em;margin:44px 0 12px;opacity:.75}
+.lede{margin:0;max-width:66ch;opacity:.8}
+.pal{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;position:sticky;top:0;padding:10px 0;background:var(--bg);z-index:2;transition:background .25s}
+.pal button{font:400 12px Jost,sans-serif;letter-spacing:.16em;padding:8px 14px;border:1px solid var(--chrome);background:none;color:var(--chrome);cursor:pointer;border-radius:999px;opacity:.6}
+.pal button[aria-pressed="true"]{background:var(--chrome);color:var(--bg);opacity:1}
+figure{margin:0}
+svg{display:block;width:100%;height:auto}
+.shot{outline:1px solid color-mix(in srgb,var(--chrome) 18%,transparent)}
+figcaption{font-size:12.5px;margin-top:8px;opacity:.7}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px}
+.voc{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:820px){.voc{grid-template-columns:repeat(2,1fr)}}
+.notes{margin:16px 0 0;padding:0;list-style:none;font-size:13.5px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px 36px}
+a{color:inherit}
+@keyframes beat{0%{transform:scale(1.12)}40%,100%{transform:scale(1)}}
+.beat{animation:beat .545s cubic-bezier(.2,.7,.2,1) infinite;transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:reduce){.beat{animation:none}}
+</style>
+</head>
+<body data-p="rust">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".07"/></linearGradient>
+  <linearGradient id="sheenH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".05"/></linearGradient>
+</defs></svg>
+<main>
+<h1>비주얼 시안 3 — 기하 추상</h1>
+<p class="lede">CMY를 버리고 레퍼런스의 어휘로 처음부터 다시 그렸다. 굵은 원반, 가는 평행선, 동심 아치. 면 안에는 아주 얕은 그라데이션만 둔다. 아래 버튼으로 같은 화면의 팔레트를 바꿔 볼 수 있다. <a href="round2.html">이전 시안</a></p>
+<div class="pal" role="group" aria-label="팔레트">
+  <button data-p="rust" aria-pressed="true">RUST</button>
+  <button data-p="mid" aria-pressed="false">MID-CENTURY</button>
+  <button data-p="navy" aria-pressed="false">NAVY</button>
+  <button data-p="ochre" aria-pressed="false">OCHRE</button>
+</div>
+<div id="out"></div>
+</main>
+<script>
+const V = n => `var(--${n})`;
+const sv = (w, h, inner, cls = 'shot') => `<svg class="${cls}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img"><rect width="${w}" height="${h}" fill="${V('bg')}"/>${inner}</svg>`;
+/* 면: 색 + 얕은 그라데이션 한 겹 */
+const plane = (d, col, g = 'sheen') => `<path d="${d}" fill="${V(col)}"/><path d="${d}" fill="url(#${g})"/>`;
+const circleD = (x, y, r) => `M ${x - r} ${y} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0 Z`;
+const disc = (x, y, r, col, cls = '') => `<g ${cls ? `class="${cls}"` : ''}>${plane(circleD(x, y, r), col)}</g>`;
+const ln = (d, col = 'line', w = 1.25, o = 1, extra = '') => `<path d="${d}" fill="none" stroke="${V(col)}" stroke-width="${w}" opacity="${o}" ${extra}/>`;
+const ring = (x, y, r, col = 'line', w = 1.25, o = 1) => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${V(col)}" stroke-width="${w}" opacity="${o}"/>`;
+const annD = (x, y, r1, r2) => `M ${x - r2} ${y} a ${r2} ${r2} 0 1 0 ${2 * r2} 0 a ${r2} ${r2} 0 1 0 ${-2 * r2} 0 Z M ${x - r1} ${y} a ${r1} ${r1} 0 1 1 ${2 * r1} 0 a ${r1} ${r1} 0 1 1 ${-2 * r1} 0 Z`;
+const txt = (x, y, t, size = 12, anchor = 'start', o = .8, ls = 3, w = 400) => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Jost, sans-serif" font-size="${size}" font-weight="${w}" letter-spacing="${ls}" fill="${V('ink')}" opacity="${o}">${t}</text>`;
+/* 아치 동심선: 아래가 열린 아치 n겹 */
+const arches = (cx, top, bottom, r0, n, gap, col, w) => { const spring = top + r0 + (n - 1) * gap; return Array.from({ length: n }, (_, k) => { const r = r0 + k * gap; return ln(`M ${cx - r} ${bottom} V ${spring} A ${r} ${r} 0 0 1 ${cx + r} ${spring} V ${bottom}`, col, w); }).join(''); };
+const archD = (cx, top, bottom, r) => `M ${cx - r} ${bottom} V ${top + r} A ${r} ${r} 0 0 1 ${cx + r} ${top + r} V ${bottom} Z`;
+const band = (cx, cy, ang, w, l0, l1) => { const a = ang * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), h = w / 2; return `M ${cx + c * l0 + s * h} ${cy + s * l0 - c * h} L ${cx + c * l1 + s * h} ${cy + s * l1 - c * h} L ${cx + c * l1 - s * h} ${cy + s * l1 + c * h} L ${cx + c * l0 - s * h} ${cy + s * l0 + c * h} Z`; };
+const rays = (cx, cy, ang, n, gap, l0, l1, col, w) => Array.from({ length: n }, (_, k) => { const a = ang * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), off = (k - (n - 1) / 2) * gap; return ln(`M ${cx + c * l0 + s * off} ${cy + s * l0 - c * off} L ${cx + c * l1 + s * off} ${cy + s * l1 - c * off}`, col, w); }).join('');
+
+const hud = (owned, hp) => `<g transform="translate(480,496)">
+  ${[0, 1, 2].map(i => i < hp ? `<circle cx="${-64 + i * 16}" cy="0" r="4.5" fill="${V('ink')}"/>` : ring(-64 + i * 16, 0, 4.5, 'ink', 1.25, .5)).join('')}
+  ${ln('M -14 -9 V 9', 'ink', 1, .35)}
+  <g opacity="${owned > 0 ? 1 : .35}">${owned > 0 ? `<circle cx="10" cy="0" r="7" fill="${V('a')}"/>` : ring(10, 0, 7, 'ink')}</g>
+  <g opacity="${owned > 1 ? 1 : .35}">${[0, 1, 2, 3].map(k => ln(`M ${27 + k * 4.4} -7 V 7`, owned > 1 ? 'b' : 'ink', 1.6)).join('')}</g>
+  <g opacity="${owned > 2 ? 1 : .35}">${[7, 4.2, 1.4].map(r => ln(`M ${58 - r} 7 V 0 A ${r} ${r} 0 0 1 ${58 + r} 0 V 7`, owned > 2 ? 'c' : 'ink', 1.6)).join('')}</g>
+</g>`;
+const player = (x, y) => `${ring(x, y, 15, 'ink', 1, .55)}<circle class="beat" cx="${x}" cy="${y}" r="8" fill="${V('ink')}"/>`;
+
+/* ── 1. 드럼의 방 ── */
+const room = sv(960, 540, `
+  ${plane(circleD(930, 270, 200), 'soft', 'sheenH')}
+  ${ln('M 800 70 V 486')}${ln('M 818 128 V 430')}
+  ${plane('M 0 540 V 404 A 136 136 0 0 1 136 540 Z', 'c')}
+  ${plane('M 350 212 H 812 V 328 H 350 Z', 'soft')}
+  ${plane('M 300 212 H 208 A 58 58 0 0 0 208 328 H 300 Z', 'soft')}
+  ${[1, 2, 3, 4, 5, 6].map(k => ln(`M 300 ${212 - k * 9} H 208 A ${58 + k * 9} ${58 + k * 9} 0 0 0 208 ${328 + k * 9} H 300`, 'line', 1.25, 1 - k * .1)).join('')}
+  ${[0, 1, 2, 3, 4, 5].map(i => [0, 1, 2].map(j => `<circle cx="${313 + j * 12}" cy="${222 + i * 19}" r="1.3" fill="${V('ink')}" opacity=".45"/>`).join('')).join('')}
+  ${[700, 520].map(x => plane(`M ${x - 13} 225 a 13 13 0 0 1 26 0 V 315 a 13 13 0 0 1 -26 0 Z`, 'a')).join('')}
+  ${[610, 430].map(x => [-9, 0, 9].map(o => ln(`M ${x + o} 214 V 326`, 'a', 1.6)).join('')).join('')}
+  ${disc(208, 270, 21, 'a', 'beat')}
+  ${player(566, 270)}
+  ${[0, 1, 2, 3].map(i => i === 1 ? `<circle cx="${356 + i * 16}" cy="352" r="4" fill="${V('a')}"/>` : ring(356 + i * 16, 352, 3, 'ink', 1, .55)).join('')}
+  ${txt(56, 64, '01', 22, 'start', .9, 2, 300)}${txt(56, 84, 'KICK · SNARE', 10.5, 'start', .6)}
+  ${txt(904, 64, '110', 22, 'end', .9, 2, 300)}${txt(904, 84, 'BPM', 10.5, 'end', .6)}
+  ${hud(0, 3)}`);
+
+/* ── 2. 보스전 ── */
+const boss = sv(960, 540, `
+  ${plane(circleD(480, 262, 236), 'soft', 'sheenH')}
+  ${ln('M 250 40 V 500')}${ln('M 268 96 V 440')}
+  ${plane(archD(712, 236, 540, 92), 'c')}
+  ${arches(712, 192, 540, 100, 5, 9, 'c', 1.6)}
+  ${plane(annD(480, 262, 118, 162), 'a')}
+  ${[176, 188, 200].map((r, i) => ring(480, 262, r, 'a', 1.5, 1 - i * .25)).join('')}
+  ${plane(band(480, 262, 156, 34, 0, 430), 'b')}
+  ${rays(480, 262, -24, 6, 6.8, 40, 430, 'b', 1.7)}
+  ${[58, 66, 74].map((r, i) => ring(480, 262, r, 'ink', 1, .5 - i * .1)).join('')}
+  <path d="M 480 214 A 48 48 0 1 1 438.4 286" fill="none" stroke="${V('ink')}" stroke-width="7" stroke-linecap="butt"/>
+  ${disc(480, 262, 30, 'ink', 'beat')}
+  <path d="M 480 262 V 232 A 30 30 0 0 1 510 262 Z" fill="${V('a2')}"/>
+  ${player(352, 372)}
+  ${txt(56, 64, 'III', 22, 'start', .9, 2, 300)}${txt(56, 84, 'TUTTI', 10.5, 'start', .6)}
+  ${ln('M 56 98 H 136', 'ink', 1, .35)}${ln('M 56 98 H 102', 'ink', 2.5)}
+  ${hud(3, 2)}`);
+
+/* ── 3. 키 비주얼 ── */
+const key = sv(960, 540, `
+  ${plane('M 0 0 H 330 V 540 H 0 Z', 'soft', 'sheenH')}
+  ${arches(165, 196, 540, 22, 11, 11, 'c', 2.2)}
+  ${disc(165, 118, 56, 'a')}
+  ${ln('M 330 0 V 540')}${ln('M 348 70 V 470')}
+  ${plane('M 960 540 H 700 A 260 260 0 0 1 960 280 Z', 'a2')}
+  ${plane('M 960 540 H 780 A 180 180 0 0 1 960 360 Z', 'a')}
+  ${plane('M 960 540 H 860 A 100 100 0 0 1 960 440 Z', 'b')}
+  ${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(k => ln(`M ${700 + k * 12} 60 V 200`, 'b', 2)).join('')}
+  ${disc(820, 130, 34, 'ink')}
+  ${txt(400, 262, 'RHYTHM', 64, 'start', 1, 10, 300)}
+  ${txt(400, 330, 'MELLOW', 64, 'start', 1, 10, 300)}
+  ${ln('M 402 362 H 640', 'ink', 1, .5)}
+  ${txt(402, 388, 'COLLECT THE LAYERS · PLAY THE BOSS', 11, 'start', .65, 3.5)}`);
+
+/* ── 어휘 ── */
+const tile = (inner, cap) => `<figure>${sv(220, 150, inner)}<figcaption>${cap}</figcaption></figure>`;
+const voc = [
+  tile(disc(110, 75, 34, 'a'), '<b>드럼</b> · 원반. 꽉 찬 면'),
+  tile(Array.from({ length: 11 }, (_, k) => ln(`M ${60 + k * 10} 35 V 115`, 'b', 2)).join(''), '<b>하이햇</b> · 가는 평행선'),
+  tile(arches(110, 30, 130, 10, 6, 9, 'c', 2), '<b>베이스</b> · 동심 아치'),
+  tile([52, 44, 36].map(r => ring(110, 75, r, 'a', 1.5)).join('') + `<circle cx="110" cy="75" r="9" fill="${V('ink')}"/>`, '<b>예고</b> · 선으로만'),
+  tile(plane(annD(110, 75, 22, 52), 'a') + `<circle cx="110" cy="75" r="9" fill="${V('ink')}"/>`, '<b>타격</b> · 같은 모양이 면으로'),
+];
+
+document.getElementById('out').innerHTML = `
+<h2>KEY VISUAL</h2>
+<figure>${key}</figure>
+<h2>IN GAME</h2>
+<div class="pair">
+  <figure>${room}<figcaption>드럼의 방 — 닫힌 문짝은 면, 열린 문짝은 선. 왼쪽 아치 안에 악기, 그 앞에 회피로 건너는 틈</figcaption></figure>
+  <figure>${boss}<figcaption>보스전 — 드럼의 고리(면)와 다음 고리(선), 하이햇의 빔(한쪽은 선, 한쪽은 면), 베이스의 아치</figcaption></figure>
+</div>
+<h2>VOCABULARY</h2>
+<div class="voc">${voc.join('')}</div>
+<ul class="notes">
+  <li><b>악기는 색보다 모양으로</b> · 원반, 평행선, 아치. 팔레트가 바뀌어도 읽힌다</li>
+  <li><b>선에서 면으로</b> · 예고는 선, 타격은 같은 모양의 면. 박이 오면 선이 채워진다</li>
+  <li><b>그라데이션</b> · 면 안에 위아래로 아주 얕게 한 겹만. 테두리선은 없다</li>
+  <li><b>선의 굵기</b> · 구조선 1.25, 악기선 1.6~2. 그 사이 굵기는 쓰지 않는다</li>
+</ul>`;
+
+document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click', () => {
+  document.body.dataset.p = b.dataset.p;
+  document.querySelectorAll('.pal button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+}));
+</script>
+</body>
+</html>
