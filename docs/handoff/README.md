@@ -37,6 +37,13 @@
 - **챕터를 다 깨면 그 챕터의 악기 세트를 장비로 얻고, 이미 깬 스테이지를 다른 장비로 다시 할 수 있다(하드 모드).** 지금 만들지는 않는다.
 - 팔레트는 챕터마다 바꿔 낀다.
 - 스테이지의 구조는 다시 짜는 중이다: `docs/superpowers/specs/2026-11-18-stage-system-design.md` (승인 대기).
-- 프로토타입은 웹, 출시는 고닷 이식, 플랫폼은 PC 스팀.
-- **구현은 고닷으로 옮겼다**(`godot/`, Godot 4.7). 웹 프로토타입(`src/`)은 규칙의 정답지로만 남긴다. 고닷 빌드는 https://jetsom22.github.io/RhythmMellow/godot/ 에서 해 볼 수 있다.
+- 플랫폼은 PC 스팀. 웹으로 만든 게임을 PC 앱으로 감싸서 낸다.
+- **구현은 웹으로 한다** (2026-11-18 기획자 결정). 고닷으로 옮겨 봤으나 화면이 웹과 너무 달랐고, 아트와 레벨 디자인 세션이 손대기에도 웹이 편하다. 고닷 프로젝트(`godot/`)는 멈춰 두었다.
+- 게임은 https://jetsom22.github.io/RhythmMellow/ 에서 해 볼 수 있다. 검증 빌드(방 넷과 첫 보스)는 주소 뒤에 `?classic=1`.
+- **스테이지를 고치는 곳**
+  - 규칙: `src/core/stage/sim.ts` (그림도 소리도 없다)
+  - 그리기: `src/render/stageRenderer.ts`, 색은 `src/render/theme.ts`
+  - 스테이지 데이터: `src/data/stages/*.json` (길이는 U). 첫 스테이지는 `scripts/build-stage01.py` 를 고치고 다시 돌려서 만든다
+  - 검사: `tests/stage.test.ts`, `npm test`
+- **어디서든 시작하기** (주소 뒤에 붙인다): `?stage=이름` `?at=x,y`(U) `?parts=drum,hat` `?god=1` `?palette=rust|mid|navy|ochre` `?zoom=0.3`. 플레이 중 `-` `=` 로 멀리 보기.
 - 비주얼 방향, 색 체계, 예고·여운·피격 표현은 `docs/handoff/ART.md` 의 "결정" 참고.

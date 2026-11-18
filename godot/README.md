@@ -1,4 +1,6 @@
-# RhythmMellow — Godot
+# RhythmMellow — Godot (멈춤)
+
+> **2026-11-18: 구현은 웹으로 한다.** 이 프로젝트는 멈춰 두었다. 여기서 만든 규칙(도형 맵, 회피 대시와 저스트 회피, 공격 엔진, 목숨과 저장)과 스테이지 데이터는 웹(`../src/core/stage/`, `../src/data/stages/`)으로 옮겼다. 소리를 미리 굽는 방식과 믹싱(`audio/`)은 웹에 아직 없다.
 
 출시용 구현. Godot 4.7, GDScript. 웹으로도 내보내서 브라우저에서 해 볼 수 있다.
 
@@ -17,7 +19,7 @@
 | `core/sim.gd` | 규칙 전부. 그림도 소리도 없고, 지금 몇 초인지만 받는다 |
 | `game/game.gd` | 화면과 소리. 규칙에서 나온 사건을 그림과 소리로 바꾼다 |
 | `data/stages/stage-01.json` | 스테이지 데이터. 길이는 U(한 박 동안 걷는 거리) |
-| `tools/build_stage01.py` | 위 데이터를 만든 스크립트. 배치를 바꿀 때 여기를 고치고 다시 돌린다 |
+| (`../scripts/build-stage01.py`) | 스테이지 데이터를 만드는 스크립트. 웹 쪽으로 옮겼다. 여기 `data/stages/stage-01.json` 은 옮기기 전의 것이다 |
 | `tools/test_sim.gd` | 규칙과 스테이지 데이터 검사 |
 
 규칙:

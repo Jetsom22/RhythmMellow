@@ -20,7 +20,7 @@ const open = async (query) => {
 
 // 1. Audio engine starts and the clock runs.
 {
-  const page = await open('?jam=1');
+  const page = await open('?classic=1&jam=1');
   await page.waitForTimeout(500);
   const t1 = await page.evaluate(() => window.__rm.engine.now());
   await page.check('#jam input[type=checkbox] >> nth=0');
@@ -34,7 +34,7 @@ const open = async (query) => {
 
 // 2. Walking and dodging reach the game state.
 {
-  const page = await open('');
+  const page = await open('?classic=1');
   await page.waitForTimeout(400);
   const x0 = await page.evaluate(() => window.__rm.state.player.x);
   await page.keyboard.down('KeyD');
@@ -80,7 +80,7 @@ const open = async (query) => {
 
 // 3. The boss fight starts, phrases turn over, and the clock does not drift.
 {
-  const page = await open('?skip=boss&god=1');
+  const page = await open('?classic=1&skip=boss&god=1');
   await page.keyboard.down('KeyS');
   await page.waitForTimeout(1400);
   await page.keyboard.up('KeyS');
@@ -98,6 +98,50 @@ const open = async (query) => {
     check(`after ${i * 20}s the scheduler is still just ahead of the clock`, d.state === 'running' && d.ahead > -0.05 && d.ahead < 0.3, `ahead ${d.ahead.toFixed(3)}s`);
     check(`after ${i * 20}s the game is on the same step as the music`, d.gameBehind >= 0 && d.gameBehind < 3, `behind ${d.gameBehind.toFixed(2)} steps`);
   }
+  await page.close();
+}
+
+// 4. The stage build (the default page): walking, the dash judgement, a fight, and the clock.
+{
+  const page = await open('');
+  await page.waitForTimeout(400);
+  const x0 = await page.evaluate(() => window.__rm.sim.x);
+  await page.keyboard.down('KeyD');
+  await page.waitForTimeout(300);
+  await page.keyboard.up('KeyD');
+  // Press on a beat and off a beat, by the game's own clock.
+  const press = async frac => {
+    await page.evaluate(f => new Promise(res => {
+      const { engine, tun, sim } = window.__rm, spb = 60 / sim.meter.bpm;
+      const tick = () => {
+        const t = engine.now() - tun.audioOffsetMs / 1000 - tun.inputOffsetMs / 1000 - engine.grid.t0, ph = ((t / spb) % 1 + 1) % 1;
+        if (Math.abs(ph - f) < 0.03) { window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' })); window.dispatchEvent(new KeyboardEvent('keyup', { code: 'Space' })); res(); }
+        else requestAnimationFrame(tick);
+      };
+      tick();
+    }), frac);
+    await page.waitForTimeout(500);
+  };
+  await press(0.5);
+  await press(0.0);
+  const r = await page.evaluate(() => ({ x: window.__rm.sim.x, step: window.__rm.sim.step, log: window.__rm.eventLog.map(e => e.type) }));
+  check('stage: player walks', r.x > x0 + 20, `${x0.toFixed(0)} -> ${r.x.toFixed(0)}`);
+  check('stage: off the beat there is no dash', r.log.filter(t => t === 'fizzle').length === 1, r.log.join(','));
+  check('stage: on the beat the dash happens', r.log.filter(t => t === 'dash').length === 1, r.log.join(','));
+  if (SHOTS) await page.screenshot({ path: SHOTS + '/stage.png' });
+  await page.close();
+}
+{
+  const page = await open('?at=0.9,1.6&parts=drum,hat,bass&god=1');
+  await page.waitForFunction(() => window.__rm.sim.fight, null, { timeout: 10000 });
+  await page.waitForTimeout(20000);
+  const d = await page.evaluate(() => {
+    const e = window.__rm.engine, sps = 60 / e.grid.bpm / 4, nowStep = (e.now() - e.grid.t0) / sps;
+    return { fight: window.__rm.sim.fight?.id, behind: nowStep - window.__rm.sim.step, fps: window.__rm.fps };
+  });
+  check('stage: the boss fight runs', d.fight === 'boss', JSON.stringify(d));
+  check('stage: after 20s the game is on the same step as the music', d.behind >= 0 && d.behind < 3, `behind ${d.behind.toFixed(2)} steps`);
+  if (SHOTS) await page.screenshot({ path: SHOTS + '/stage-boss.png' });
   await page.close();
 }
 

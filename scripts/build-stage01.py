@@ -97,7 +97,7 @@ for layer, c in ZONES.items():
             {"at": 40, "attack": "zone", "anchor": "target"}, {"at": 56, "attack": "circle"}]},
     }[layer]
     phrase["advance"] = {"hpBelow": 0, "answered": 3}
-    emitters.append({"id": layer + "-guardian", "kind": "guardian", "x": gx, "y": gy, "hp": 120, "body": 0.24})
+    emitters.append({"id": layer + "-guardian", "kind": "guardian", "x": gx, "y": gy, "hp": 120, "body": 28 * PX})
     encounters.append({"id": layer + "-guard", "kind": "guardian", "emitter": layer + "-guardian", "x": gx, "y": gy, "r": 4.0,
         "flag": layer + "-passed", "phrases": [phrase]})
     parts.append({"layer": layer, **at(27.5, c + 16), "guard": layer + "-guard"})
@@ -111,7 +111,7 @@ PADS = [(-230, 110, "drum"), (0, -170, "hat"), (230, 110, "bass")]
 for x, y, layer in PADS:
     plates.append({"id": "pad-" + layer, "layer": layer, "x": x * PX, "y": y * PX, "r": 40 * PX, "encounter": "boss"})
 def over_pad(step, i): return {"at": step, "attack": "zone", "anchor": "fixed", "x": PADS[i][0] * PX, "y": PADS[i][1] * PX}
-emitters.append({"id": "boss", "kind": "boss", "x": 0, "y": 0, "hp": 900, "body": 0.3})
+emitters.append({"id": "boss", "kind": "boss", "x": 0, "y": 0, "hp": 900, "body": 36 * PX})
 encounters.append({"id": "boss", "kind": "boss", "emitter": "boss", "x": 0, "y": 0, "r": 4.6, "flag": "boss-down", "phrases": [
     {"id": "gi-solo", "bars": 4, "events": circles([8, 16, 24]), "openBars": [2, 3], "advance": {"hpBelow": 0.85}},
     {"id": "seung-drum", "bars": 4, "events": sweep(0) + sweep(2), "openBars": [1, 3], "weakTo": "hat", "advance": {"hpBelow": 0.65}},
@@ -127,6 +127,6 @@ encounters.append({"id": "boss", "kind": "boss", "emitter": "boss", "x": 0, "y":
 stage = {"id": "stage-01", "name": "첫 스테이지", "meter": {"bpm": 110, "stepsPerBeat": 4, "beatsPerBar": 4, "dashMs": 120, "justMs": 60}, "seed": 7, "lives": 3,
     "start": [0, 10.5], "map": {"ground": ground, "holes": holes}, "attacks": attacks, "emitters": emitters, "parts": parts,
     "plates": plates, "gates": gates, "checkpoints": checkpoints, "encounters": encounters}
-out = os.path.join(os.path.dirname(__file__), "..", "data", "stages", "stage-01.json")
+out = os.path.join(os.path.dirname(__file__), "..", "src", "data", "stages", "stage-01.json")
 json.dump(stage, open(out, "w"), ensure_ascii=False, indent=1)
 print(len(emitters), "emitters,", len(holes), "holes,", len(gates), "gates")
