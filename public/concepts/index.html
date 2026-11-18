@@ -55,11 +55,11 @@ a{color:inherit}
 <canvas id="scene" width="1920" height="1080"></canvas>
 
 <h2>2 · 적의 공격 — 벽에 튕기는 여운</h2>
-<p>여운의 선은 악기마다 다르게 퍼진다. 하이햇은 가장 좁게 금방, 드럼은 중간, 베이스는 옅게 멀리 오래. 벽에 닿으면 튕겨 돌아온다.</p>
+<p>여운은 악기마다 다르게 퍼진다. 하이햇은 선 한 겹이 가장 좁게 금방, 드럼은 두 겹이 중간쯤 퍼지고, 벽에 닿으면 튕겨 돌아온다. 베이스는 선 대신 아주 옅은 범위가 멀리 번지며 잦아든다.</p>
 <div class="row">
   <figure><canvas class="etile" data-inst="drum" width="800" height="520"></canvas><figcaption><b>드럼</b> · 두 겹이 한 박 남짓 퍼진다</figcaption></figure>
   <figure><canvas class="etile" data-inst="hat" width="800" height="520"></canvas><figcaption><b>하이햇</b> · 한 겹이 띠 옆으로 조금만</figcaption></figure>
-  <figure><canvas class="etile" data-inst="bass" width="800" height="520"></canvas><figcaption><b>베이스</b> · 옅은 세 겹이 네 박 동안 벽에 튕기며 떠돈다</figcaption></figure>
+  <figure><canvas class="etile" data-inst="bass" width="800" height="520"></canvas><figcaption><b>베이스</b> · 선 없이, 아주 옅은 범위가 번져 나가며 잦아든다</figcaption></figure>
 </div>
 
 <h2>3 · 플레이어 — 대시와 공격</h2>
@@ -73,7 +73,7 @@ a{color:inherit}
 <ul class="notes">
   <li><b>색</b> · 붉은 계열은 적, 푸른 계열은 플레이어. 계열 안에서 밝기와 색조로 악기 셋을 가른다</li>
   <li><b>땅의 끝</b> · 보통 색의 선 하나. 다가가면 안쪽으로 옅은 선 두 줄만 더 보인다. 바깥의 점은 가까울 때만</li>
-  <li><b>여운</b> · 벽에 튕긴다. 좁은 순서대로 하이햇, 드럼, 베이스</li>
+  <li><b>여운</b> · 하이햇과 드럼은 선이 벽에 튕긴다. 베이스는 옅은 범위가 번지며 잦아든다</li>
   <li><b>빠진 것</b> · 드럼의 방 장면은 이번 시안에서 뺐다. 방향이 정해지면 다시 넣는다</li>
 </ul>
 </main>
@@ -135,6 +135,22 @@ function travel(px, py, vx, vy, d, wall) {
 function drawEcho(g, atk, e, wall) {
   const E = ECHO[atk.inst], fr = atk._fr || (atk._fr = fronts(atk.shape));
   g.save();
+  if (atk.inst === 'bass') {
+    // 베이스는 선이 아니라 아주 옅은 범위가 번져 나가며 그라데이션으로 잦아든다.
+    const s = atk.shape, c = col.e3;
+    for (const start of atk.hold ? [0, atk.hold] : [0]) {
+      const te = (e - start) / 3.2;
+      if (te <= 0 || te >= 1) continue;
+      const d = 24 + easeOut(te) * s.r * 1.9;
+      // 색에서 투명으로: 중간색이 탁해지지 않게 같은 색의 알파만 줄인다.
+      const fade = g.createLinearGradient(s.x, 0, s.x - d, 0);
+      for (let i = 0; i <= 8; i++) { const u = i / 8; fade.addColorStop(u, c + Math.round(255 * (1 - u) ** 1.6).toString(16).padStart(2, '0')); }
+      g.globalAlpha = .17 * (1 - te) ** 1.6;
+      g.fillStyle = fade; g.fillRect(s.x - d, s.y - s.r, d, s.r * 2);
+    }
+    g.restore();
+    return;
+  }
   g.strokeStyle = col[ENEMY[atk.inst]]; g.lineJoin = 'round';
   for (const start of atk.hold ? [0, atk.hold] : [0]) for (let k = 0; k < E.lines; k++) {
     const te = (e - start - k * E.gap) / E.life;
