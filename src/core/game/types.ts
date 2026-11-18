@@ -13,6 +13,8 @@ export interface Input {
   dodgeAt: number | null;
   switchDir: -1 | 0 | 1;
   switchTo: Instrument | null;
+  /** The special-attack key was pressed (stage build). */
+  special?: boolean;
 }
 
 export interface Dash { t: number; dur: number; vx: number; vy: number; grade: Grade }

@@ -79,6 +79,8 @@ function sound(e: StageEvent): OneShot | null {
   switch (e.type) {
     case 'dash': return e.just ? 'dodgePerfect' : 'dodgeNear';
     case 'fizzle': return 'dodgeMiss';
+    case 'special': return 'fill';
+    case 'trigger': return 'resolve';
     case 'part': return 'collect';
     case 'plate': return 'resolve';
     case 'hurt': case 'gameover': return 'hit';
@@ -128,7 +130,7 @@ function frame(now: number): void {
   const heard = heardTime(engine.now(), tun) - t0;
   const input = kb.poll();
   const events = sim.stepTo(heard, {
-    moveX: input.moveX, moveY: input.moveY, switchDir: input.switchDir, switchTo: input.switchTo,
+    moveX: input.moveX, moveY: input.moveY, switchDir: input.switchDir, switchTo: input.switchTo, special: input.special,
     dashAt: input.dodgeAt === null ? null : inputTime(input.dodgeAt, tun) - t0,
   });
   for (const e of events) {
