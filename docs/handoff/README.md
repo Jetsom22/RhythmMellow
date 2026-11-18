@@ -1,11 +1,12 @@
 # 세션 사이의 약속
 
-이 저장소에서는 세 세션이 나란히 일한다. 서로의 영역을 건드리지 않도록 경계를 정해 둔다.
+이 저장소에서는 네 세션이 나란히 일한다. 서로의 영역을 건드리지 않도록 경계를 정해 둔다.
 
 | 세션 | 맡는 일 | 주로 만지는 곳 | 브랜치 |
 |---|---|---|---|
-| **시스템** | 게임 규칙, 박자·소리 엔진, 테스트, 빌드와 배포 | `src/core/**`, `src/audio/**`, `src/input/**`, `src/main.ts`, `tests/**`, `.github/**` | `kkami/youthful-hawking-9iej8u` |
+| **시스템** | 게임 규칙, 박자 시계, 소리를 내보내는 길, 테스트, 빌드와 배포 | `godot/**`(다른 세션의 파일 제외), `src/**`, `tests/**`, `.github/**` | `kkami/youthful-hawking-9iej8u` |
 | **아트** | 비주얼 시스템, UI/UX, 이펙트, 시안 | `src/render/**`, `src/ui/**`, `index.html`, `public/concepts/**`, `docs/art/**` | `art/visual-system` |
+| **사운드** | 음색, 믹싱, 박자 패턴에 따른 작곡, 마스터링 | `godot/audio/synth.gd`, `godot/audio/mix.gd`, `godot/core/song.gd`, `docs/sound/**` | `sound/mix-and-composition` |
 | **레벨디자인** | 맵, 기믹 배치, 보스 패턴, 학습-반복-심화의 흐름 | `src/core/game/world.ts`, `src/core/game/bossPatterns.ts`, `docs/level/**` | `level/gimmick-design` |
 
 ## 규칙
@@ -27,4 +28,5 @@
 - 팔레트는 챕터마다 바꿔 낀다.
 - 스테이지의 구조는 다시 짜는 중이다: `docs/superpowers/specs/2026-11-18-stage-system-design.md` (승인 대기).
 - 프로토타입은 웹, 출시는 고닷 이식, 플랫폼은 PC 스팀.
+- **구현은 고닷으로 옮겼다**(`godot/`, Godot 4.7). 웹 프로토타입(`src/`)은 규칙의 정답지로만 남긴다. 고닷 빌드는 https://jetsom22.github.io/RhythmMellow/godot/ 에서 해 볼 수 있다.
 - 비주얼 방향, 색 체계, 예고·여운·피격 표현은 `docs/handoff/ART.md` 의 "결정" 참고.
