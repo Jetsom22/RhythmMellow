@@ -94,7 +94,7 @@
 
 ## 시스템 쪽에서 받아 쓰는 것
 
-> 2026-11-18: 구현은 고닷이 아니라 **웹**으로 간다. https://jetsom22.github.io/RhythmMellow/ 가 스테이지 빌드다(검증 빌드는 `?classic=1`). 스테이지의 그리기는 `src/render/stageRenderer.ts` 한 곳이고, 장치·음표 몬스터·수호자·체크포인트·닫힌 길은 시스템 세션이 임시로 그린 것이다. 시안 8의 결정을 여기로 옮기는 것이 아트 세션의 다음 일이다. 보기 편한 주소: `?at=x,y`(U) `?parts=drum,hat,bass` `?god=1` `?palette=rust|mid|navy|ochre` `?zoom=0.3`.
+> 2026-11-18: 구현은 고닷이 아니라 **웹**으로 간다. https://jetsom22.github.io/RhythmMellow/ 가 스테이지 빌드다(검증 빌드는 `?classic=1`). 스테이지의 그리기는 `src/render/stageRenderer.ts` 한 곳이고, 장치·음표 몬스터·수호자·체크포인트·닫힌 길은 시스템 세션이 임시로 그린 것이다. 시안 8의 결정 중 그리는 쪽에서 할 수 있는 것은 옮겼다(2026-11-18): 아치 시계(12시 판정선 고정, 원판이 돈다), 저스트 회피 동안에만 녹색 몸, 끊기지 않고 여러 번 반사되는 여운, 겹친 면의 보스·수호자, 악기 획득·다시 뭉칠 때·길이 열릴 때 지도로 물러나는 카메라. 덩어리 땅은 판정(`sim.isGround`)이 바뀌어야 해서 시스템 세션에 요청했다(`requests.md`). 보기 편한 주소: `?at=x,y`(U) `?parts=drum,hat,bass` `?god=1` `?palette=rust|mid|navy|ochre` `?zoom=0.3`.
 
 - `GameState`, `GameEvent` (`src/core/game/types.ts`). 그리는 쪽은 읽기만 한다.
 - `Renderer.draw(state, beatPhase, stepF, events)` 가 매 프레임 불린다. `stepF` 는 16분 스텝 단위의 곡 시간.

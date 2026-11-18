@@ -18,9 +18,18 @@ const ECHO: Record<LayerId, { dist: number; lines: number; life: number; alpha: 
   bass: { dist: 0, lines: 0, life: 3.4, alpha: .17, w: 0, gap: 0 },
 };
 
-/** A point on an attack's edge, the way it travels, how far until it meets the edge of the ground, and the way it bounces. null breaks the line. */
-type FrontPt = [number, number, number, number, number, number, number] | null;
-interface Echo { inst: Inst; at: number; fronts: FrontPt[][] | null }
+/**
+ * An echo's wavefront. Each point on the attack's edge travels in straight runs and bounces off the edge of the ground,
+ * as many times as it meets it. A node is where a run starts: x, y, direction, distance travelled so far, bounces so far.
+ * null: the point starts off the ground and is left out.
+ */
+type RayNode = [number, number, number, number, number, number];
+type Ray = RayNode[] | null;
+/** free(d): how far apart two neighbouring points would be at distance d if there were no walls. */
+interface Front { rays: Ray[]; free: (d: number) => number; closed: boolean }
+interface Echo { inst: Inst; at: number; fronts: Front[] | null }
+/** Each bounce leaves the wave this much weaker. */
+const BOUNCE = .62;
 interface Flash { inst: Inst; at: number }
 type PlayerFx =
   | { kind: 'dash'; at: number; x: number; y: number; x1: number; y1: number; strong: boolean }
@@ -59,14 +68,25 @@ export class StageRenderer {
   camX = 0; camY = 0;
   /** 1 in play. The workbench can pull back to look at the whole map. */
   zoom = 1;
+  /** The zoom actually used this frame (zoom, eased toward the whole map while the camera pulls back). */
+  private vz = 1;
+  /**
+   * The camera follows the player, and pulls back to show the whole map after certain moments:
+   * an instrument picked up (saved), the player scattering and gathering again, a way opening.
+   * 0 = following, 1 = whole map. Eased.
+   */
+  private overview = 0;
+  private overviewUntil = -1;
+  private lastStep: number | null = null;
+  private bounds = { x0: 0, y0: 0, x1: 1, y1: 1 };
   private echoes: Echo[] = [];
   private flashes: Flash[] = [];
   private pfx: PlayerFx[] = [];
   private bassLine = { until: -1, tx: 0, ty: 0 };
   /** Steps of the dodge beats that were answered with a just dodge, for the clock. */
   private justs: number[] = [];
-  /** The clock at the bottom centre. Its shape is still being chosen by the planner: dial, arch or strip. */
-  clock: 'dial' | 'arch' | 'strip' = 'dial';
+  /** Kept so the stage page can still set it. The planner chose the arch: it is the only one drawn. */
+  clock: 'dial' | 'arch' | 'strip' = 'arch';
   /** The edge of the ground as long lines, and as points with the direction that leads into the ground. */
   private runs: { x0: number; y0: number; x1: number; y1: number; pts: number[] }[] = [];
   private edgePts: [number, number, number, number][] = [];
@@ -95,12 +115,22 @@ export class StageRenderer {
     if (this.built !== s) { this.buildEdges(s); this.built = s; }
     this.collect(s, stepF, events);
 
-    this.camX = s.x - w / 2 / this.zoom;
-    this.camY = s.y - h / 2 / this.zoom;
+    // Camera: follow the player; pull back to the whole map for a moment after the moments listed above.
+    const dt = this.lastStep === null ? 0 : clamp((stepF - this.lastStep) / s.meter.stepsPerBeat, 0, 1);
+    this.lastStep = stepF;
+    const want = stepF < this.overviewUntil || s.reform ? 1 : 0;
+    this.overview += (want - this.overview) * (1 - Math.exp(-dt * (want ? 2.4 : 1.8)));
+    const ov = this.overview < .002 ? 0 : this.overview, B = this.bounds;
+    const fit = Math.min(this.zoom, w / (B.x1 - B.x0 + 200), h / (B.y1 - B.y0 + 200));
+    const e = ov * ov * (3 - 2 * ov);
+    this.vz = this.zoom + (fit - this.zoom) * e;
+    const cx = s.x + ((B.x0 + B.x1) / 2 - s.x) * e, cy = s.y + ((B.y0 + B.y1) / 2 - s.y) * e;
+    this.camX = cx - w / 2 / this.vz;
+    this.camY = cy - h / 2 / this.vz;
     c.fillStyle = this.pal.bg;
     c.fillRect(0, 0, w, h);
     c.save();
-    c.scale(this.zoom, this.zoom);
+    c.scale(this.vz, this.vz);
     c.translate(-Math.round(this.camX), -Math.round(this.camY));
 
     this.drawThings(s, stepF, pulse);
@@ -116,7 +146,7 @@ export class StageRenderer {
   }
 
   private visible(x: number, y: number, pad = 60): boolean {
-    return x > this.camX - pad && x < this.camX + this.width / this.zoom + pad && y > this.camY - pad && y < this.camY + this.height / this.zoom + pad;
+    return x > this.camX - pad && x < this.camX + this.width / this.vz + pad && y > this.camY - pad && y < this.camY + this.height / this.vz + pad;
   }
 
   /* ───────── events → effects ───────── */
@@ -137,14 +167,17 @@ export class StageRenderer {
         else if (e.layer === 'hat') this.pfx.push({ kind: 'hat', at: stepF, x: e.from.x, y: e.from.y, tx, ty });
         else this.bassLine = { until: stepF + 1.4, tx, ty };
       } else if (e.type === 'hurt' || e.type === 'gameover') {
+        this.overviewUntil = Math.max(this.overviewUntil, stepF + 8 + s.meter.stepsPerBeat);
         this.pfx.push({ kind: 'dust', at: stepF, from: e.from, to: e.to, dur: 8 });
         this.pfx.push({ kind: 'ring', at: stepF, x: e.from.x, y: e.from.y, color: this.pal.danger });
         this.pfx.push({ kind: 'ring', at: stepF + 8, x: e.to.x, y: e.to.y, color: eq });
       } else if (e.type === 'part' || e.type === 'plate') {
+        if (e.type === 'part') this.overviewUntil = Math.max(this.overviewUntil, stepF + 4 * s.meter.stepsPerBeat);
         this.pfx.push({ kind: 'ring', at: stepF, x: s.x, y: s.y, color: this.pal.player[e.layer] });
       } else if (e.type === 'broken') {
         this.pfx.push({ kind: 'ring', at: stepF, x: e.pos.x, y: e.pos.y, color: this.pal.ink });
       } else if (e.type === 'gate') {
+        this.overviewUntil = Math.max(this.overviewUntil, stepF + 3 * s.meter.stepsPerBeat);
         this.buildEdges(s);
       } else if (e.type === 'strike') {
         // An attack has just landed: flash it and send out its echo.
@@ -199,41 +232,82 @@ export class StageRenderer {
     c.arc(a.x, a.y, s.r0, 0, TAU);
   }
 
-  /** Points on an attack's edge and the way each travels. A point that meets the edge of the ground bounces off it. */
-  private fronts(sim: StageSim, a: Inst): FrontPt[][] {
-    const s = a.def.shape, raw: [number, number, number, number][][] = [];
-    const circle = (r: number, sg: number): [number, number, number, number][] => {
-      const f: [number, number, number, number][] = [];
-      for (let i = 0; i <= 96; i++) { const t = (i / 96) * TAU; f.push([a.x + r * Math.cos(t), a.y + r * Math.sin(t), sg * Math.cos(t), sg * Math.sin(t)]); }
-      return f;
+  /** The wavefronts of an attack's echo: points on its edge, each with the path it takes, bouncing off the edge of the ground. */
+  private fronts(sim: StageSim, a: Inst): Front[] {
+    const s = a.def.shape, E = ECHO[a.layer], far = 2 + E.dist * (1 + E.lines * .12) + 4, out: Front[] = [];
+    const circle = (r: number, sg: number): void => {
+      const N = 160, rays: Ray[] = [];
+      for (let i = 0; i < N; i++) { const t = (i / N) * TAU; rays.push(this.ray(sim, a.x + r * Math.cos(t), a.y + r * Math.sin(t), sg * Math.cos(t), sg * Math.sin(t), far)); }
+      out.push({ rays, free: d => (TAU * Math.max(6, Math.abs(r + sg * d))) / N, closed: true });
     };
-    if (s.kind === 'circle') raw.push(circle(s.r, 1));
-    else if (s.kind === 'ring') raw.push(circle(s.r1, 1), circle(s.r0, -1));
+    if (s.kind === 'circle') circle(s.r, 1);
+    else if (s.kind === 'ring') { circle(s.r1, 1); circle(s.r0, -1); }
     else if (s.kind === 'beam') {
       const cx = Math.cos(a.rot), cy = Math.sin(a.rot);
       for (const sg of [1, -1]) {
-        const f: [number, number, number, number][] = [];
-        for (let t = 0; t <= Math.min(s.len ?? 1100, 1100); t += 7) f.push([a.x + cx * t + cy * sg * s.w / 2, a.y + cy * t - cx * sg * s.w / 2, cy * sg, -cx * sg]);
-        raw.push(f);
+        const rays: Ray[] = [];
+        for (let t = 0; t <= Math.min(s.len ?? 1100, 1100); t += 7) rays.push(this.ray(sim, a.x + cx * t + cy * sg * s.w / 2, a.y + cy * t - cx * sg * s.w / 2, cy * sg, -cx * sg, far));
+        out.push({ rays, free: () => 7, closed: false });
       }
     }
-    const E = ECHO[a.layer], far = 2 + E.dist * (1 + E.lines * .12) + 4;
-    return raw.map(f => f.map(([x, y, vx, vy]): FrontPt => {
-      if (!sim.isGround(x, y)) return null;
-      for (let d = 4; d <= far; d += 4) {
-        if (sim.isGround(x + vx * d, y + vy * d)) continue;
-        // Which way is ground, seen from the place it met the edge.
-        const hit = d - 4, hx = x + vx * hit, hy = y + vy * hit;
-        let nx = 0, ny = 0;
-        for (let i = 0; i < 12; i++) { const t = (i * TAU) / 12; if (sim.isGround(hx + Math.cos(t) * 9, hy + Math.sin(t) * 9)) { nx += Math.cos(t); ny += Math.sin(t); } }
-        const L = Math.hypot(nx, ny);
-        if (L < .01) return [x, y, vx, vy, hit, -vx, -vy];
-        nx /= L; ny /= L;
-        const dot = Math.min(0, vx * nx + vy * ny);
-        return [x, y, vx, vy, hit, vx - 2 * dot * nx, vy - 2 * dot * ny];
+    return out;
+  }
+
+  /** One point's path: straight until it meets the edge of the ground, then reflected about the edge, again and again. */
+  private ray(sim: StageSim, x: number, y: number, vx: number, vy: number, far: number): Ray {
+    if (!sim.isGround(x, y)) return null;
+    const nodes: RayNode[] = [[x, y, vx, vy, 0, 0]];
+    let d = 0, bounces = 0;
+    for (let guard = 0; guard < 400 && d < far && bounces < 6; guard++) {
+      const step = Math.min(3, far - d);
+      if (sim.isGround(x + vx * step, y + vy * step)) { x += vx * step; y += vy * step; d += step; continue; }
+      let lo = 0, hi = step;
+      for (let i = 0; i < 6; i++) { const m = (lo + hi) / 2; if (sim.isGround(x + vx * m, y + vy * m)) lo = m; else hi = m; }
+      x += vx * lo; y += vy * lo; d += lo;
+      // Which way is ground, seen from where it met the edge: that is the edge's normal.
+      let gx = 0, gy = 0;
+      for (let i = 0; i < 16; i++) { const t = (i * TAU) / 16; if (sim.isGround(x + Math.cos(t) * 6, y + Math.sin(t) * 6)) { gx += Math.cos(t); gy += Math.sin(t); } }
+      const L = Math.hypot(gx, gy);
+      if (L < .01) { vx = -vx; vy = -vy; } else {
+        gx /= L; gy /= L;
+        const dot = vx * gx + vy * gy;
+        if (dot < 0) { vx -= 2 * dot * gx; vy -= 2 * dot * gy; }
+        x += gx * .4; y += gy * .4;
       }
-      return [x, y, vx, vy, Infinity, vx, vy];
-    }));
+      bounces++;
+      nodes.push([x, y, vx, vy, d, bounces]);
+    }
+    return nodes;
+  }
+
+  /** Where a point is after travelling d, and how many times it has bounced. */
+  private along(r: RayNode[], d: number): [number, number, number] {
+    let n = r[0];
+    for (const q of r) { if (q[4] <= d) n = q; else break; }
+    const k = d - n[4];
+    return [n[0] + n[2] * k, n[1] + n[3] * k, n[5]];
+  }
+
+  /**
+   * Draw a wavefront at distance d. It is never broken: where neighbouring points have spread further apart than
+   * they would without walls (round a bend, after a bounce), the line fades in proportion; every bounce weakens it.
+   */
+  private wave(f: Front, d: number, color: string, alpha: number, width: number): void {
+    const c = this.ctx, pts = f.rays.map(r => (r ? this.along(r, d) : null)), s0 = f.free(d), n = pts.length;
+    const buckets = new Map<number, Path2D>();
+    for (let i = 0; i < (f.closed ? n : n - 1); i++) {
+      const p = pts[i], q = pts[(i + 1) % n];
+      if (!p || !q) continue;
+      const stretch = Math.hypot(q[0] - p[0], q[1] - p[1]) / s0;
+      if (stretch > 14) continue;
+      const k = Math.round(alpha * Math.min(1, 1.3 / Math.max(stretch, .01)) * BOUNCE ** Math.max(p[2], q[2]) * 40);
+      if (k <= 0) continue;
+      let path = buckets.get(k);
+      if (!path) buckets.set(k, (path = new Path2D()));
+      path.moveTo(p[0], p[1]); path.lineTo(q[0], q[1]);
+    }
+    c.strokeStyle = color; c.lineWidth = width; c.lineCap = 'round';
+    for (const [k, path] of buckets) { c.globalAlpha = k / 40; c.stroke(path); }
   }
 
   /* ───────── the ground ───────── */
@@ -262,15 +336,18 @@ export class StageRenderer {
       }
       end();
     }
+    const B = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+    for (const r of this.runs) { B.x0 = Math.min(B.x0, r.x0); B.y0 = Math.min(B.y0, r.y0); B.x1 = Math.max(B.x1, r.x1); B.y1 = Math.max(B.y1, r.y1); }
+    if (isFinite(B.x0)) this.bounds = B;
   }
 
   private drawGround(s: StageSim): void {
     const c = this.ctx, px = s.x, py = s.y;
-    const vx0 = this.camX - 40, vy0 = this.camY - 40, vx1 = this.camX + this.width / this.zoom + 40, vy1 = this.camY + this.height / this.zoom + 40;
+    const vx0 = this.camX - 40, vy0 = this.camY - 40, vx1 = this.camX + this.width / this.vz + 40, vy1 = this.camY + this.height / this.vz + 40;
     const REACH = 120;
     c.save();
     c.strokeStyle = this.pal.ink;
-    c.lineWidth = 1;
+    c.lineWidth = 1 / Math.min(1, this.vz);      // the same thin line on screen, even when the camera pulls back
     c.lineJoin = 'round';
     // The boundary itself: one thin line in the ordinary colour.
     c.globalAlpha = .75;
@@ -421,25 +498,11 @@ export class StageRenderer {
       }
       if (!E.lines) continue;
       const fr = e.fronts ?? (e.fronts = this.fronts(s, a));
-      c.strokeStyle = pal.enemy[a.layer]; c.lineJoin = 'round';
       for (let k = 0; k < E.lines; k++) {
         const te = (age - k * E.gap) / E.life;
         if (te <= 0 || te >= 1) continue;
         const d = 2 + easeOut(te) * E.dist * (1 + k * .12);
-        c.globalAlpha = E.alpha * (1 - te) ** 1.4;
-        c.lineWidth = E.w * (1 - te * .35);
-        c.beginPath();
-        for (const f of fr) {
-          let lx = 0, ly = 0, pen = false;
-          for (const p of f) {
-            if (!p) { pen = false; continue; }
-            const [x, y, vx, vy, hit, wx, wy] = p;
-            const qx = d <= hit ? x + vx * d : x + vx * hit + wx * (d - hit), qy = d <= hit ? y + vy * d : y + vy * hit + wy * (d - hit);
-            if (pen && Math.hypot(qx - lx, qy - ly) < 26) c.lineTo(qx, qy); else c.moveTo(qx, qy);
-            lx = qx; ly = qy; pen = true;
-          }
-        }
-        c.stroke();
+        for (const f of fr) this.wave(f, d, pal.enemy[a.layer], E.alpha * (1 - te) ** 1.4, E.w * (1 - te * .35));
       }
     }
     c.restore();
@@ -480,13 +543,54 @@ export class StageRenderer {
         if (on) c.fill(); else c.stroke();
       }
       c.globalAlpha = 1;
-      c.fillStyle = pal.ink; c.strokeStyle = pal.ink; c.lineWidth = 2;
-      c.beginPath(); c.arc(em.x, em.y, r, 0, TAU);
-      if (open) c.stroke(); else c.fill();
-      c.fillStyle = pal.enemy.drum; c.globalAlpha = open ? .9 : 1;
-      c.beginPath(); c.moveTo(em.x, em.y); c.arc(em.x, em.y, r, -Math.PI / 2, 0); c.closePath(); c.fill();
+      this.drawBlob(s, em, r, open, stepF, pulse);
     }
     c.restore();
+  }
+
+  /**
+   * A guardian or a boss: soft masses in the enemy colours and ink, layered and flowing, small circles drifting round.
+   * It swells a little on the beat, gathers just before one of its attacks lands, and its edge wobbles once when it does.
+   * In an open window (weak to the player) the masses are drawn as outlines.
+   */
+  private drawBlob(s: StageSim, em: Emitter, r: number, open: boolean, stepF: number, pulse: number): void {
+    const c = this.ctx, pal = this.pal, beat = stepF / 4, seed = [...em.id].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 97;
+    let gather = 0, wob = 0;
+    for (const a of s.active) if (a.src === em.id && stepF < a.hitStep) { const left = (a.hitStep - stepF) / 4; if (left < .25) gather = Math.max(gather, 1 - left / .25); }
+    for (const f of this.flashes) if (f.inst.src === em.id) { const x = (stepF - f.at) / 4; if (x >= 0 && x < 1.2) wob = Math.max(wob, Math.exp(-x * 3.5)); }
+    const scale = (1 + .02 * pulse - .035 * gather + .025 * wob) * r, amp = .55 - .3 * gather + .5 * wob, t = beat * .35;
+    const layers: [string, number, number, number, number][] = [
+      [pal.enemy.bass, -.22, -.16, 1, 11], [pal.enemy.drum, .12, .05, .86, 12], [pal.enemy.hat, .3, .3, .5, 13], [pal.ink, -.1, .38, .62, 14],
+    ];
+    c.save();
+    for (const [col, ox, oy, rr, sd] of layers) {
+      this.blobPath(em.x + ox * r, em.y + oy * r, scale * rr, sd + seed, t, amp);
+      if (open) { c.fillStyle = col; c.globalAlpha = .15; c.fill(); c.strokeStyle = col; c.globalAlpha = .9; c.lineWidth = 1.5; c.stroke(); }
+      else { c.fillStyle = col; c.globalAlpha = 1; c.fill(); }
+    }
+    const sat: [string, number][] = [[pal.ink, .13], [pal.enemy.bass, .07], [pal.enemy.hat, .05], [pal.ink, .09]];
+    sat.forEach(([col, size], i) => {
+      const a = t * .4 + i * 1.7 + seed, d = r * (1.35 + .15 * Math.sin(t + i));
+      c.fillStyle = col; c.globalAlpha = 1; c.beginPath(); c.arc(em.x + Math.cos(a) * d, em.y + Math.sin(a) * d, r * size, 0, TAU); c.fill();
+    });
+    c.restore();
+  }
+
+  /** A closed soft mass: a circle whose radius varies a little with angle and slowly flows. */
+  private blobPath(x: number, y: number, R: number, seed: number, t: number, amp: number): void {
+    const c = this.ctx, N = 72, pts: [number, number][] = [];
+    const rnd = (a: number, b: number): number => { const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return v - Math.floor(v); };
+    for (let i = 0; i < N; i++) {
+      const th = (i / N) * TAU;
+      let k = 1;
+      for (let h = 2; h <= 5; h++) k += amp * (rnd(seed, h) - .3) * .55 / (h - 1) * Math.sin(h * th + rnd(seed, h + 9) * TAU + t * (.25 + .12 * h) * (rnd(seed, h + 3) < .5 ? 1 : -1));
+      pts.push([x + Math.cos(th) * R * k, y + Math.sin(th) * R * k]);
+    }
+    const mid = (a: [number, number], b: [number, number]): [number, number] => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    c.beginPath();
+    const m0 = mid(pts[N - 1], pts[0]); c.moveTo(m0[0], m0[1]);
+    for (let i = 0; i < N; i++) { const q = mid(pts[i], pts[(i + 1) % N]); c.quadraticCurveTo(pts[i][0], pts[i][1], q[0], q[1]); }
+    c.closePath();
   }
 
   /** Devices and monsters. New here (the validation build had neither): kept to the same few marks. */
@@ -586,8 +690,9 @@ export class StageRenderer {
     if (s.reform) return;       // scattered: the dust is the player
     const r = PLAYER_R * .8 * (1 + .12 * pulse), R = PLAYER_R + 4;
     c.save();
-    if (s.dash?.just || s.iframe > 0 || s.step < s.graceUntil) {
-      // Invulnerable: the body goes transparent and takes the just colour. A just dodge stays so for the whole dash, any other only for an instant.
+    if (s.dash?.just) {
+      // A just dodge: for the whole dash the body goes transparent and takes the just colour.
+      // The brief invulnerability of any other dash, and the beat of grace after re-forming, are not shown: green means just.
       c.strokeStyle = c.fillStyle = pal.just;
       c.lineWidth = 1.6; c.beginPath(); c.arc(s.x, s.y, R, 0, TAU); c.stroke();
       c.globalAlpha = .22; c.beginPath(); c.arc(s.x, s.y, r, 0, TAU); c.fill();
@@ -630,53 +735,39 @@ export class StageRenderer {
     c.restore();
   }
 
-  /** Bottom centre: one whole bar. Where the dodge beats sit in it, how far the next one is, and which were answered with a just. */
+  /**
+   * Bottom centre: the arch clock. The judgement line stays at twelve o'clock and the disc turns under it.
+   * Dodge beats are points on the disc; one crosses the line at the moment of its beat. One turn is two bars,
+   * so about two beats ahead are in view. A dodge beat answered with a just stays in the just colour for a moment.
+   */
   private drawClock(s: StageSim, stepF: number): void {
     const c = this.ctx, pal = this.pal, m = s.meter, bar = m.stepsPerBar, w = this.width, h = this.height;
     const k = Math.max(1.4, Math.min(2.2, Math.min(w / 640, h / 360)));     // drawn in the mock-up's units, then scaled
-    const barIx = Math.floor(stepF / bar), ph = (stepF - barIx * bar) / bar, p1 = pal.player[s.equipped ?? 'drum'];
+    const REV = bar * 2, R = 50, y0 = 2, p1 = pal.player[s.equipped ?? 'drum'];
+    const ang = (t: number): number => -Math.PI / 2 + ((t - stepF) / REV) * TAU;
     const fill = (t: number): number => { const j = this.justs.find(q => q === t); return j === undefined ? 0 : Math.max(0, 1 - (stepF - j) / (1.5 * m.stepsPerBeat)); };
-    const marks = m.dodgeSteps.map(d => ({ t: barIx * bar + d, u: d / bar }));
-    const next = marks.find(q => q.t > stepF);
-    const mark = (px: number, py: number, t: number, isNext: boolean, edge = 1): void => {
-      const f = fill(t);
-      c.globalAlpha = 1; c.fillStyle = pal.bg; c.beginPath(); c.arc(px, py, 4, 0, TAU); c.fill();
-      c.fillStyle = f > 0 ? pal.just : p1; c.globalAlpha = edge * (f > 0 ? .4 + .6 * f : t < stepF ? .35 : .9);
-      c.beginPath(); c.arc(px, py, f > 0 ? 4 : 3, 0, TAU); c.fill();
-      if (isNext) { c.strokeStyle = p1; c.globalAlpha = .7; c.lineWidth = 1; c.beginPath(); c.arc(px, py, 6.5, 0, TAU); c.stroke(); }
-    };
     c.save();
     c.translate(w / 2, h);
     c.scale(k, k);
-    c.strokeStyle = c.fillStyle = pal.ink;
-    if (this.clock === 'dial') {
-      const y = -38, R = 26, ang = (u: number): number => -Math.PI / 2 + u * TAU;
-      c.globalAlpha = .6; c.lineWidth = 1; c.beginPath(); c.arc(0, y, R, 0, TAU); c.stroke();
-      c.globalAlpha = .1; c.beginPath(); c.moveTo(0, y); c.arc(0, y, R, ang(0), ang(ph)); c.closePath(); c.fill();
-      for (let b = 0; b < m.beatsPerBar; b++) { const a = ang(b / m.beatsPerBar); c.globalAlpha = .4; c.beginPath(); c.moveTo(Math.cos(a) * (R - 3), y + Math.sin(a) * (R - 3)); c.lineTo(Math.cos(a) * R, y + Math.sin(a) * R); c.stroke(); }
-      for (const q of marks) mark(Math.cos(ang(q.u)) * R, y + Math.sin(ang(q.u)) * R, q.t, q === next);
-      c.strokeStyle = c.fillStyle = pal.ink; c.globalAlpha = .85; c.lineWidth = 1.3;
-      c.beginPath(); c.moveTo(0, y); c.lineTo(Math.cos(ang(ph)) * (R - 5), y + Math.sin(ang(ph)) * (R - 5)); c.stroke();
-      c.beginPath(); c.arc(0, y, 1.8, 0, TAU); c.fill();
-    } else if (this.clock === 'arch') {
-      const y = -4, R = 48, ang = (u: number): number => Math.PI + u * Math.PI;
-      c.lineWidth = 1;
-      for (const [r, a] of [[R, .6], [R - 6, .22], [R - 12, .12]]) { c.globalAlpha = a; c.beginPath(); c.arc(0, y, r, Math.PI, TAU); c.stroke(); }
-      c.globalAlpha = .1; c.beginPath(); c.moveTo(0, y); c.arc(0, y, R, Math.PI, ang(ph)); c.closePath(); c.fill();
-      for (const q of marks) mark(Math.cos(ang(q.u)) * R, y + Math.sin(ang(q.u)) * R, q.t, q === next);
-      c.strokeStyle = pal.ink; c.globalAlpha = .85; c.lineWidth = 1.3;
-      c.beginPath(); c.moveTo(Math.cos(ang(ph)) * (R - 14), y + Math.sin(ang(ph)) * (R - 14)); c.lineTo(Math.cos(ang(ph)) * R, y + Math.sin(ang(ph)) * R); c.stroke();
-    } else {
-      const y = -30, x0 = -120, x1 = 120, cx = -70, per = 240 / (bar * 1.6);
-      c.globalAlpha = .55; c.lineWidth = 1; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke();
-      for (let n = -1; n <= 2; n++) { const bx = cx + ((barIx + n) * bar - stepF) * per; if (bx > x0 && bx < x1) { c.globalAlpha = .35; c.beginPath(); c.moveTo(bx, y - 5); c.lineTo(bx, y + 5); c.stroke(); } }
-      for (let n = -1; n <= 2; n++) for (const d of m.dodgeSteps) {
-        const t = (barIx + n) * bar + d, px = cx + (t - stepF) * per;
-        if (px < x0 || px > x1) continue;
-        mark(px, y, t, false, Math.min(1, (px - x0) / 20, (x1 - px) / 20));
-      }
-      c.strokeStyle = pal.ink; c.globalAlpha = .85; c.lineWidth = 1.3; c.beginPath(); c.moveTo(cx, y - 9); c.lineTo(cx, y + 9); c.stroke();
+    c.strokeStyle = c.fillStyle = pal.ink; c.lineWidth = 1;
+    for (const [r, a] of [[R, .6], [R - 7, .2], [R - 14, .12]]) { c.globalAlpha = a; c.beginPath(); c.arc(0, y0, r, Math.PI, TAU); c.stroke(); }
+    // Beat ticks turn with the disc; a bar's first beat is longer.
+    for (let t = Math.ceil((stepF - REV / 2) / m.stepsPerBeat) * m.stepsPerBeat; t <= stepF + REV / 2; t += m.stepsPerBeat) {
+      const a = ang(t); if (Math.sin(a) > 0) continue;
+      const long = ((t % bar) + bar) % bar === 0, l = long ? 14 : 7;
+      c.globalAlpha = long ? .5 : .25;
+      c.beginPath(); c.moveTo(Math.cos(a) * (R - l), y0 + Math.sin(a) * (R - l)); c.lineTo(Math.cos(a) * R, y0 + Math.sin(a) * R); c.stroke();
     }
+    for (const t of this.dodgeBeats(s, stepF - REV / 2, stepF + REV / 2)) {
+      const a = ang(t); if (Math.sin(a) > 0) continue;
+      const px = Math.cos(a) * R, py = y0 + Math.sin(a) * R, f = fill(t);
+      c.globalAlpha = 1; c.fillStyle = pal.bg; c.beginPath(); c.arc(px, py, 4.5, 0, TAU); c.fill();
+      c.fillStyle = f > 0 ? pal.just : p1; c.globalAlpha = f > 0 ? .4 + .6 * f : t < stepF ? .3 : .9;
+      c.beginPath(); c.arc(px, py, f > 0 ? 4.2 : 3.2, 0, TAU); c.fill();
+    }
+    // The judgement line at twelve o'clock does not move.
+    c.strokeStyle = pal.ink; c.globalAlpha = .9; c.lineWidth = 1.4;
+    c.beginPath(); c.moveTo(0, y0 - R - 7); c.lineTo(0, y0 - R + 9); c.stroke();
     c.restore();
   }
 

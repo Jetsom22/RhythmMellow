@@ -17,7 +17,7 @@ const K = (() => {
     '34': { label: '3/4', steps: 12, dur: .25, dodge: [0, 4, 8], beats: [0, 4, 8], snare: [4, 8] },
     '78': { label: '7/8 (2+2+3)', steps: 7, dur: .5, dodge: [0, 2, 4], beats: [0, 2, 4], snare: [2, 4] },
     swing: { label: '스윙', steps: 12, dur: 1 / 3, dodge: [0, 3, 5, 6, 9, 11], beats: [0, 3, 6, 9], snare: [3, 9] },
-    jersey: { label: '저지 클럽', steps: 16, dur: .25, dodge: [0, 3, 6, 10, 12, 14], beats: [0, 4, 8, 12], snare: [4, 12] },
+    jersey: { label: '저지 클럽', steps: 16, dur: .25, dodge: [0, 4, 8, 11, 14], beats: [0, 4, 8, 12], snare: [4, 12] },
     break: { label: '브레이크비트', steps: 16, dur: .25, dodge: [0, 2, 4, 7, 10, 12], beats: [0, 4, 8, 12], snare: [4, 7, 12] },
   };
   const barLen = m => m.steps * m.dur;               // 마디의 길이(박)
