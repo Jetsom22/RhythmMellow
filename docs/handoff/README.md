@@ -45,5 +45,5 @@
   - 그리기: `src/render/stageRenderer.ts`, 색은 `src/render/theme.ts`
   - 스테이지 데이터: `src/data/stages/*.json` (길이는 U). 첫 스테이지는 `scripts/build-stage01.py` 를 고치고 다시 돌려서 만든다
   - 검사: `tests/stage.test.ts`, `npm test`
-- **어디서든 시작하기** (주소 뒤에 붙인다): `?stage=이름` `?at=x,y`(U) `?parts=drum,hat` `?god=1` `?palette=rust|mid|navy|ochre` `?zoom=0.3`. 플레이 중 `-` `=` 로 멀리 보기.
+- **어디서든 시작하기** (주소 뒤에 붙인다): `?stage=이름` `?at=x,y`(U) `?parts=drum,hat` `?god=1` `?palette=rust|mid|navy|ochre` `?zoom=0.3` `?clock=dial|arch|strip`(시계의 모양. 플레이 중 `V` 로 바꿔 본다). 플레이 중 `-` `=` 로 멀리 보기.
 - 비주얼 방향, 색 체계, 예고·여운·피격 표현은 `docs/handoff/ART.md` 의 "결정" 참고.

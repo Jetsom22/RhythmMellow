@@ -1,6 +1,7 @@
 import { LayerId } from '../music/song';
 import { Meter, MeterData } from './meter';
-import { contains, scaled, Shape } from './shapes';
+import { GroundField } from './ground';
+import { scaled, Shape } from './shapes';
 
 /**
  * The rules of a stage, with no drawing and no sound: it only needs to be told what time it is.
@@ -32,7 +33,8 @@ export interface StageData {
   id?: string; name?: string; seed?: number; palette?: string;
   meter?: MeterData; lives?: number; walkPxPerSec?: number; dashU?: number;
   start: [number, number];
-  map: { ground: Shape[]; holes?: Shape[] };
+  /** blend: how far apart ground shapes start to melt into one lump, in U (default 0.75; 0 is plain geometry). */
+  map: { ground: Shape[]; holes?: Shape[]; blend?: number };
   attacks?: Record<string, AttackDef>;
   emitters?: (V & { id: string; kind: 'device' | 'monster' | 'guardian' | 'boss'; hp?: number; body?: number; pattern?: Pattern;
     follow?: { layer: LayerId; attack: string }; motion?: { kind: 'approach'; every?: number; by?: number; min?: number; sight?: number };
@@ -69,7 +71,7 @@ export type StageEvent =
   | { type: 'fizzle'; offsetMs: number }
   | { type: 'absorb'; streak: number }
   | { type: 'strike'; inst: Inst; step: number }
-  | { type: 'attack'; layer: Instrument; from: V; to: V; hit: boolean }
+  | { type: 'attack'; layer: Instrument; from: V; to: V; hit: boolean; /** Made stronger by a just dodge. */ strong: boolean }
   | { type: 'hurt' | 'gameover'; kind: 'hit' | 'fall'; from: V; to: V; lives: number }
   | { type: 'part'; layer: Instrument; pos: V }
   | { type: 'plate'; id: string; layer: Instrument; pos: V }
@@ -83,8 +85,8 @@ export interface StageInput { moveX: number; moveY: number; /** Song time of the
 
 export const DASH_TIME = 0.16;
 export const DASH_COOLDOWN = 0.25;
-/** Invulnerability of a dash that is not just: only the instant of the press. */
-export const SHORT_IFRAME = 0.05;
+/** A just dodge makes the next attack that lands this much stronger. */
+export const JUST_DAMAGE_MULT = 2;
 /** Steps the player stays scattered after being hit or falling (two beats). */
 export const REFORM_STEPS = 8;
 const SLICE = 1 / 120;
@@ -98,8 +100,8 @@ const dist = (ax: number, ay: number, bx: number, by: number): number => Math.hy
 
 export class StageSim {
   meter = new Meter();
-  ground: Shape[] = [];
-  holes: Shape[] = [];
+  /** The ground: one soft lump made of the map's shapes. It decides both where the player can stand and where the edge is drawn. */
+  field = new GroundField([], [], 0);
   /** Pixels per U. 1U is the distance walked in one beat, and also the length of a dash. */
   u = 120;
   dashU = 1;
@@ -119,6 +121,8 @@ export class StageSim {
   reform: { from: V; until: number } | null = null;
   checkpoint: V = { x: 0, y: 0 };
   streak = 0;
+  /** Set by a just dodge: the next attack that lands is stronger. */
+  charged = false;
   /** Attacks cannot hurt before this step: one beat of grace after re-forming. */
   graceUntil = 0;
 
@@ -179,12 +183,7 @@ export class StageSim {
 
   // ───────── the player ─────────
 
-  isGround(px: number, py: number): boolean {
-    for (const g of this.gates) if (g.open && contains(g.shape, px, py)) return true;
-    for (const h of this.holes) if (contains(h, px, py)) return false;
-    for (const g of this.ground) if (contains(g, px, py)) return true;
-    return false;
-  }
+  isGround(px: number, py: number): boolean { return this.field.isGround(px, py); }
 
   switchInstrument(dir: number): void {
     if (!this.owned.length || !this.equipped) return;
@@ -193,9 +192,9 @@ export class StageSim {
 
   /**
    * Two separate judgements:
-   *  - dash: the key is pressed within the judgement time of a dodge beat -> the dash happens (always 1U)
-   *  - just: the dodge starts within the just time of an attack landing on the player -> invulnerable for the whole dash
-   * A dash that is not just is invulnerable only for an instant, so the player has to actually leave the attack.
+   *  - dash: the key is pressed within the judgement time of a dodge beat -> the dash happens (always 1U),
+   *    and the player is invulnerable for the whole dash
+   *  - just: the dodge starts within the just time of an attack landing on the player -> the next attack is stronger
    */
   private tryDash(mx: number, my: number, pressedAt: number): void {
     if (this.dash || this.cooldown > 0 || this.reform) return;
@@ -221,11 +220,11 @@ export class StageSim {
     const just = answered.length > 0, d = this.dashU * this.u;
     const from = this.pos;
     this.dash = { t: 0, dur: DASH_TIME, vx: (dx * d) / DASH_TIME, vy: (dy * d) / DASH_TIME, just };
-    this.iframe = Math.max(this.iframe, SHORT_IFRAME);
     this.cooldown = DASH_COOLDOWN;
     this.events.push({ type: 'dash', just, offsetMs: j.offsetMs, from, to: { x: from.x + dx * d, y: from.y + dy * d } });
     if (just) {
       this.pending = this.pending.filter(p => !answered.includes(p.hitStep));
+      this.charged = true;
       this.absorb();
     }
   }
@@ -283,6 +282,7 @@ export class StageSim {
       for (const f of r.flags ?? []) if (!this.flags[f]) ok = false;
       if (ok) { g.open = true; this.events.push({ type: 'gate', id: g.id }); }
     }
+    this.field.setWays(this.gates.filter(g => g.open).map(g => g.shape));
   }
 
   private takeSave(): void {
@@ -306,6 +306,7 @@ export class StageSim {
     this.pending = [];
     this.active = this.active.filter(a => a.srcKind === 'device' || a.srcKind === 'monster');
     this.streak = 0;
+    this.charged = false;
     this.dash = null;
     this.lives--;
     const over = this.lives <= 0;
@@ -331,6 +332,7 @@ export class StageSim {
     this.lives = this.maxLives;
     this.parts.forEach((p, i) => { p.taken = s.taken[i]; });
     this.gates.forEach((g, i) => { g.open = s.gates[i]; });
+    this.field.setWays(this.gates.filter(g => g.open).map(g => g.shape));
     this.emitters.forEach((e, i) => { [e.hp, e.broken, e.x, e.y] = s.emitters[i]; });
     this.encounters.forEach((e, i) => {
       e.cleared = s.encounters[i]; e.index = 0; e.repeat = 0; e.running = false;
@@ -373,8 +375,7 @@ export class StageSim {
   private strike(a: Inst, s: number): void {
     this.events.push({ type: 'strike', inst: a, step: s });
     if (this.god || this.reform || s < this.graceUntil || !this.hits(a, this.x, this.y)) return;
-    if (this.dash?.just) return;         // already answered when the dodge started
-    if (this.iframe > 0) return;
+    if (this.dash || this.iframe > 0) return;      // a dash is invulnerable from start to end
     this.pending.push({ hitStep: s, due: s * this.meter.secPerStep + (this.meter.justMs + Math.max(0, this.inputOffsetMs)) / 1000 + 0.02 });
   }
 
@@ -504,9 +505,10 @@ export class StageSim {
       if (d < bestD) { bestD = d; best = em; }
     }
     if (!best) return;
-    const hit = bestD <= ATTACK_RANGE_U[eq] * this.u;
-    if (hit) this.damage(best, ATTACK_DAMAGE[eq], s);
-    this.events.push({ type: 'attack', layer: eq, from: this.pos, to: { x: best.x, y: best.y }, hit });
+    const hit = bestD <= ATTACK_RANGE_U[eq] * this.u, strong = hit && this.charged;
+    if (hit) this.damage(best, ATTACK_DAMAGE[eq] * (strong ? JUST_DAMAGE_MULT : 1), s);
+    if (strong) this.charged = false;
+    this.events.push({ type: 'attack', layer: eq, from: this.pos, to: { x: best.x, y: best.y }, hit, strong });
   }
 
   private damage(em: Emitter, amount: number, s: number): void {
@@ -538,8 +540,7 @@ export class StageSim {
     const k = s.u = (d.walkPxPerSec ?? 220) * s.meter.secPerBeat;
     s.dashU = d.dashU ?? 1;
     s.lives = s.maxLives = d.lives ?? 3;
-    s.ground = d.map.ground.map(g => scaled(g, k));
-    s.holes = (d.map.holes ?? []).map(h => scaled(h, k));
+    s.field = new GroundField(d.map.ground.map(g => scaled(g, k)), (d.map.holes ?? []).map(h => scaled(h, k)), (d.map.blend ?? 0.75) * k);
     s.x = d.start[0] * k; s.y = d.start[1] * k;
     for (const [id, a] of Object.entries(d.attacks ?? {})) {
       const sh: any = { ...a.shape };

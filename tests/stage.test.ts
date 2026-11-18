@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Meter } from '../src/core/stage/meter';
+import { GroundField, sdShape } from '../src/core/stage/ground';
 import { contains, Shape } from '../src/core/stage/shapes';
 import { REFORM_STEPS, StageData, StageEvent, StageSim } from '../src/core/stage/sim';
 import stage01 from '../src/data/stages/stage-01.json';
@@ -8,7 +9,7 @@ const BEAT = 60 / 110, STEP = BEAT / 4, U = 120;
 
 const stage = (extra: Partial<StageData> = {}): StageData => ({
   meter: { bpm: 110 }, lives: 3, start: [0, 0],
-  map: { ground: [{ kind: 'circle', x: 0, y: 0, r: 10 }], holes: [{ kind: 'rect', x: 5, y: 0, w: 0.7, h: 6 }] },
+  map: { blend: 0, ground: [{ kind: 'circle', x: 0, y: 0, r: 10 }], holes: [{ kind: 'rect', x: 5, y: 0, w: 0.7, h: 6 }] },
   attacks: {
     big: { shape: { kind: 'circle', r: 3 }, tele: 4, anchor: 'self', layer: 'drum' },
     ring: { shape: { kind: 'ring', r0: 1.0, r1: 1.9 }, tele: 4, anchor: 'self', layer: 'drum' },
@@ -44,6 +45,42 @@ describe('the ground', () => {
     expect(on(0, 250) && !on(-250, 0) && !on(0, 150)).toBe(true);
     expect(on(30, -270) && !on(45, -315)).toBe(true);
     expect(on(900, 900)).toBe(false);
+  });
+});
+
+describe('the ground as one lump', () => {
+  const shapes: Shape[] = [{ kind: 'circle', x: 0, y: 0, r: 100 }, { kind: 'capsule', x1: 0, y1: 0, x2: 300, y2: 0, r: 30 }, { kind: 'rect', x: 0, y: -200, w: 100, h: 40, rot: 30 },
+    { kind: 'sector', x: 0, y: 0, r0: 200, r1: 300, a0: 80, a1: 100 }, { kind: 'polygon', points: [[400, 0], [500, 0], [450, 80]] }];
+  it('the distance to each shape is negative exactly where the shape is', () => {
+    for (const s of shapes) for (let y = -350; y <= 350; y += 17) for (let x = -350; x <= 550; x += 17) {
+      const d = sdShape(s, x, y);
+      if (Math.abs(d) > 0.01) expect(d < 0, `${s.kind} at ${x},${y}`).toBe(contains(s, x, y));
+    }
+  });
+  it('with no blend it is plain geometry; with blend the joins fill in and nothing else moves', () => {
+    const plain = new GroundField([shapes[0], shapes[1]], [], 0), soft = new GroundField([shapes[0], shapes[1]], [], 60);
+    expect(plain.isGround(105, 35)).toBe(false);       // the corner where the path leaves the circle
+    expect(soft.isGround(105, 35)).toBe(true);
+    expect(soft.isGround(250, 35)).toBe(false);        // far from the join the path is as wide as before
+    expect(soft.isGround(0, 105)).toBe(false);
+  });
+  it('holes are cut out, and an open way is laid over a hole', () => {
+    const f = new GroundField([shapes[0]], [{ kind: 'circle', x: 0, y: 0, r: 40 }], 30);
+    expect(f.isGround(0, 0)).toBe(false);
+    f.setWays([{ kind: 'rect', x: 0, y: 0, w: 120, h: 20 }]);
+    expect(f.isGround(0, 0)).toBe(true);
+    expect(f.isGround(0, 25)).toBe(false);
+  });
+  it('a point travelling into the edge bounces back onto the ground', () => {
+    const f = new GroundField([shapes[0]], [], 0), [x, y, hits] = f.travel(80, 0, 1, 0, 60);
+    expect(hits).toBe(1);
+    expect(x).toBeCloseTo(60, 0);
+    expect(y).toBeCloseTo(0, 0);
+  });
+  it('its edge can be traced', () => {
+    const f = new GroundField([shapes[0]], [], 0), [edge] = f.contour(-128, -128, 256, [0]);
+    expect(edge.length).toBeGreaterThan(100);
+    for (const [x0, y0] of edge) expect(Math.hypot(x0, y0)).toBeCloseTo(100, 0);
   });
 });
 
@@ -105,7 +142,7 @@ describe('attacks and the just judgement', () => {
     expect(of(ev, 'strike')[0].step).toBe(40);
     expect(of(ev, 'strike')[0].inst.start).toBe(36);
   });
-  it('a dodge started as the attack lands is a just: invulnerable for the whole dash', () => {
+  it('a dodge started as the attack lands is a just', () => {
     const s = make(device('big'));
     run(s, 40 * STEP - 0.03);
     const ev = run(s, 40 * STEP + 0.4, { dashAt: 40 * STEP - 0.02 });
@@ -121,13 +158,32 @@ describe('attacks and the just judgement', () => {
     expect(of(ev, 'hurt')).toHaveLength(0);
     expect(of(ev, 'absorb')).toHaveLength(1);
   });
-  it('inside the dash time but outside the just time: the dash happens, it is not a just, and it still hurts', () => {
+  it('any dash is invulnerable from start to end, just or not', () => {
     const s = make(device('big'));
     run(s, 40 * STEP - 0.11);
-    const ev = run(s, 40 * STEP + 0.4, { dashAt: 40 * STEP - 0.10 });
+    const ev = run(s, 40 * STEP + 0.4, { dashAt: 40 * STEP - 0.10 });      // inside the dash time, outside the just time
     expect(of(ev, 'dash')).toHaveLength(1);
     expect(of(ev, 'dash')[0].just).toBe(false);
+    expect(of(ev, 'hurt')).toHaveLength(0);
+    expect(of(ev, 'absorb')).toHaveLength(0);
+    expect(s.charged).toBe(false);
+  });
+  it('a dash that has ended no longer protects', () => {
+    const s = make(device('zone'));          // strikes at 40, 44, 48
+    s.x = -0.5 * U;                           // the dash ends still inside the zone
+    run(s, 40 * STEP - 0.03);
+    const ev = run(s, 44 * STEP + 0.4, { dashAt: 40 * STEP - 0.02 });
     expect(of(ev, 'hurt')).toHaveLength(1);
+  });
+  it('a just dodge makes the next attack that lands stronger, once', () => {
+    const s = make({ emitters: [{ id: 'dev', kind: 'device', x: 0, y: 0, hp: 1000, body: 0.2, pattern: { length: 16, rest: 16, events: [{ at: 8, attack: 'big' }] } }] });
+    s.owned = ['drum']; s.equipped = 'drum'; s.x = 0.5 * U;
+    run(s, 40 * STEP - 0.03);
+    const ev = run(s, 44 * STEP + 0.01, { dashAt: 40 * STEP - 0.02, moveX: 0, moveY: 0 });
+    expect(of(ev, 'dash')[0].just).toBe(true);
+    const hits = of(run(s, 56 * STEP), 'attack').concat(of(ev, 'attack')).filter(a => a.hit);
+    expect(hits.filter(a => a.strong)).toHaveLength(1);
+    expect(s.charged).toBe(false);
   });
   it('pressing off the beat does nothing: still inside, still hit', () => {
     const s = make(device('big'));
