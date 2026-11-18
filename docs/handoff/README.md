@@ -7,7 +7,7 @@
 | **시스템** | 게임 규칙, 박자 시계, 소리를 내보내는 길, 테스트, 빌드와 배포 | `godot/**`(다른 세션의 파일 제외), `src/**`, `tests/**`, `.github/**` | `kkami/youthful-hawking-9iej8u` |
 | **아트** | 비주얼 시스템, UI/UX, 이펙트, 시안 | `src/render/**`, `src/ui/**`, `index.html`, `public/concepts/**`, `docs/art/**` | `art/visual-system` |
 | **사운드** | 음색, 믹싱, 박자 패턴에 따른 작곡, 마스터링 | `godot/audio/synth.gd`, `godot/audio/mix.gd`, `godot/core/song.gd`, `docs/sound/**` | `sound/mix-and-composition` |
-| **레벨디자인** | 맵, 기믹 배치, 보스 패턴, 학습-반복-심화의 흐름 | `src/core/game/world.ts`, `src/core/game/bossPatterns.ts`, `docs/level/**` | `level/gimmick-design` |
+| **레벨디자인** | 맵, 기믹 설계와 배치, 보스 패턴, 학습-반복-심화의 흐름, 레벨 디자인 작업대 | `scripts/build-stage*.py`, `src/data/stages/**`, `src/workbench/**`, `workbench.html`, `tests/workbench/**`, `src/core/game/bossPatterns.ts`, `docs/level/**`. 새 기믹의 규칙은 `src/core/stage/sim.ts` 에 직접 넣되 PR 설명에 적어 알린다 (2026-11-18 기획자 결정) | `level/gimmick-design` |
 
 ## 규칙
 

@@ -1,52 +1,42 @@
 import { describe, expect, it } from 'vitest';
-import raw from '../../data/stages/stage-01.json?raw';
+import { StageData } from '../../src/core/stage/sim';
 import { check } from '../../src/workbench/checker';
-import { StageData, loadStage } from '../../src/workbench/stage';
+import { loadModel } from '../../src/workbench/model';
 
-/** Change a copy of stage-01 and return the ids of the checks that now fail. */
+const stages = import.meta.glob<StageData>('../../src/data/stages/*.json', { eager: true, import: 'default' });
+const stage01 = stages['../../src/data/stages/stage-01.json'];
+
+/** Change a copy of stage-01 and return the checks that now fail. */
 function failsAfter(change: (d: StageData) => void): string[] {
-  const d: StageData = JSON.parse(raw);
+  const d: StageData = JSON.parse(JSON.stringify(stage01));
   change(d);
-  return check(loadStage(d)).filter(f => !f.ok).map(f => f.id);
+  return check(loadModel(d)).filter(f => !f.ok).map(f => f.id);
 }
+const em = (d: StageData, id: string) => d.emitters!.find(e => e.id === id)!;
 
-describe('the checker catches what it is meant to catch', () => {
-  it('a boss pattern that differs from the validation build', () => {
-    expect(failsAfter(d => { d.patterns['seung-drum'].hits![1].shape = { type: 'ring', inner: 150, outer: 200 }; })).toContain('same-as-validation');
+describe('each level-design check catches its problem', () => {
+  it('a boss phrase unlike the validation build', () => {
+    expect(failsAfter(d => { d.encounters!.find(e => e.kind === 'boss')!.phrases[0].events[0].at = 12; })).toContain('same-as-validation');
   });
-
   it('a hit off the kick and snare beats', () => {
-    expect(failsAfter(d => { d.patterns['gi-solo'].hits![0].step = 10; })).toContain('on-beat');
+    expect(failsAfter(d => { em(d, 'drum-in').pattern!.phase = 2; })).toContain('on-beat');
   });
-
-  it('a device standing over a chasm', () => {
-    expect(failsAfter(d => { d.emitters.find(e => e.id === 'drum-middle-1')!.at = { r: 19.4, deg: 150 }; })).toContain('on-ground');
+  it('a device over the void', () => {
+    expect(failsAfter(d => { const e = em(d, 'hat-in'); e.x = 0; e.y = -40; })).toContain('on-ground');
   });
-
-  it('a missing cliff between two instrument areas', () => {
-    expect(failsAfter(d => { d.field.holes = d.field.holes.filter(h => h.id !== 'cliff-bass-drum'); })).toContain('cliffs');
+  it('two instrument areas joined without the centre', () => {
+    expect(failsAfter(d => { d.map.ground.push({ kind: 'sector', x: 0, y: 0, r0: 15, r1: 29, a0: 80, a1: 100 }); })).toContain('cliffs');
   });
-
-  it('a cliff narrow enough to dash across', () => {
-    expect(failsAfter(d => { const c = d.field.holes.find(h => h.id === 'cliff-drum-hat')!; if (c.type === 'path') c.width = 0.9; })).toContain('cliffs');
+  it('an attack the road never shows before the boss', () => {
+    expect(failsAfter(d => { d.emitters = d.emitters!.filter(e => !(e.pattern?.events ?? []).some(ev => ev.attack === 'zone') && !e.follow); })).toContain('road-first');
   });
-
-  it('an attack met first among others', () => {
-    // without the single beam device at the entrance, beams are first met in the middle next to other things
-    expect(failsAfter(d => {
-      d.emitters = d.emitters.filter(e => !e.id.startsWith('hat-entrance') && !e.id.startsWith('hat-middle'));
-    })).toContain('first-alone');
+  it('an attack first met next to another', () => {
+    expect(failsAfter(d => { const e = em(d, 'note-0'), h = em(d, 'hat-in'); e.x = h.x; e.y = h.y + 2; })).toContain('first-alone');
   });
-
-  it('an attack the boss uses but the road never shows', () => {
-    expect(failsAfter(d => { d.emitters = d.emitters.filter(e => e.pattern !== 'zone-device'); })).toContain('road-first');
-  });
-
   it('an order of collecting that gets stuck', () => {
-    expect(failsAfter(d => { d.routes.find(r => r.from === 'center' && r.to === 'hat-entrance')!.requires = { parts: ['drum'] }; })).toContain('any-order');
+    expect(failsAfter(d => { d.gates!.push({ id: 'wall', shape: { kind: 'circle', x: 0, y: 0, r: 0.01 }, requires: {} }); d.map.holes!.push({ kind: 'sector', x: 0, y: 0, r0: 13.6, r1: 17, a0: 214, a1: 326 }); })).toContain('any-order');
   });
-
-  it('a guardian that cannot be passed without an instrument', () => {
-    expect(failsAfter(d => { d.emitters.find(e => e.id === 'hat-guardian')!.pass = ['defeat']; })).toContain('dodge-pass');
+  it('a guardian that needs an instrument', () => {
+    expect(failsAfter(d => { for (const p of d.encounters!.find(e => e.id === 'hat-guard')!.phrases) delete p.advance!.answered; })).toContain('dodge-pass');
   });
 });
