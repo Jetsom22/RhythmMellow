@@ -11,7 +11,7 @@
 <body data-p="rust">
 <main>
 <h1>시안 8 · 박과 판정</h1>
-<p class="lede">박이 화면에서 어떻게 보일지, 회피가 저스트였는지를 어떻게 알려 줄지, 하드 모드에서 두 격자를 어떻게 가를지. 갈래마다 큰 화면 하나에 시안 셋을 버튼으로 바꿔 가며 볼 수 있다. 화면 왼쪽 아래에 방금 일어난 일이 한 줄로 적힌다. 위에서 박자표를 바꾸면 모든 화면이 따라 바뀐다. <a href="index.html">시안 8 목록</a></p>
+<p class="lede">기획자가 고른 방향(다가오는 고리와 시계, 투명해지는 몸, 점선 예고)을 한 화면씩 그렸다. 남은 결정은 시계의 모양 하나다. 화면 왼쪽 아래에는 방금 일어난 일이 한 줄로 적힌다(시안을 보기 위한 글이고 게임에는 없다). <a href="index.html">시안 8 목록</a></p>
 <div class="bar">
   <div class="grp" role="group" aria-label="팔레트" id="pal">
     <button data-p="rust" aria-pressed="true">RUST</button><button data-p="mid" aria-pressed="false">MID</button><button data-p="navy" aria-pressed="false">NAVY</button><button data-p="ochre" aria-pressed="false">OCHRE</button>
@@ -26,46 +26,49 @@
 </div>
 <p class="hint"><b>직접 해 보기</b> · 스페이스를 누르거나 아무 화면이나 누르면 회피한다. 박에 맞추면 저스트다. 누르는 동안은 자동으로 피하던 것이 멈추고 두 마디 동안 손에 넘어온다. 소리를 켜면 회피 자리에서 킥과 스네어가 울린다(1×일 때만).</p>
 
-<h2>1 · 박이 보이는 자리</h2>
-<p>회피는 킥과 스네어 자리에서만 된다. 그래서 보여 줄 것은 "다음 회피 자리까지 얼마 남았나"다. 4/4가 아닌 박자에서도 그 간격이 그대로 읽혀야 한다. 셋 다 플레이어의 색으로 그리고, 크게 움직이지 않는다.</p>
-<div class="grp vsel" role="group" aria-label="시안" style="margin-bottom:10px"><button data-v="orbit" data-cap="<b>A · 궤도</b> · 몸 둘레의 보이지 않는 원 위에 마디 하나가 놓인다. 점은 회피 자리, 작은 호가 그 위를 돈다. 점을 지날 때 점이 살짝 커진다. 고르지 않은 박은 점의 간격으로 보인다" aria-pressed="true">A · 궤도</button><button data-v="clock" data-cap="<b>B · 시계</b> · 박은 화면 귀퉁이의 작은 원에만 있고, 몸은 회피 자리에서 아주 조금 부풀 뿐이다. 눈이 싸움터를 떠나야 해서 가장 조용하지만 가장 덜 읽힌다" aria-pressed="false">B · 시계</button><button data-v="approach" data-cap="<b>C · 다가오는 고리</b> · 회피 자리마다 고리 하나가 한 박 앞에서 몸으로 좁혀 온다. 적의 예고처럼 16분음마다 한 칸씩 짙어진다. 적은 면으로 번지고, 나는 선으로 좁혀 든다" aria-pressed="false">C · 다가오는 고리</button></div>
-<canvas class="tile big" data-kind="beat" data-v="orbit" width="1920" height="1080"></canvas>
-<p class="cap"><b>A · 궤도</b> · 몸 둘레의 보이지 않는 원 위에 마디 하나가 놓인다. 점은 회피 자리, 작은 호가 그 위를 돈다. 점을 지날 때 점이 살짝 커진다. 고르지 않은 박은 점의 간격으로 보인다</p>
+<h2>정해진 것</h2>
+<ul class="notes">
+  <li><b>박</b> · 다가오는 고리와 시계를 함께 쓴다. 시계는 화면 아래 가운데에 따로 크게 둔다</li>
+  <li><b>회피 판정</b> · 무적인 동안 몸이 투명해지고 저스트 색(녹색 계열)으로 바뀐다. 저스트면 대시하는 내내, 아니면 0.05초쯤만</li>
+  <li><b>하드 모드</b> · 회피 박에 맞지 않는 타격은 예고의 테두리를 점선으로 그려 보여 준다</li>
+</ul>
+
+<h2>1 · 화면 아래 가운데의 시계</h2>
+<p>몸 둘레에는 다가오는 고리가 회피 자리마다 한 박 앞에서 좁혀 온다. 시계는 마디 하나를 통째로 보여 주는 자리다. 회피 자리가 마디 안 어디에 있는지, 다음 회피까지 얼마나 남았는지를 시계로 읽는다. 저스트로 넘긴 회피 자리는 시계에서도 저스트 색으로 잠시 채워진다. 시계의 모양을 세 가지로 그렸다. 위에서 박자표를 바꿔 고르지 않은 박에서도 비교해 보면 좋다.</p>
+<div class="grp vsel" role="group" aria-label="시계의 모양" id="clockSel" style="margin-bottom:10px"><button data-v="dial" data-cap="<b>원형 시계</b> · 바늘이 마디 하나를 한 바퀴 돈다. 회피 자리는 테두리 위의 점이고, 바늘이 지나간 자리는 옅게 채워진다. 박자표가 바뀌면 점의 자리가 바뀐다" aria-pressed="true">원형 시계</button><button data-v="arch" data-cap="<b>아치</b> · 마디 하나를 왼쪽에서 오른쪽으로 가는 반원으로 펼쳤다. 레퍼런스의 동심 아치를 따랐다. 화면 아래 가장자리에 걸쳐 있어 싸움터를 덜 가린다" aria-pressed="false">아치</button><button data-v="strip" data-cap="<b>흐르는 띠</b> · 가로줄 위로 회피 자리가 오른쪽에서 흘러와 가운데 표시에 닿는다. 다음 마디까지 미리 보여서 고르지 않은 박을 가장 쉽게 읽는다. 대신 리듬 게임의 노트 길과 가장 닮았다" aria-pressed="false">흐르는 띠</button></div>
+<canvas class="tile big" data-kind="beat" data-v="dial" width="1920" height="1080"></canvas>
+<p class="cap"><b>원형 시계</b> · 바늘이 마디 하나를 한 바퀴 돈다. 회피 자리는 테두리 위의 점이고, 바늘이 지나간 자리는 옅게 채워진다. 박자표가 바뀌면 점의 자리가 바뀐다</p>
 
 <h2>2 · 회피의 판정</h2>
-<p>저스트면 대시하는 내내 무적이고, 아니면 아주 잠깐뿐이라 몸이 실제로 빠져나가야 한다(시스템 명세의 결정). 플레이어는 방금 것이 저스트였는지를 글자 없이 알아야 한다. 아래는 마디마다 저스트 → 근접 → 빗나감을 차례로 보여 준다. 근접은 박보다 조금 이르게, 빗나감은 많이 늦게 눌렀다. 빗나간 대시는 짧아서 원 모양 공격을 못 빠져나간다.</p>
-<div class="grp vsel" role="group" aria-label="시안" style="margin-bottom:10px"><button data-v="body" data-cap="<b>가 · 몸이 빈다</b> · 무적인 동안 몸의 속이 비어 테두리만 남는다. 저스트는 대시 내내, 근접은 눈 깜빡할 만큼. &quot;무적&quot;이라는 규칙을 그대로 보여 준다. ¼×로 보면 차이가 잘 보인다" aria-pressed="true">가 · 몸이 빈다</button><button data-v="ring" data-cap="<b>나 · 떠난 자리</b> · 대시가 남기는 고리가 판정을 말한다. 저스트는 두 겹의 온전한 고리, 근접은 끊긴 고리, 빗나감은 고리가 없다. 대시가 끝난 뒤에도 잠시 남아서 돌아볼 수 있다" aria-pressed="false">나 · 떠난 자리</button><button data-v="mark" data-cap="<b>다 · 박 자국</b> · 궤도(A) 위에 누른 자리가 찍힌다. 저스트는 회피 점이 채워지고, 근접과 빗나감은 이르거나 늦은 만큼 옆에 찍힌다. 이른지 늦은지까지 알 수 있어 손을 고치기 좋다" aria-pressed="false">다 · 박 자국</button></div>
-<canvas class="tile big" data-kind="grade" data-v="body" width="1920" height="1080"></canvas>
-<p class="cap"><b>가 · 몸이 빈다</b> · 무적인 동안 몸의 속이 비어 테두리만 남는다. 저스트는 대시 내내, 근접은 눈 깜빡할 만큼. "무적"이라는 규칙을 그대로 보여 준다. ¼×로 보면 차이가 잘 보인다</p>
+<p>마디마다 저스트, 근접, 빗나감을 차례로 보여 준다. 무적인 동안에만 몸이 투명해지고 저스트 색으로 바뀐다. 저스트는 대시하는 내내 바뀌어 있고, 근접은 0.05초쯤 깜빡이고 끝난다. 그래서 근접은 몸이 실제로 모양 밖으로 나가야 한다. 빗나감은 대시가 짧고 무적이 없다. ¼×로 보면 길이 차이가 잘 보인다. 시계는 위에서 고른 모양을 따른다.</p>
+<canvas class="tile big" data-kind="grade" data-v="green" width="1920" height="1080"></canvas>
 
-<h2>3 · 하드 모드의 두 격자</h2>
-<p>다른 챕터의 드럼을 끼면 회피 자리가 바뀐다. 적의 타격은 챕터의 박에 그대로 떨어진다. 그래서 회피 자리와 안 맞는 타격이 생기고, 그건 저스트로 넘길 수 없어 걸어서 빠져나가야 한다. 챕터는 4/4로 두고 낀 드럼만 바꿔 볼 수 있다. 플레이어는 회피 자리에 오는 타격은 대시로, 아닌 것은 걸어서 피한다.</p>
+<h2>3 · 하드 모드</h2>
+<p>챕터는 4/4로 두고 낀 드럼만 바꿔 볼 수 있다. 회피 박에 맞는 타격은 대시로 넘기고, 맞지 않는 타격은 예고의 테두리가 점선이 되어 걸어서 빠져나간다. 몸 둘레의 다가오는 고리와 시계는 낀 드럼의 회피 박을 따른다.</p>
 <div class="grp" role="group" aria-label="낀 드럼" id="equip" style="margin-bottom:12px">
   <button data-e="44" aria-pressed="false">4/4 드럼 (처음 할 때)</button><button data-e="jersey" aria-pressed="true">저지 클럽 드럼</button><button data-e="break" aria-pressed="false">브레이크비트 드럼</button>
 </div>
-<div class="grp vsel" role="group" aria-label="시안" style="margin-bottom:10px"><button data-v="ticks" data-cap="<b>ㄱ · 안팎 눈금</b> · 궤도(A)의 안쪽에 내 회피 자리(푸른 점), 바깥에 적의 타격 자리(붉은 눈금). 짝이 없는 붉은 눈금이 걸어서 피할 타격이다. 정보는 가장 많고, 그만큼 몸 둘레가 바쁘다" aria-pressed="true">ㄱ · 안팎 눈금</button><button data-v="dotted" data-cap="<b>ㄴ · 예고가 말한다</b> · 내 회피 자리에 안 맞는 타격은 예고의 테두리가 점선이 된다. 점선이면 걸어서 나가라는 뜻. 박 표시는 다가오는 고리(C)" aria-pressed="false">ㄴ · 예고가 말한다</button><button data-v="plain" data-cap="<b>ㄷ · 따로 말하지 않는다</b> · 내 회피 자리는 다가오는 고리(C)로, 적의 타격은 예고로만 보인다. 둘을 맞춰 보는 일은 플레이어의 몫이다. 하드 모드다운 가장 조용한 길" aria-pressed="false">ㄷ · 따로 말하지 않는다</button></div>
-<canvas class="tile big" data-kind="hard" data-v="ticks" width="1920" height="1080"></canvas>
-<p class="cap"><b>ㄱ · 안팎 눈금</b> · 궤도(A)의 안쪽에 내 회피 자리(푸른 점), 바깥에 적의 타격 자리(붉은 눈금). 짝이 없는 붉은 눈금이 걸어서 피할 타격이다. 정보는 가장 많고, 그만큼 몸 둘레가 바쁘다</p>
+<canvas class="tile big" data-kind="hard" data-v="dotted" width="1920" height="1080"></canvas>
 
-<h2>까미의 생각</h2>
+<h2>확인한 것과 못 한 것</h2>
 <ul class="notes">
-  <li><b>박</b> · C를 기본으로, 마디의 모양을 한눈에 봐야 하는 챕터(7/8, 저지 클럽)를 처음 만날 때만 A를 잠깐 겹치면 어떨까. C는 적의 예고와 같은 문법(계단으로 짙어짐)이라 새로 배울 것이 적다</li>
-  <li><b>판정</b> · 가와 나를 함께. 가는 "지금 무적인가"를, 나는 "방금 어땠나"를 말한다. 다는 박자 맞추기(C 키) 화면에 어울린다</li>
-  <li><b>하드 모드</b> · ㄴ을 권한다. 판단이 필요한 순간에 판단할 곳(예고) 위에 답이 있다. ㄱ은 몸 둘레가 너무 바빠진다</li>
-  <li><b>참고작에서 본 것</b> · 메탈: 헬싱어는 조준점 둘레로 박을 보여 주는데, 큰 싸움에서는 따라가기 어렵다는 평이 있다. 크립트 오브 더 네크로댄서는 적까지 모두 같은 박에 움직이게 하자 세계가 하나로 느껴졌다고 개발자가 말했다. 그래서 박은 화면 귀퉁이(B)보다 몸(C)에 두고, 몸과 적이 같은 박에 숨 쉬게 하는 쪽을 권한다</li>
-  <li><b>확인한 것과 못 한 것</b> · 헤드리스 브라우저로 화면을 찍어 모양과 색은 확인했다. 손맛, 그리고 1×에서 0.05초짜리 무적이 눈에 들어오는지는 확인하지 못했다</li>
+  <li><b>확인한 것</b> · 헤드리스 브라우저로 화면을 찍어 모양과 색을 봤다. 플레이어 자리를 박마다 재서 한 프레임에 튀는 곳이 없는 것도 확인했다</li>
+  <li><b>못 한 것</b> · 손맛, 그리고 1×에서 0.05초짜리 깜빡임이 눈에 들어오는지는 직접 봐 주셔야 한다</li>
+  <li><b>저스트 색</b> · 팔레트마다 녹색 계열을 하나씩 넣었다. 플레이어의 푸른 계열과 섞이지 않게 노란 쪽으로 기울였다. 위에서 팔레트를 바꿔 볼 수 있다</li>
 </ul>
+<p class="hint">이전 판(시안 셋씩 나란히 둔 것): <a href="beat-1.html">beat-1.html</a></p>
 </main>
 <script src="kit8.js"></script>
 <script>
 const { TAU, clamp, easeOut, easeInOut, col, METERS, barLen, around, crossed, clock, SPB } = K;
-const W = 640, H = 360, G = { x1: 205, x2: 435, y: 190, r: 128 };      // 땅: 가로로 누운 캡슐
+const W = 640, H = 360, G = { x1: 205, x2: 435, y: 160, r: 116 };      // 땅: 가로로 누운 캡슐. 아래 가운데는 시계 자리
 const DIST = { perfect: 85, near: 60, miss: 26 }, DASH_S = .16, NEAR_INV_S = .05;
 const GRADE_NAME = { perfect: '저스트', near: '근접', miss: '빗나감' };
 let meter = METERS['44'], equipped = METERS.jersey;
 const user = { presses: [], windows: [], until: -1 };  // 직접 누른 회피, 그동안 자동 회피는 쉰다
 
-const target = b => ({ x: 320 + 148 * Math.sin(b * .39), y: G.y + 60 * Math.sin(b * .61 + 1.3) });
+const target = b => ({ x: 320 + 148 * Math.sin(b * .39), y: G.y + 54 * Math.sin(b * .61 + 1.3) });
+let clockV = 'dial';
 function inGround(p) {                                   // 캡슐 안으로 밀어 넣는다
   const cx = clamp(p.x, G.x1, G.x2), dx = p.x - cx, dy = p.y - G.y, d = Math.hypot(dx, dy), R = G.r - 18;
   return d <= R ? p : { x: cx + dx / d * R, y: G.y + dy / d * R };
@@ -175,34 +178,6 @@ function hitAt(tile, st) {
 }
 
 /* ── 박 표시들 ── */
-function orbit(g, m, list, b, p, opt = {}) {
-  const L = barLen(m), ph = (b % L + L) % L / L, R = opt.r || 30;
-  const ang = s => -Math.PI / 2 + s / m.steps * TAU;
-  g.save();
-  g.fillStyle = g.strokeStyle = col.ink;
-  for (let s = 0; s < m.steps; s++) if ((s * m.dur) % 1 < 1e-6 && !list.includes(s)) { g.globalAlpha = .3; g.beginPath(); g.arc(p.x + Math.cos(ang(s)) * R, p.y + Math.sin(ang(s)) * R, .9, 0, TAU); g.fill(); }
-  const { prev } = around(m, b, list);
-  const prevS = ((prev / m.dur) % m.steps + m.steps) % m.steps;
-  g.strokeStyle = opt.color || col.p1; g.lineWidth = 1.2; g.globalAlpha = .55;   // 직전 회피 자리에서 지금까지의 호
-  g.beginPath(); let a0 = ang(prevS), a1 = -Math.PI / 2 + ph * TAU; if (a1 < a0) a1 += TAU; g.arc(p.x, p.y, R, a0, a1); g.stroke();
-  for (const s of list) {
-    const t = ((b - s * m.dur) % L + L) % L, pop = t < .3 ? 1 - t / .3 : 0;
-    g.fillStyle = opt.color || col.p1; g.globalAlpha = .75;
-    g.beginPath(); g.arc(p.x + Math.cos(ang(s)) * R, p.y + Math.sin(ang(s)) * R, 2 + 1.4 * pop, 0, TAU); g.fill();
-  }
-  g.globalAlpha = .9; g.fillStyle = col.ink; g.beginPath(); g.arc(p.x + Math.cos(a1) * R, p.y + Math.sin(a1) * R, 1.6, 0, TAU); g.fill();
-  g.restore();
-  return ang;
-}
-function clockHud(g, m, list, b) {
-  const x = W - 46, y = 40, R = 15, L = barLen(m), ph = (b % L + L) % L / L, ang = s => -Math.PI / 2 + s / m.steps * TAU;
-  g.save(); g.strokeStyle = g.fillStyle = col.ink;
-  g.globalAlpha = .55; g.lineWidth = 1; g.beginPath(); g.arc(x, y, R, 0, TAU); g.stroke();
-  g.globalAlpha = .12; g.beginPath(); g.moveTo(x, y); g.arc(x, y, R, -Math.PI / 2, -Math.PI / 2 + ph * TAU); g.closePath(); g.fill();
-  for (const s of list) { const t = ((b - s * m.dur) % L + L) % L; g.fillStyle = col.p1; g.globalAlpha = .85; g.beginPath(); g.arc(x + Math.cos(ang(s)) * R, y + Math.sin(ang(s)) * R, 2 + (t < .25 ? 1.2 * (1 - t / .25) : 0), 0, TAU); g.fill(); }
-  g.strokeStyle = col.ink; g.globalAlpha = .8; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(-Math.PI / 2 + ph * TAU) * (R - 3), y + Math.sin(-Math.PI / 2 + ph * TAU) * (R - 3)); g.stroke();
-  g.restore();
-}
 function approach(g, m, list, b, p, color) {
   g.save(); g.strokeStyle = color;
   for (const t of crossed(m, b, b + 1, list)) {
@@ -214,7 +189,60 @@ function approach(g, m, list, b, p, color) {
   if (since < .3) { g.globalAlpha = .85 * (1 - since / .3); g.lineWidth = 2; g.beginPath(); g.arc(p.x, p.y, 15 + 10 * easeOut(since / .3), 0, TAU); g.stroke(); }
   g.restore();
 }
-function pulseAt(m, list, b) { const { prev } = around(m, b, list); const s = b - prev; return s < .25 ? 1 - s / .25 : 0; }
+/* ── 화면 아래 가운데의 시계 ── */
+function justAt(m, dashes, t) {                         // 이 회피 자리를 저스트로 넘겼으면 그 대시
+  return dashes.find(d => d.grade === 'perfect' && Math.abs(d.t - t) < .2);
+}
+function bigClock(g, v, m, list, b, dashes) {
+  const L = barLen(m), bar = Math.floor(b / L), ph = (b - bar * L) / L;
+  const marks = [];                                     // 이번 마디의 회피 자리들
+  for (const s of list) { const t = bar * L + s * m.dur; marks.push({ s, t, u: s / m.steps }); }
+  const fill = mk => { const d = justAt(m, dashes, mk.t), age = d ? b - d.t : 9; return age >= 0 && age < 1.5 ? 1 - age / 1.5 : 0; };
+  const next = marks.find(mk => mk.t > b) || { t: (bar + 1) * L + list[0] * m.dur, u: list[0] / m.steps };
+  g.save(); g.strokeStyle = g.fillStyle = col.ink;
+  if (v === 'dial') {
+    const x = W / 2, y = 322, R = 26, ang = u => -Math.PI / 2 + u * TAU;
+    g.globalAlpha = .6; g.lineWidth = 1; g.beginPath(); g.arc(x, y, R, 0, TAU); g.stroke();
+    g.globalAlpha = .1; g.beginPath(); g.moveTo(x, y); g.arc(x, y, R, ang(0), ang(ph)); g.closePath(); g.fill();
+    for (let s = 0; s < m.steps; s++) if ((s * m.dur) % 1 < 1e-6) { g.globalAlpha = .4; g.beginPath(); g.moveTo(x + Math.cos(ang(s / m.steps)) * (R - 3), y + Math.sin(ang(s / m.steps)) * (R - 3)); g.lineTo(x + Math.cos(ang(s / m.steps)) * R, y + Math.sin(ang(s / m.steps)) * R); g.stroke(); }
+    for (const mk of marks) {
+      const px = x + Math.cos(ang(mk.u)) * R, py = y + Math.sin(ang(mk.u)) * R, f = fill(mk), isNext = mk === next;
+      g.globalAlpha = 1; g.fillStyle = col.bg; g.beginPath(); g.arc(px, py, 4, 0, TAU); g.fill();
+      g.fillStyle = f > 0 ? col.j : col.p1; g.globalAlpha = f > 0 ? .4 + .6 * f : (mk.t < b ? .35 : .9);
+      g.beginPath(); g.arc(px, py, f > 0 ? 4 : 3, 0, TAU); g.fill();
+      if (isNext) { g.strokeStyle = col.p1; g.globalAlpha = .7; g.beginPath(); g.arc(px, py, 6.5, 0, TAU); g.stroke(); }
+    }
+    g.strokeStyle = col.ink; g.globalAlpha = .85; g.lineWidth = 1.3; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(ang(ph)) * (R - 5), y + Math.sin(ang(ph)) * (R - 5)); g.stroke();
+    g.beginPath(); g.arc(x, y, 1.8, 0, TAU); g.fill();
+  } else if (v === 'arch') {
+    const x = W / 2, y = 356, R = 48, ang = u => Math.PI + u * Math.PI;
+    g.lineWidth = 1;
+    for (const [r, a] of [[R, .6], [R - 6, .22], [R - 12, .12]]) { g.globalAlpha = a; g.beginPath(); g.arc(x, y, r, Math.PI, TAU); g.stroke(); }
+    g.globalAlpha = .1; g.beginPath(); g.moveTo(x, y); g.arc(x, y, R, Math.PI, ang(ph)); g.closePath(); g.fill();
+    for (const mk of marks) {
+      const px = x + Math.cos(ang(mk.u)) * R, py = y + Math.sin(ang(mk.u)) * R, f = fill(mk);
+      g.globalAlpha = 1; g.fillStyle = col.bg; g.beginPath(); g.arc(px, py, 4, 0, TAU); g.fill();
+      g.fillStyle = f > 0 ? col.j : col.p1; g.globalAlpha = f > 0 ? .4 + .6 * f : (mk.t < b ? .35 : .9);
+      g.beginPath(); g.arc(px, py, f > 0 ? 4 : 3, 0, TAU); g.fill();
+      if (mk === next) { g.strokeStyle = col.p1; g.globalAlpha = .7; g.beginPath(); g.arc(px, py, 6.5, 0, TAU); g.stroke(); }
+    }
+    const hx = x + Math.cos(ang(ph)) * R, hy = y + Math.sin(ang(ph)) * R;
+    g.strokeStyle = col.ink; g.globalAlpha = .85; g.lineWidth = 1.3; g.beginPath(); g.moveTo(x + Math.cos(ang(ph)) * (R - 14), y + Math.sin(ang(ph)) * (R - 14)); g.lineTo(hx, hy); g.stroke();
+  } else {
+    const y = 330, x0 = 200, x1 = 440, cx = 250, pxPerBeat = 240 / (L * 1.6);
+    g.globalAlpha = .55; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+    for (let k = -1; k <= 2; k++) { const bx = cx + ((bar + k) * L - b) * pxPerBeat; if (bx > x0 && bx < x1) { g.globalAlpha = .35; g.beginPath(); g.moveTo(bx, y - 5); g.lineTo(bx, y + 5); g.stroke(); } }
+    for (let k = -1; k <= 2; k++) for (const s of list) {
+      const t = (bar + k) * L + s * m.dur, px = cx + (t - b) * pxPerBeat; if (px < x0 || px > x1) continue;
+      const edge = Math.min(1, (px - x0) / 20, (x1 - px) / 20), f = fill({ t });
+      g.globalAlpha = 1; g.fillStyle = col.bg; g.beginPath(); g.arc(px, y, 4, 0, TAU); g.fill();
+      g.fillStyle = f > 0 ? col.j : col.p1; g.globalAlpha = edge * (f > 0 ? .4 + .6 * f : (t < b ? .35 : .9));
+      g.beginPath(); g.arc(px, y, f > 0 ? 4 : 3, 0, TAU); g.fill();
+    }
+    g.strokeStyle = col.ink; g.globalAlpha = .85; g.lineWidth = 1.3; g.beginPath(); g.moveTo(cx, y - 9); g.lineTo(cx, y + 9); g.stroke();
+  }
+  g.restore();
+}
 
 /* ── 땅과 가루 ── */
 function groundPath(g) { g.beginPath(); g.arc(G.x1, G.y, G.r, Math.PI / 2, Math.PI * 1.5); g.lineTo(G.x2, G.y - G.r); g.arc(G.x2, G.y, G.r, -Math.PI / 2, Math.PI / 2); g.closePath(); }
@@ -236,7 +264,7 @@ const tiles = [...document.querySelectorAll('canvas.tile')].map(cv => {
 });
 document.querySelectorAll('.vsel').forEach(grp => {                    // 시안 고르기: 버튼 아래의 화면과 설명이 바뀐다
   const cv = grp.nextElementSibling, cap = cv.nextElementSibling, tile = tiles.find(t => t.cv === cv);
-  K.choice(grp, 'v', v => { tile.v = v; tile.memo = null; tile.hits = []; tile.lastB = clock.beat; cap.innerHTML = grp.querySelector(`[data-v="${v}"]`).dataset.cap; });
+  K.choice(grp, 'v', v => { if (grp.id === 'clockSel') clockV = v; tile.v = v; tile.memo = null; tile.hits = []; tile.lastB = clock.beat; cap.innerHTML = grp.querySelector(`[data-v="${v}"]`).dataset.cap; });
 });
 function drawTile(tile, b) {
   const { g } = tile.surf, { m, strike, dodge } = grids(tile);
@@ -256,43 +284,17 @@ function drawTile(tile, b) {
     } else K.attack(g, st.shape, st.color, pr, e, 4);
   }
   g.restore();
-  // 대시
-  for (const d of S.dashes) {
-    const age = b - d.t, ring = tile.kind === 'grade' && tile.v === 'ring' ? { perfect: 2, near: .5, miss: 0 }[d.grade] : 1;
-    K.dash(g, d.from.x, d.from.y, d.to.x, d.to.y, age, col.p1, ring, .8);
-  }
-  // 플레이어 (맞았으면 가루)
+  // 대시: 떠난 자리에 고리와 잔상이 남는다
+  for (const d of S.dashes) K.dash(g, d.from.x, d.from.y, d.to.x, d.to.y, b - d.t, col.p1, 1, .8);
+  // 플레이어 (맞았으면 가루). 무적인 동안 몸이 투명해지고 저스트 색으로 바뀐다
   const hit = tile.hits.find(h => b >= h.t && b < h.t + 2);
   const inv = invuln(S.dashes, b);
   if (hit) dust(g, hit.at, p, (b - hit.t) / 2);
-  else {
-    let pulse = 0; if (tile.v === 'clock') pulse = pulseAt(m, dodge, b);
-    const hollow = tile.kind === 'grade' && tile.v === 'body' && inv.on ? 1 : 0;
-    K.player(g, p.x, p.y, col.p1, { pulse, hollow });
-  }
-  // 박 표시
-  if (!hit) {
-    if (tile.v === 'orbit') orbit(g, m, dodge, b, p);
-    if (tile.v === 'approach' || tile.v === 'dotted' || tile.v === 'plain') approach(g, m, dodge, b, p, col.p1);
-    if (tile.v === 'ticks') { const ang = orbit(g, m, dodge, b, p, { r: 27 }); g.save(); g.strokeStyle = col.e1; g.lineWidth = 1.3; for (const s of strike) { const t = ((b - s * m.dur) % barLen(m) + barLen(m)) % barLen(m), on = dodge.includes(s); g.globalAlpha = (on ? .4 : .9) * (t < .3 ? 1 : .75); g.beginPath(); g.moveTo(p.x + Math.cos(ang(s)) * 34, p.y + Math.sin(ang(s)) * 34); g.lineTo(p.x + Math.cos(ang(s)) * 41, p.y + Math.sin(ang(s)) * 41); g.stroke(); } g.restore(); }
-    if (tile.v === 'mark') { const ang = orbit(g, m, dodge, b, p); marks(g, tile, S, b, p, ang, m); }
-  }
-  if (tile.v === 'clock') clockHud(g, m, dodge, b);
-  // 판정 이름표(시안 설명용)
+  else K.player(g, p.x, p.y, col.p1, { hollow: inv.on ? 1 : 0, just: col.j });
+  // 박: 몸 둘레의 다가오는 고리 + 화면 아래 가운데의 시계
+  if (!hit) approach(g, m, dodge, b, p, col.p1);
+  bigClock(g, tile.kind === 'beat' ? tile.v : clockV, m, dodge, b, S.dashes);
   status(g, tile, S, b);
-}
-function marks(g, tile, S, b, p, ang, m) {
-  const L = barLen(m), R = 30;
-  for (const d of S.dashes) {
-    const age = b - d.t; if (age > L) continue;
-    const near = Math.round(d.t / m.dur) * m.dur, nearest = crossed(m, d.t - 1, d.t + 1, m.dodge).reduce((a, c) => Math.abs(c.t - d.t) < Math.abs(a.t - d.t) ? c : a, { t: 1e9 });
-    const off = d.t - nearest.t, s = ((nearest.t / m.dur) % m.steps + m.steps) % m.steps, a = ang(s) + off / L * TAU * 1.8;
-    const f = 1 - age / L;
-    g.save(); g.globalAlpha = .9 * f;
-    if (d.grade === 'perfect') { g.fillStyle = col.p1; g.beginPath(); g.arc(p.x + Math.cos(a) * R, p.y + Math.sin(a) * R, 3.6, 0, TAU); g.fill(); }
-    else { g.strokeStyle = d.grade === 'near' ? col.p1 : col.ink; g.lineWidth = 1.3; g.beginPath(); g.moveTo(p.x + Math.cos(a) * (R - 6), p.y + Math.sin(a) * (R - 6)); g.lineTo(p.x + Math.cos(a) * (R + 6), p.y + Math.sin(a) * (R + 6)); g.stroke(); if (d.grade === 'miss') { g.beginPath(); g.arc(p.x + Math.cos(a) * (R + 10), p.y + Math.sin(a) * (R + 10), 2.4, 0, TAU); g.stroke(); } }
-    g.restore();
-  }
 }
 /* 방금 일어난 일을 한 줄로 (시안을 읽는 데 돕는 글. 게임에는 없다) */
 const SAY = {
