@@ -13,9 +13,13 @@ window.__rmA = window.__rmA || (function () {
   const ctx = window.__rmCtx;
   const loops = {}, shots = {}, gains = {}, sources = {};
   let t0 = null;
+  // The master bus: gentle compression so the layers move as one, with headroom left over.
   const master = ctx.createGain();
-  master.gain.value = 0.9;
-  master.connect(ctx.destination);
+  master.gain.value = 0.85;
+  const glue = ctx.createDynamicsCompressor();
+  glue.threshold.value = -16; glue.knee.value = 10; glue.ratio.value = 3; glue.attack.value = 0.012; glue.release.value = 0.22;
+  master.connect(glue);
+  glue.connect(ctx.destination);
   function buffer(b64, rate) {
     const bin = atob(b64), n = bin.length >> 1;
     const b = ctx.createBuffer(1, n, rate), d = b.getChannelData(0);

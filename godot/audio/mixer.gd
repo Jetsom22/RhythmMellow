@@ -26,6 +26,15 @@ func _ready() -> void:
 		_web = WebAudio.new()
 		_web.install()
 		backend = "browser audio thread"
+	else:
+		# The same master treatment as on the web: gentle compression, with headroom.
+		var glue := AudioEffectCompressor.new()
+		glue.threshold = -16.0
+		glue.ratio = 3.0
+		glue.attack_us = 12000.0
+		glue.release_ms = 220.0
+		AudioServer.add_bus_effect(0, glue)
+		AudioServer.set_bus_volume_db(0, -1.5)
 
 func _player(stream: AudioStream) -> AudioStreamPlayer:
 	var p := AudioStreamPlayer.new()
@@ -38,7 +47,7 @@ func _player(stream: AudioStream) -> AudioStreamPlayer:
 func bake(song: Song, id: String, bpm: float, timbre: Dictionary = {}) -> float:
 	var t0 := Time.get_ticks_usec()
 	var notes: Array = song.tick if id == "tick" else song.layers[id]
-	var buf := Synth.render(notes, song.loop_steps, bpm, 1.0, timbre)
+	var buf := Synth.render(notes, song.loop_steps, bpm, 1.0, timbre, Synth.kick_steps_of(song))
 	loop_seconds = float(buf.size()) / Synth.SR
 	if _web:
 		_web.add_loop(id, buf)
@@ -54,7 +63,7 @@ func bake(song: Song, id: String, bpm: float, timbre: Dictionary = {}) -> float:
 
 ## Change one layer's timbre while the music plays, without losing its place in the bar.
 func rebake(song: Song, id: String, bpm: float, timbre: Dictionary) -> void:
-	var buf := Synth.render(song.layers[id], song.loop_steps, bpm, 1.0, timbre)
+	var buf := Synth.render(song.layers[id], song.loop_steps, bpm, 1.0, timbre, Synth.kick_steps_of(song))
 	if _web:
 		_web.replace_loop(id, buf)
 	else:

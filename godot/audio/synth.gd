@@ -18,37 +18,58 @@ static func mtof(m: float) -> float:
 
 ## Render notes into one loop. Tails that run past the end wrap to the start, so the loop is seamless.
 ## `timbre` picks the bass and lead presets: { "bass": index, "lead": index }.
-static func render(notes: Array, loop_steps: int, bpm: float, gain: float = 1.0, timbre: Dictionary = {}) -> PackedFloat32Array:
+## `kick_steps` are the loop steps where the kick lands (the bass ducks under them).
+## With `mixed` off the voices are returned raw, as the synths made them.
+static func render(notes: Array, loop_steps: int, bpm: float, gain: float = 1.0, timbre: Dictionary = {}, kick_steps: Array = [], mixed: bool = true) -> PackedFloat32Array:
 	var sps := 60.0 / bpm / 4.0
 	var total := int(round(loop_steps * sps * SR))
-	var buf := PackedFloat32Array()
-	buf.resize(total)
 	var noise := RandomNumberGenerator.new()
 	noise.seed = 1234
 	var bass_kind := int(timbre.get("bass", 0))
 	var lead_kind := int(timbre.get("lead", 0))
-	var pitched := ""
+	# One buffer per voice, so each can go through its own mixing chain.
+	var voices := {}
 	for n in notes:
+		var voice: String = n["voice"]
+		if not voices.has(voice):
+			var fresh := PackedFloat32Array()
+			fresh.resize(total)
+			voices[voice] = fresh
+		var buf: PackedFloat32Array = voices[voice]
 		var at := int(round(float(n["step"]) * sps * SR))
 		var dur: float = float(n["len"]) * sps
 		var vel: float = float(n["vel"]) * gain
-		match n["voice"]:
+		match voice:
 			"kick": _kick(buf, at, vel)
 			"snare": _snare(buf, at, vel, noise)
 			"hat": _hat(buf, at, vel, noise)
-			"bass":
-				_bass(buf, at, float(n["midi"]), dur, vel, bass_kind)
-				pitched = "bass"
-			"lead":
-				_lead(buf, at, float(n["midi"]), dur, vel, lead_kind)
-				pitched = "lead"
+			"bass": _bass(buf, at, float(n["midi"]), dur, vel, bass_kind)
+			"lead": _lead(buf, at, float(n["midi"]) + (Mix.octave_of("lead") if mixed else 0.0), dur, vel, lead_kind)
 			"pad": _pad(buf, at, float(n["midi"]), dur, vel)
 			"tick": _tone(buf, at, 2000.0, 0.02, vel * 0.5)
-	if pitched == "lead":
-		_echo(buf, int(round(3.0 * sps * SR)), 0.34, 0.28)     # a dotted-eighth echo, baked into the loop
-	if pitched != "":
-		_level(buf, 0.62 if pitched == "bass" else 0.5)
-	return buf
+		voices[voice] = buf
+	var hits: Array = []
+	for st in kick_steps:
+		hits.append(int(round(float(st) * sps * SR)))
+	var out := PackedFloat32Array()
+	out.resize(total)
+	for voice in voices:
+		var buf: PackedFloat32Array = voices[voice]
+		if voice == "lead":
+			_echo(buf, int(round(3.0 * sps * SR)), 0.34, 0.28)     # a dotted-eighth echo, baked into the loop
+		if mixed:
+			Mix.process(buf, voice, SR, hits)
+		for i in total:
+			out[i] += buf[i]
+	return out
+
+## The loop steps where a song's kick lands.
+static func kick_steps_of(song: Song) -> Array:
+	var out: Array = []
+	for n in song.layers["drum"]:
+		if n["voice"] == "kick":
+			out.append(n["step"])
+	return out
 
 ## Band-limiting correction for a naive saw or pulse edge (PolyBLEP). Without it the edges alias into a harsh buzz.
 static func _blep(t: float, dt: float) -> float:
