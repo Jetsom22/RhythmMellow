@@ -64,20 +64,21 @@ function hurt(s: GameState, ev: GameEvent[]): void {
   ev.push({ type: 'hurt', hp: p.hp });
   if (p.hp > 0) return;
   // Back to the door; the fight starts over.
-  const entry = s.world.rooms.boss!.entry;
+  const entry = s.world.rooms.boss!.entry, from = { x: p.x, y: p.y };
   p.hp = s.tun.playerHp;
   p.x = entry.x;
   p.y = entry.y;
   p.dash = null;
+  p.reform = { from, until: s.step + s.tun.reformSteps };
   s.boss = null;
   s.leadOwner = null;
-  ev.push({ type: 'death' });
+  ev.push({ type: 'death', from, to: { x: entry.x, y: entry.y } });
 }
 
 /** A hit lands on the beat, but the player still has the late half of the judgement window to answer it. */
 function land(s: GameState, shape: Shape, origin: Pt, hitAbs: number, grid: BeatGrid): void {
   const b = s.boss!, p = s.player;
-  if (s.flags.god || !hitTest(shape, origin, b, p.x, p.y) || p.iframe > 0) return;
+  if (s.flags.god || p.reform || !hitTest(shape, origin, b, p.x, p.y) || p.iframe > 0) return;
   b.pending.push({ hitAbs, due: stepToTime(grid, hitAbs) + (s.tun.nearMs + Math.max(0, s.tun.inputOffsetMs)) / 1000 + 0.02 });
 }
 
@@ -98,7 +99,7 @@ export function stepBoss(s: GameState, absStep: number, grid: BeatGrid, ev: Game
   const p = s.player;
   let b = s.boss;
   if (!b) {
-    if (absStep % 16 !== 0 || roomAt(s.world, p.x, p.y) !== 'boss') return;
+    if (absStep % 16 !== 0 || p.reform || roomAt(s.world, p.x, p.y) !== 'boss') return;
     b = begin(s, absStep, ev);
   }
   if (b.defeated) return;

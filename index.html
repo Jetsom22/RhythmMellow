@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RhythmMellow</title>
 <style>
-html,body{margin:0;height:100%;background:#101114;color:#e8e6df;font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+html,body{margin:0;height:100%;background:#f1e9d8;color:#232524;font:14px/1.4 system-ui,sans-serif;overflow:hidden}
 canvas{display:block;width:100vw;height:100vh}
-#overlay{position:fixed;inset:0;display:grid;place-items:center;background:#101114}
+#overlay{position:fixed;inset:0;display:grid;place-items:center;background:#f1e9d8}
 #overlay>div{display:grid;gap:12px;justify-items:center}
-button{font:inherit;padding:12px 28px;background:#e8e6df;color:#101114;border:0;border-radius:2px;cursor:pointer}
+button{font:inherit;padding:12px 28px;background:#232524;color:#f1e9d8;border:0;border-radius:999px;cursor:pointer}
 #overlay .keys{color:#6b6a66;text-align:center;margin:8px 0 0}
-#panel{position:fixed;right:0;top:0;bottom:0;width:260px;overflow:auto;background:rgba(12,13,16,.94);padding:12px;box-sizing:border-box}
+#panel{position:fixed;right:0;top:0;bottom:0;width:260px;overflow:auto;color:#e8e6df;background:rgba(12,13,16,.94);padding:12px;box-sizing:border-box}
 #panel .grid{display:grid;grid-template-columns:1fr 84px;gap:4px 8px;align-items:center;font:12px ui-monospace,monospace}
 #panel input{width:100%;box-sizing:border-box;background:#1b1d22;color:#e8e6df;border:1px solid #2c2f38;padding:3px 4px;font:inherit}
 #panel .row{display:flex;gap:8px;margin-top:12px}
@@ -21,7 +21,7 @@ button{font:inherit;padding:12px 28px;background:#e8e6df;color:#101114;border:0;
 #calibrate .dots i{width:14px;height:14px;background:#2c2f38}
 #calibrate .dots i.on{background:#e8e6df}
 #calibrate p{color:#8a8880;margin:0}
-button.ghost{background:none;color:#8a8880;padding:6px 12px}
+button.ghost{background:none;color:#6b6a66;padding:6px 12px}
 </style>
 </head>
 <body>

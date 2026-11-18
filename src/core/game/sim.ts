@@ -26,7 +26,8 @@ export function createGame(seed: number, tun: Tunables, world: World = buildWorl
 }
 
 function advance(s: GameState, input: Input, dt: number, t: number, stepF: number, ev: GameEvent[]): void {
-  movePlayer(s, input, dt, (x, y) => isSolid(s.world, x, y, s.doorOpen));
+  // Scattered players do not move: the timers still run.
+  movePlayer(s, s.player.reform ? { ...input, moveX: 0, moveY: 0 } : input, dt, (x, y) => isSolid(s.world, x, y, s.doorOpen));
   stepGimmicks(s, stepF, ev);
   updateBoss(s, t, ev);
 }
@@ -43,8 +44,9 @@ function targetsOf(s: GameState): Target[] {
 }
 
 function onStep(s: GameState, absStep: number, grid: BeatGrid, ev: GameEvent[]): void {
+  if (s.player.reform && absStep >= s.player.reform.until) s.player.reform = null;
   stepBoss(s, absStep, grid, ev);
-  ev.push(...s.attack.onStep(s, absStep, targetsOf(s)));
+  if (!s.player.reform) ev.push(...s.attack.onStep(s, absStep, targetsOf(s)));
 }
 
 /**

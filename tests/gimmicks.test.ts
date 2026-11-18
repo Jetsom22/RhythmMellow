@@ -90,7 +90,8 @@ describe('failing inside a room', () => {
     tick(s);                   // entering the room sets the respawn point
     const ev: ReturnType<typeof tick> = [];
     while (s.time < 1.5) ev.push(...tick(s));   // step 11 (missing platform) passes
-    expect(ev.filter(e => e.type === 'respawn')).toEqual([{ type: 'respawn', room: 'hat' }]);
+    expect(ev.filter(e => e.type === 'respawn')).toHaveLength(1);
+    expect(ev.find(e => e.type === 'respawn')).toMatchObject({ room: 'hat' });
     expect({ x: s.player.x, y: s.player.y }).toEqual(w.rooms.hat!.entry);
     expect(s.player.hp).toBe(s.tun.playerHp);
   });
@@ -103,5 +104,49 @@ describe('failing inside a room', () => {
     while (s.time < 1.2) ev.push(...stepGame(s, idle({ moveX: -1 }), s.time + 0.005, GRID));
     expect(ev.some(e => e.type === 'respawn')).toBe(false);
     expect(s.player.x).toBeLessThan(g.x - 16);
+  });
+});
+
+describe('re-forming after a fall', () => {
+  // Falling scatters the player; it takes two beats (8 steps) to come back together.
+  const fallen = (): GameState => {
+    const s = game(1.0);
+    const p = centre('p');
+    s.player.x = p.x; s.player.y = p.y;
+    tick(s);
+    while (!s.player.reform) tick(s);
+    return s;
+  };
+  it('reports where the player fell from and where it re-forms', () => {
+    const s = game(1.0);
+    const p = centre('p');
+    s.player.x = p.x; s.player.y = p.y;
+    const ev: ReturnType<typeof tick> = [];
+    while (!s.player.reform) ev.push(...tick(s));
+    const e = ev.find(x => x.type === 'respawn')!;
+    expect(e).toMatchObject({ type: 'respawn', room: 'hat', from: { x: p.x, y: p.y }, to: w.rooms.hat!.entry });
+    expect(s.player.reform!.until - s.step).toBe(8);
+  });
+  it('ignores movement and dodging until it has re-formed, then obeys again', () => {
+    const s = fallen();
+    const home = { x: s.player.x, y: s.player.y };
+    const until = s.player.reform!.until;
+    while (s.step < until - 1) {
+      const ev = stepGame(s, idle({ moveY: 1, dodgeAt: s.time }), s.time + 0.01, GRID);
+      expect(ev.filter(e => e.type === 'dodge')).toEqual([]);
+    }
+    expect({ x: s.player.x, y: s.player.y }).toEqual(home);
+    while (s.step < until) tick(s);
+    expect(s.player.reform).toBeNull();
+    for (let i = 0; i < 10; i++) stepGame(s, idle({ moveY: 1 }), s.time + 0.01, GRID);
+    expect(s.player.y).toBeGreaterThan(home.y + 10);
+  });
+  it('does not attack while scattered', () => {
+    const s = fallen();
+    s.player.owned = ['drum']; s.player.equipped = 'drum';
+    const ev: ReturnType<typeof tick> = [];
+    const until = s.player.reform!.until;
+    while (s.step < until) ev.push(...tick(s));
+    expect(ev.filter(e => e.type === 'attack')).toEqual([]);
   });
 });

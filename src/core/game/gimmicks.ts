@@ -40,15 +40,18 @@ export function gimmickDeadly(w: World, song: Song, stepF: number, x: number, y:
 function sendBack(s: GameState, ev: GameEvent[]): void {
   const p = s.player;
   const room = roomAt(s.world, p.x, p.y);
+  const from = { x: p.x, y: p.y };
   p.x = p.respawn.x;
   p.y = p.respawn.y;
   p.dash = null;
-  ev.push({ type: 'respawn', room: room ?? '' });
+  p.reform = { from, until: s.step + s.tun.reformSteps };
+  ev.push({ type: 'respawn', room: room ?? '', from, to: { x: p.x, y: p.y } });
 }
 
 /** Room hazards, pickups and the boss door. Runs after every movement slice. */
 export function stepGimmicks(s: GameState, stepF: number, ev: GameEvent[]): void {
   const p = s.player, w = s.world;
+  if (p.reform) return;     // scattered: nothing on the floor can touch the player
   const room = roomAt(w, p.x, p.y);
   if (room && room !== 'boss') {
     const entry = w.rooms[room]!.entry;

@@ -28,6 +28,8 @@ export interface Player {
   iframe: number;
   cooldown: number;
   respawn: { x: number; y: number };
+  /** Set while the player is scattered: no input, no hazards, no attacks until step `until`. */
+  reform: { from: { x: number; y: number }; until: number } | null;
 }
 
 export interface Room { x: number; y: number; w: number; h: number; entry: { x: number; y: number } }
@@ -41,9 +43,9 @@ export interface World {
 export type GameEvent =
   | { type: 'dodge'; grade: Grade; offsetMs: number; beat: number }
   | { type: 'collect'; inst: Instrument }
-  | { type: 'respawn'; room: string }
+  | { type: 'respawn'; room: string; from: { x: number; y: number }; to: { x: number; y: number } }
   | { type: 'hurt'; hp: number }
-  | { type: 'death' }
+  | { type: 'death'; from: { x: number; y: number }; to: { x: number; y: number } }
   | { type: 'attack'; inst: Instrument; x: number; y: number; tx: number; ty: number; hit: boolean }
   | { type: 'doorOpen' }
   | { type: 'bossStart' }

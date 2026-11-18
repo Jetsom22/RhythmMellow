@@ -11,6 +11,8 @@ export interface Tunables {
   rangeDrum: number; rangeHat: number; rangeBass: number;
   hatGapStart: number; hatGapLen: number;
   harmonyMax: number; muffleBars: number;
+  /** 16th steps the player stays scattered after a fall or a death (2 beats). */
+  reformSteps: number;
 }
 
 export function defaultTunables(): Tunables {
@@ -26,5 +28,6 @@ export function defaultTunables(): Tunables {
     rangeDrum: 70, rangeHat: 400, rangeBass: 220,
     hatGapStart: 0.68, hatGapLen: 0.2,
     harmonyMax: 3, muffleBars: 2,
+    reformSteps: 8,
   };
 }

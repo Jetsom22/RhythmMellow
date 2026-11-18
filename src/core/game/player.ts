@@ -5,7 +5,7 @@ import { GameEvent, GameState, Input, Instrument, Player } from './types';
 export type SolidFn = (x: number, y: number) => boolean;
 
 export function createPlayer(x: number, y: number, hp: number): Player {
-  return { x, y, faceX: 1, faceY: 0, hp, owned: [], equipped: null, dash: null, iframe: 0, cooldown: 0, respawn: { x, y } };
+  return { x, y, faceX: 1, faceY: 0, hp, owned: [], equipped: null, dash: null, iframe: 0, cooldown: 0, respawn: { x, y }, reform: null };
 }
 
 function blocked(solid: SolidFn, x: number, y: number, r: number): boolean {
@@ -41,7 +41,7 @@ export function movePlayer(s: GameState, input: Input, dt: number, solid: SolidF
 /** A dodge always happens; its grade decides how far and how safe. */
 export function tryDodge(s: GameState, input: Input, grid: BeatGrid): GameEvent | null {
   const p = s.player, tun = s.tun;
-  if (input.dodgeAt === null || p.cooldown > 0 || p.dash) return null;
+  if (input.dodgeAt === null || p.cooldown > 0 || p.dash || p.reform) return null;
   const j = judgeDodge(grid, input.dodgeAt, tun);
   const len = Math.hypot(input.moveX, input.moveY);
   const dx = len > 0 ? input.moveX / len : p.faceX;

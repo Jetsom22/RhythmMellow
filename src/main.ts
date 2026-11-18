@@ -20,6 +20,9 @@ const state = createGame(seed, tun);
 const engine = new AudioEngine(state.song, tun);
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const renderer = new Renderer(canvas);
+// Palettes are swapped per genre or stage group; for now the address can pick one.
+renderer.setPalette(params.get('palette'));
+document.body.style.background = renderer.pal.bg;
 const kb = new Keyboard(window, () => engine.now());
 
 if (params.get('skip') === 'boss') {

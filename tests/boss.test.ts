@@ -131,7 +131,7 @@ describe('boss fight', () => {
     s.player.hp = 1;
     const hit = pat('gi-solo').attacks[0];
     const ev = runTo(s, t0 + hit.hitStep * STEP + 0.3);
-    expect(ev).toContainEqual({ type: 'death' });
+    expect(ev.some(e => e.type === 'death')).toBe(true);
     expect(s.boss).toBeNull();
     expect(s.leadOwner).toBeNull();
     expect(s.player.hp).toBe(tun.playerHp);
@@ -236,5 +236,20 @@ describe('aiming inside the arena', () => {
     expect(ev.length).toBeGreaterThan(0);
     expect(ev.every(e => e.type === 'attack' && e.hit)).toBe(true);
     expect(b.hp).toBeLessThan(hp);
+  });
+});
+
+describe('re-forming after death', () => {
+  it('scatters for two beats at the door and cannot start the fight or be hit meanwhile', () => {
+    const { s, t0 } = fight();
+    s.player.hp = 1;
+    const hit = pat('gi-solo').attacks[0];
+    const ev = runTo(s, t0 + hit.hitStep * STEP + 0.3);
+    const death = ev.find(e => e.type === 'death')!;
+    expect(death).toMatchObject({ type: 'death', to: s.world.rooms.boss!.entry });
+    expect(s.player.reform).not.toBeNull();
+    expect(s.player.reform!.until - s.step).toBeGreaterThan(4);
+    runTo(s, s.time + 8 * STEP + 0.05);
+    expect(s.player.reform).toBeNull();
   });
 });
