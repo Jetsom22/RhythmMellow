@@ -5,7 +5,7 @@
 ## 볼 것
 
 - 게임: https://jetsom22.github.io/RhythmMellow/ (`?skip=boss` 보스 문 앞, `?god=1` 맞지 않음, `?palette=mid|navy|ochre`)
-- 시안의 역사: https://jetsom22.github.io/RhythmMellow/concepts/ — 지금 것이 8번째(`beat.html` 박과 판정, `map.html` 맵의 문법; 공용 `kit8.js`, `round8.css`). `round1.html` ~ `round7.html` 이 이전 판이다. 기획자가 무엇을 버렸는지 보려면 순서대로 훑는다.
+- 시안의 역사: https://jetsom22.github.io/RhythmMellow/concepts/ — 지금 것이 8번째(`beat.html` 박과 판정, `map.html` 맵의 문법, `organic.html` 곡선 덩어리; 공용 `kit8.js`, `round8.css`). `round1.html` ~ `round7.html` 이 이전 판이다. 기획자가 무엇을 버렸는지 보려면 순서대로 훑는다.
 - 코드: `src/render/renderer.ts`(그리기 전부), `src/render/theme.ts`(팔레트), `public/concepts/index.html`(움직이는 시안)
 
 ## 결정 (기획자가 정한 것. 바꾸지 않는다)
@@ -76,7 +76,7 @@
 - HUD. 담을 것: 스테이지 목숨, 든 악기, 얻은 파츠, 세이브의 순간. 박 표시와 자리를 나눈다.
 - 타이틀, 메뉴, 글꼴. 시안은 Jost를 썼다.
 - 보스와 수호자의 생김새. 지금 보스는 원반에 사분원 하나.
-- 유기적인 곡선 덩어리(추가 레퍼런스에 있던 것)를 쓸지. 레퍼런스 이미지는 기획자에게서 받기로 했다.
+- 유기적인 곡선 덩어리(`docs/art/references/b1-organic-blobs.webp`)를 쓸지. 시안 8의 `organic.html` 에서 땅의 모양과 보스·수호자의 몸 두 자리에 그려 봤다.
 
 ## 시스템 쪽에서 받아 쓰는 것
 
