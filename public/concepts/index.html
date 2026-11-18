@@ -3,184 +3,162 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RhythmMellow 비주얼 시안 2</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&display=swap">
+<title>RhythmMellow 비주얼 시안 3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
 <style>
-:root{--paper:#f6f5f1;--ink:#3b3936;--mute:#8d8a84;--hair:#d9d6cf}
+body{--bg:#f1e9d8;--ink:#232524;--a:#b8371a;--a2:#86190f;--b:#cf9535;--c:#7e8686;--soft:#e6d9bf;--line:#232524;--chrome:#232524}
+body[data-p="mid"]{--bg:#efe3c2;--ink:#0d0d12;--a:#e0603a;--a2:#b9452a;--b:#d9a441;--c:#8fb0a6;--soft:#e3d5a9;--line:#0d0d12;--chrome:#0d0d12}
+body[data-p="navy"]{--bg:#12303f;--ink:#f3ede0;--a:#f7931e;--a2:#d9701a;--b:#f3ede0;--c:#3fa9f5;--soft:#1b4051;--line:#8fc8f0;--chrome:#f3ede0}
+body[data-p="ochre"]{--bg:#ead7ad;--ink:#1a1a1a;--a:#1a1a1a;--a2:#3a3a3a;--b:#b9791c;--c:#ce9535;--soft:#dcc48f;--line:#1a1a1a;--chrome:#1a1a1a}
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 "Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-main{max-width:1280px;margin:0 auto;padding:48px 24px 96px}
-h1{font:500 30px/1.1 "Barlow Condensed","Apple SD Gothic Neo",sans-serif;letter-spacing:.02em;margin:0 0 10px}
-h2{font:500 24px/1.1 "Barlow Condensed","Apple SD Gothic Neo",sans-serif;letter-spacing:.02em;margin:0}
-.lede{color:var(--mute);margin:0;max-width:64ch}
-.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px 36px;margin:22px 0 0;padding:0;list-style:none;font-size:13.5px}
-.read b{font-weight:600}
-section{border-top:1px solid var(--ink);margin-top:56px;padding-top:16px}
-.head{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
-.head span{font:500 13px "Barlow Condensed",sans-serif;letter-spacing:.14em;color:var(--mute)}
-.why{margin:8px 0 18px;max-width:72ch}
-.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+body{margin:0;background:var(--bg);color:var(--chrome);font:15px/1.65 "Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:background .25s,color .25s}
+main{max-width:1240px;margin:0 auto;padding:48px 24px 96px}
+h1{font:300 34px/1.1 Jost,"Apple SD Gothic Neo",sans-serif;letter-spacing:.04em;margin:0 0 10px}
+h2{font:400 13px Jost,sans-serif;letter-spacing:.22em;margin:44px 0 12px;opacity:.75}
+.lede{margin:0;max-width:66ch;opacity:.8}
+.pal{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;position:sticky;top:0;padding:10px 0;background:var(--bg);z-index:2;transition:background .25s}
+.pal button{font:400 12px Jost,sans-serif;letter-spacing:.16em;padding:8px 14px;border:1px solid var(--chrome);background:none;color:var(--chrome);cursor:pointer;border-radius:999px;opacity:.6}
+.pal button[aria-pressed="true"]{background:var(--chrome);color:var(--bg);opacity:1}
 figure{margin:0}
 svg{display:block;width:100%;height:auto}
-figcaption{font-size:12px;color:var(--mute);margin-top:8px}
-.sw{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font:500 12px "Barlow Condensed",sans-serif;letter-spacing:.1em;color:var(--mute)}
-.sw i{display:inline-block;width:28px;height:10px;margin-right:6px;vertical-align:0}
-.notes{margin:12px 0 0;padding:0;list-style:none;font-size:13.5px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px 36px}
-.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
-@media(max-width:700px){.strip{grid-template-columns:repeat(2,1fr)}}
+.shot{outline:1px solid color-mix(in srgb,var(--chrome) 18%,transparent)}
+figcaption{font-size:12.5px;margin-top:8px;opacity:.7}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px}
+.voc{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:820px){.voc{grid-template-columns:repeat(2,1fr)}}
+.notes{margin:16px 0 0;padding:0;list-style:none;font-size:13.5px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px 36px}
 a{color:inherit}
-@keyframes beat{0%{transform:scale(1.14)}40%,100%{transform:scale(1)}}
-@keyframes fade{0%{opacity:1}45%,100%{opacity:.72}}
+@keyframes beat{0%{transform:scale(1.12)}40%,100%{transform:scale(1)}}
 .beat{animation:beat .545s cubic-bezier(.2,.7,.2,1) infinite;transform-box:fill-box;transform-origin:center}
-.fade{animation:fade .545s linear infinite}
-@media (prefers-reduced-motion:reduce){.beat,.fade{animation:none}}
+@media (prefers-reduced-motion:reduce){.beat{animation:none}}
 </style>
 </head>
-<body>
+<body data-p="rust">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".07"/></linearGradient>
+  <linearGradient id="sheenH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".05"/></linearGradient>
+</defs></svg>
 <main>
-<h1>비주얼 시안 2 — 판과 면</h1>
-<p class="lede">B(오버프린트)와 D(색면) 계열로 좁히고, 색을 가라앉히고 선과 두께를 다시 잡았다. 게임 빌드에는 반영하지 않았다. <a href="round1.html">이전 시안</a></p>
-<ul class="read">
-  <li><b>글리피카에서 읽은 것</b> · 순백이 아닌 따뜻한 종이색, 가장자리로 아주 옅게 어두워지는 바탕</li>
-  <li><b>선</b> · 굵은 테두리가 없다. 1px 실선과 점선, 그리고 작은 채운 도형 둘뿐</li>
-  <li><b>색</b> · 검정 대신 따뜻한 짙은 회색. 강조색은 채도를 낮춘 한두 가지</li>
-  <li><b>크기</b> · 요소가 작고 여백이 넓다. 글자는 좁은 대문자체로 작게</li>
-</ul>
+<h1>비주얼 시안 3 — 기하 추상</h1>
+<p class="lede">CMY를 버리고 레퍼런스의 어휘로 처음부터 다시 그렸다. 굵은 원반, 가는 평행선, 동심 아치. 면 안에는 아주 얕은 그라데이션만 둔다. 아래 버튼으로 같은 화면의 팔레트를 바꿔 볼 수 있다. <a href="round2.html">이전 시안</a></p>
+<div class="pal" role="group" aria-label="팔레트">
+  <button data-p="rust" aria-pressed="true">RUST</button>
+  <button data-p="mid" aria-pressed="false">MID-CENTURY</button>
+  <button data-p="navy" aria-pressed="false">NAVY</button>
+  <button data-p="ochre" aria-pressed="false">OCHRE</button>
+</div>
 <div id="out"></div>
 </main>
 <script>
-const INK = '#3b3936';
-let uid = 0;
-const paper = id => `<defs>
-  <radialGradient id="${id}p" cx="50%" cy="46%" r="75%"><stop offset="0" stop-color="#fbfaf7"/><stop offset="1" stop-color="#ebe9e2"/></radialGradient>
-</defs><rect width="960" height="540" fill="url(#${id}p)"/>`;
-const frame = inner => { const id = 'g' + (uid++); return `<svg viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img">${paper(id)}${inner(id)}</svg>`; };
-const mul = 'style="mix-blend-mode:multiply"';
-const hair = (d, o = .55, dash = '') => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="1" opacity="${o}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
-const circ = (x, y, r, o = .4, dash = '') => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${INK}" stroke-width="1" opacity="${o}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
-const label = (x, y, t, anchor = 'start', o = .7, size = 13) => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Barlow Condensed, sans-serif" font-size="${size}" font-weight="500" letter-spacing="1.6" fill="${INK}" opacity="${o}">${t}</text>`;
-const poly = (cx, cy, r, n, rot = -90) => Array.from({ length: n }, (_, i) => { const a = (rot + 360 / n * i) * Math.PI / 180; return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`; }).join(' ');
-const arcPath = (cx, cy, r, f) => { const a = -Math.PI / 2 + Math.PI * 2 * f; return `M ${cx} ${cy - r} A ${r} ${r} 0 ${f > .5 ? 1 : 0} 1 ${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`; };
-const annulus = (cx, cy, r1, r2) => `M ${cx - r2} ${cy} a ${r2} ${r2} 0 1 0 ${2 * r2} 0 a ${r2} ${r2} 0 1 0 ${-2 * r2} 0 M ${cx - r1} ${cy} a ${r1} ${r1} 0 1 1 ${2 * r1} 0 a ${r1} ${r1} 0 1 1 ${-2 * r1} 0`;
-const band = (cx, cy, ang, w, len) => { const a = ang * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), h = w / 2; return `${cx + s * h},${cy - c * h} ${cx + c * len + s * h},${cy + s * len - c * h} ${cx + c * len - s * h},${cy + s * len + c * h} ${cx - s * h},${cy + c * h}`; };
+const V = n => `var(--${n})`;
+const sv = (w, h, inner, cls = 'shot') => `<svg class="${cls}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img"><rect width="${w}" height="${h}" fill="${V('bg')}"/>${inner}</svg>`;
+/* 면: 색 + 얕은 그라데이션 한 겹 */
+const plane = (d, col, g = 'sheen') => `<path d="${d}" fill="${V(col)}"/><path d="${d}" fill="url(#${g})"/>`;
+const circleD = (x, y, r) => `M ${x - r} ${y} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0 Z`;
+const disc = (x, y, r, col, cls = '') => `<g ${cls ? `class="${cls}"` : ''}>${plane(circleD(x, y, r), col)}</g>`;
+const ln = (d, col = 'line', w = 1.25, o = 1, extra = '') => `<path d="${d}" fill="none" stroke="${V(col)}" stroke-width="${w}" opacity="${o}" ${extra}/>`;
+const ring = (x, y, r, col = 'line', w = 1.25, o = 1) => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${V(col)}" stroke-width="${w}" opacity="${o}"/>`;
+const annD = (x, y, r1, r2) => `M ${x - r2} ${y} a ${r2} ${r2} 0 1 0 ${2 * r2} 0 a ${r2} ${r2} 0 1 0 ${-2 * r2} 0 Z M ${x - r1} ${y} a ${r1} ${r1} 0 1 1 ${2 * r1} 0 a ${r1} ${r1} 0 1 1 ${-2 * r1} 0 Z`;
+const txt = (x, y, t, size = 12, anchor = 'start', o = .8, ls = 3, w = 400) => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Jost, sans-serif" font-size="${size}" font-weight="${w}" letter-spacing="${ls}" fill="${V('ink')}" opacity="${o}">${t}</text>`;
+/* 아치 동심선: 아래가 열린 아치 n겹 */
+const arches = (cx, top, bottom, r0, n, gap, col, w) => { const spring = top + r0 + (n - 1) * gap; return Array.from({ length: n }, (_, k) => { const r = r0 + k * gap; return ln(`M ${cx - r} ${bottom} V ${spring} A ${r} ${r} 0 0 1 ${cx + r} ${spring} V ${bottom}`, col, w); }).join(''); };
+const archD = (cx, top, bottom, r) => `M ${cx - r} ${bottom} V ${top + r} A ${r} ${r} 0 0 1 ${cx + r} ${top + r} V ${bottom} Z`;
+const band = (cx, cy, ang, w, l0, l1) => { const a = ang * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), h = w / 2; return `M ${cx + c * l0 + s * h} ${cy + s * l0 - c * h} L ${cx + c * l1 + s * h} ${cy + s * l1 - c * h} L ${cx + c * l1 - s * h} ${cy + s * l1 + c * h} L ${cx + c * l0 - s * h} ${cy + s * l0 + c * h} Z`; };
+const rays = (cx, cy, ang, n, gap, l0, l1, col, w) => Array.from({ length: n }, (_, k) => { const a = ang * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), off = (k - (n - 1) / 2) * gap; return ln(`M ${cx + c * l0 + s * off} ${cy + s * l0 - c * off} L ${cx + c * l1 + s * off} ${cy + s * l1 - c * off}`, col, w); }).join('');
 
-const player = (x, y) => `<circle cx="${x}" cy="${y}" r="8" fill="#fbfaf7" stroke="${INK}" stroke-width="1.5"/><circle class="beat" cx="${x}" cy="${y}" r="3.2" fill="${INK}"/>`;
-const hud = (P, owned, hp = 3) => `<g transform="translate(480,502)">
-  ${[0, 1, 2].map(i => `<rect x="${-58 + i * 14}" y="-4" width="9" height="9" fill="${i < hp ? INK : 'none'}" stroke="${INK}" stroke-width="1" opacity="${i < hp ? .9 : .4}"/>`).join('')}
-  ${hair('M -8 -8 V 9', .3)}
-  ${[P.m, P.y, P.c].map((c, i) => `<rect x="${6 + i * 18}" y="-6" width="13" height="13" fill="${i < owned ? c : 'none'}" stroke="${INK}" stroke-width="1" opacity="${i < owned ? 1 : .35}"/>`).join('')}
-  ${owned ? `<path d="M 6 12 h 13" stroke="${INK}" stroke-width="1.5"/>` : ''}
+const hud = (owned, hp) => `<g transform="translate(480,496)">
+  ${[0, 1, 2].map(i => i < hp ? `<circle cx="${-64 + i * 16}" cy="0" r="4.5" fill="${V('ink')}"/>` : ring(-64 + i * 16, 0, 4.5, 'ink', 1.25, .5)).join('')}
+  ${ln('M -14 -9 V 9', 'ink', 1, .35)}
+  <g opacity="${owned > 0 ? 1 : .35}">${owned > 0 ? `<circle cx="10" cy="0" r="7" fill="${V('a')}"/>` : ring(10, 0, 7, 'ink')}</g>
+  <g opacity="${owned > 1 ? 1 : .35}">${[0, 1, 2, 3].map(k => ln(`M ${27 + k * 4.4} -7 V 7`, owned > 1 ? 'b' : 'ink', 1.6)).join('')}</g>
+  <g opacity="${owned > 2 ? 1 : .35}">${[7, 4.2, 1.4].map(r => ln(`M ${58 - r} 7 V 0 A ${r} ${r} 0 0 1 ${58 + r} 0 V 7`, owned > 2 ? 'c' : 'ink', 1.6)).join('')}</g>
 </g>`;
-const beats = (x, y, on) => [0, 1, 2, 3].map(i => `<rect x="${x + i * 16}" y="${y}" width="10" height="${i === on ? 4 : 1}" fill="${INK}" opacity="${i === on ? .9 : .45}"/>`).join('');
+const player = (x, y) => `${ring(x, y, 15, 'ink', 1, .55)}<circle class="beat" cx="${x}" cy="${y}" r="8" fill="${V('ink')}"/>`;
 
-/* ── 방: 드럼 ── mode: wash | field | line */
-function room(P, mode) {
-  return frame(() => {
-    const X0 = 150, X1 = 810, Y0 = 210, H = 120, Y1 = Y0 + H;
-    const floor = mode === 'wash' ? P.mt : mode === 'field' ? P.m : 'none';
-    const gateFill = mode === 'field' ? INK : P.m;
-    const gates = [690, 610, 530, 450];
-    let s = '';
-    // 가운데 방(오른쪽으로 잘림)과 다른 방의 기척
-    s += `<rect x="810" y="130" width="200" height="280" fill="${mode === 'line' ? 'none' : '#e6e3dc'}" ${mul} opacity=".8"/>`;
-    if (mode === 'line') s += hair('M 960 130 H 810 V 210 M 810 330 V 410 H 960', .5);
-    // 방 바닥: 틈(낭떠러지)에서 끊긴 두 판
-    if (mode !== 'line') s += `<rect x="${X0}" y="${Y0}" width="150" height="${H}" fill="${floor}" ${mul}/><rect x="350" y="${Y0}" width="${X1 - 350}" height="${H}" fill="${floor}" ${mul}/>`;
-    else s += hair(`M 300 ${Y0} H ${X0} V ${Y1} H 300 M 350 ${Y0} H ${X1} M 350 ${Y1} H ${X1}`, .55);
-    s += hair(`M 300 ${Y0} V ${Y1} M 350 ${Y0} V ${Y1}`, .45, '2 4');
-    // 문짝: 닫힘은 면, 열림은 실선 한 쌍
-    gates.forEach((x, i) => {
-      if (i % 2 === 0) s += `<rect class="fade" x="${x - 11}" y="${Y0}" width="22" height="${H}" fill="${gateFill}" ${mode === 'field' ? '' : mul}/>`;
-      else s += hair(`M ${x - 11} ${Y0} V ${Y1} M ${x + 11} ${Y0} V ${Y1}`, mode === 'field' ? .8 : .5) + `<rect x="${x - 11}" y="${Y0}" width="22" height="7" fill="${gateFill}" ${mode === 'field' ? '' : mul}/><rect x="${x - 11}" y="${Y1 - 7}" width="22" height="7" fill="${gateFill}" ${mode === 'field' ? '' : mul}/>`;
-    });
-    // 악기
-    s += circ(215, 270, 26, .35, '2 5');
-    s += `<circle class="beat" cx="215" cy="270" r="9" fill="${mode === 'field' ? '#fbfaf7' : P.m}"/>`;
-    s += player(570, 270);
-    // 회피 거리 암시
-    s += hair('M 356 270 H 296', .35, '1 5');
-    s += label(X0, Y0 - 14, 'KICK · SNARE', 'start', .6);
-    s += beats(X0, Y1 + 16, 1);
-    s += label(480, 40, 'ROOM 1', 'middle', .75, 15) + `<rect x="450" y="50" width="60" height="1" fill="${INK}" opacity=".3"/><rect x="450" y="49" width="22" height="3" fill="${INK}" opacity=".8"/>`;
-    s += hud(P, 0);
-    return s;
-  });
-}
+/* ── 1. 드럼의 방 ── */
+const room = sv(960, 540, `
+  ${plane(circleD(930, 270, 200), 'soft', 'sheenH')}
+  ${ln('M 800 70 V 486')}${ln('M 818 128 V 430')}
+  ${plane('M 0 540 V 404 A 136 136 0 0 1 136 540 Z', 'c')}
+  ${plane('M 350 212 H 812 V 328 H 350 Z', 'soft')}
+  ${plane('M 300 212 H 208 A 58 58 0 0 0 208 328 H 300 Z', 'soft')}
+  ${[1, 2, 3, 4, 5, 6].map(k => ln(`M 300 ${212 - k * 9} H 208 A ${58 + k * 9} ${58 + k * 9} 0 0 0 208 ${328 + k * 9} H 300`, 'line', 1.25, 1 - k * .1)).join('')}
+  ${[0, 1, 2, 3, 4, 5].map(i => [0, 1, 2].map(j => `<circle cx="${313 + j * 12}" cy="${222 + i * 19}" r="1.3" fill="${V('ink')}" opacity=".45"/>`).join('')).join('')}
+  ${[700, 520].map(x => plane(`M ${x - 13} 225 a 13 13 0 0 1 26 0 V 315 a 13 13 0 0 1 -26 0 Z`, 'a')).join('')}
+  ${[610, 430].map(x => [-9, 0, 9].map(o => ln(`M ${x + o} 214 V 326`, 'a', 1.6)).join('')).join('')}
+  ${disc(208, 270, 21, 'a', 'beat')}
+  ${player(566, 270)}
+  ${[0, 1, 2, 3].map(i => i === 1 ? `<circle cx="${356 + i * 16}" cy="352" r="4" fill="${V('a')}"/>` : ring(356 + i * 16, 352, 3, 'ink', 1, .55)).join('')}
+  ${txt(56, 64, '01', 22, 'start', .9, 2, 300)}${txt(56, 84, 'KICK · SNARE', 10.5, 'start', .6)}
+  ${txt(904, 64, '110', 22, 'end', .9, 2, 300)}${txt(904, 84, 'BPM', 10.5, 'end', .6)}
+  ${hud(0, 3)}`);
 
-/* ── 보스전 ── */
-function boss(P, mode, stage = 2) {
-  return frame(() => {
-    const cx = 480, cy = 262;
-    let s = '';
-    const big = mode === 'field';
-    // 경기장
-    s += mode === 'line' ? '' : `<rect x="150" y="70" width="660" height="390" fill="#e9e6df" ${mul} opacity="${big ? .0 : .55}"/>`;
-    s += hair('M 150 70 H 810 V 460 H 150 Z', mode === 'line' ? .5 : .22);
-    // 화성 고리
-    s += circ(cx, cy, 64, .3, '2 5') + circ(cx, cy, 96, .22, '2 5');
-    // 베이스 장판 (C)
-    const zone = big ? [480, 70, 330, 390] : [560, 300, 220, 150];
-    s += `<rect x="${zone[0]}" y="${zone[1]}" width="${zone[2]}" height="${zone[3]}" fill="${P.c}" ${mul} opacity="${mode === 'line' ? .0 : .9}"/>`;
-    if (mode === 'line') s += hair(`M ${zone[0]} ${zone[1]} h ${zone[2]} v ${zone[3]} h ${-zone[2]} Z`, .6, '4 4') + `<rect x="${zone[0]}" y="${zone[1]}" width="${zone[2]}" height="${zone[3] * .4}" fill="${P.c}" ${mul} opacity=".9"/>`;
-    // 드럼 고리 (M): 바깥은 실선, 안은 차오르는 면
-    const r1 = big ? 110 : 122, r2 = big ? 196 : 180;
-    s += `<path class="fade" d="${annulus(cx, cy, r1, mode === 'line' ? r1 + (r2 - r1) * .45 : r2)}" fill="${P.m}" fill-rule="evenodd" ${mul}/>`;
-    s += circ(cx, cy, r1, .45) + circ(cx, cy, r2, .45);
-    [0, 90, 180, 270].forEach(a => { const t = a * Math.PI / 180; s += hair(`M ${cx + Math.cos(t) * (r2 + 4)} ${cy + Math.sin(t) * (r2 + 4)} L ${cx + Math.cos(t) * (r2 + 12)} ${cy + Math.sin(t) * (r2 + 12)}`, .6); });
-    // 하이햇 빔 (Y)
-    const bw = big ? 54 : 30;
-    s += `<polygon points="${band(cx, cy, -24, bw, 420)}" fill="${P.y}" ${mul}/><polygon points="${band(cx, cy, 156, bw, 420)}" fill="${P.y}" ${mul}/>`;
-    s += hair(`M ${cx} ${cy} L ${cx + Math.cos(-24 * Math.PI / 180) * 420} ${cy + Math.sin(-24 * Math.PI / 180) * 420} M ${cx} ${cy} L ${cx + Math.cos(156 * Math.PI / 180) * 420} ${cy + Math.sin(156 * Math.PI / 180) * 420}`, .35, '1 6');
-    // 보스
-    s += `<path d="${arcPath(cx, cy, 40, .62)}" fill="none" stroke="${INK}" stroke-width="1.5"/>` + circ(cx, cy, 40, .18);
-    s += `<polygon class="beat" points="${poly(cx, cy, 24, 5)}" fill="${INK}"/>`;
-    s += player(338, 356);
-    s += label(480, 34, 'III · 승', 'middle', .8, 15) + label(480, 52, 'TUTTI', 'middle', .5, 11) + `<rect x="440" y="60" width="80" height="1" fill="${INK}" opacity=".3"/><rect x="440" y="59" width="46" height="3" fill="${INK}" opacity=".8"/>`;
-    s += hud(P, 3, 2);
-    void stage;
-    return s;
-  });
-}
+/* ── 2. 보스전 ── */
+const boss = sv(960, 540, `
+  ${plane(circleD(480, 262, 236), 'soft', 'sheenH')}
+  ${ln('M 250 40 V 500')}${ln('M 268 96 V 440')}
+  ${plane(archD(712, 236, 540, 92), 'c')}
+  ${arches(712, 192, 540, 100, 5, 9, 'c', 1.6)}
+  ${plane(annD(480, 262, 118, 162), 'a')}
+  ${[176, 188, 200].map((r, i) => ring(480, 262, r, 'a', 1.5, 1 - i * .25)).join('')}
+  ${plane(band(480, 262, 156, 34, 0, 430), 'b')}
+  ${rays(480, 262, -24, 6, 6.8, 40, 430, 'b', 1.7)}
+  ${[58, 66, 74].map((r, i) => ring(480, 262, r, 'ink', 1, .5 - i * .1)).join('')}
+  <path d="M 480 214 A 48 48 0 1 1 438.4 286" fill="none" stroke="${V('ink')}" stroke-width="7" stroke-linecap="butt"/>
+  ${disc(480, 262, 30, 'ink', 'beat')}
+  <path d="M 480 262 V 232 A 30 30 0 0 1 510 262 Z" fill="${V('a2')}"/>
+  ${player(352, 372)}
+  ${txt(56, 64, 'III', 22, 'start', .9, 2, 300)}${txt(56, 84, 'TUTTI', 10.5, 'start', .6)}
+  ${ln('M 56 98 H 136', 'ink', 1, .35)}${ln('M 56 98 H 102', 'ink', 2.5)}
+  ${hud(3, 2)}`);
 
-/* ── 예고가 타격이 되기까지 (작은 네 컷) ── */
-function strip(P) {
-  const cell = (k, cap) => `<figure><svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="180" fill="#f6f5f1"/>
-    ${k < 3 ? `<path d="${annulus(120, 90, 34, 34 + 36 * (k === 0 ? 0.001 : k === 1 ? .5 : 1))}" fill="${P.m}" fill-rule="evenodd" ${mul} opacity="${k === 2 ? 1 : .8}"/>` : `<path d="${annulus(120, 90, 34, 70)}" fill="${P.m}" fill-rule="evenodd" ${mul} opacity=".22"/>`}
-    <circle cx="120" cy="90" r="34" fill="none" stroke="${INK}" stroke-width="1" opacity="${k === 3 ? .2 : .45}"/><circle cx="120" cy="90" r="70" fill="none" stroke="${INK}" stroke-width="1" opacity="${k === 3 ? .2 : .45}" ${k === 0 ? 'stroke-dasharray="2 5"' : ''}/>
-    ${k === 2 ? `<circle cx="120" cy="90" r="76" fill="none" stroke="${INK}" stroke-width="1.5"/>` : ''}
-    <polygon points="${poly(120, 90, 11, 5)}" fill="${INK}"/></svg><figcaption>${cap}</figcaption></figure>`;
-  return `<div class="strip">${cell(0, '예고 — 점선만')}${cell(1, '차오름 — 면이 안에서 밖으로')}${cell(2, '타격 — 면이 꽉 차고 실선이 굵어짐')}${cell(3, '잔상 — 옅게 남았다 사라짐')}</div>`;
-}
+/* ── 3. 키 비주얼 ── */
+const key = sv(960, 540, `
+  ${plane('M 0 0 H 330 V 540 H 0 Z', 'soft', 'sheenH')}
+  ${arches(165, 196, 540, 22, 11, 11, 'c', 2.2)}
+  ${disc(165, 118, 56, 'a')}
+  ${ln('M 330 0 V 540')}${ln('M 348 70 V 470')}
+  ${plane('M 960 540 H 700 A 260 260 0 0 1 960 280 Z', 'a2')}
+  ${plane('M 960 540 H 780 A 180 180 0 0 1 960 360 Z', 'a')}
+  ${plane('M 960 540 H 860 A 100 100 0 0 1 960 440 Z', 'b')}
+  ${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(k => ln(`M ${700 + k * 12} 60 V 200`, 'b', 2)).join('')}
+  ${disc(820, 130, 34, 'ink')}
+  ${txt(400, 262, 'RHYTHM', 64, 'start', 1, 10, 300)}
+  ${txt(400, 330, 'MELLOW', 64, 'start', 1, 10, 300)}
+  ${ln('M 402 362 H 640', 'ink', 1, .5)}
+  ${txt(402, 388, 'COLLECT THE LAYERS · PLAY THE BOSS', 11, 'start', .65, 3.5)}`);
 
-const P1 = { c: '#86b6c2', m: '#d08a9e', y: '#e0c26a', mt: '#f1dde2' };
-const P2 = { c: '#6ea6b5', m: '#c06a86', y: '#d6ae48', mt: '#ecd3da' };
-const P3 = { c: '#a5cdd7', m: '#e3acbb', y: '#ead68f', mt: '#f5e6ea' };
-const sw = P => `<div class="sw"><span><i style="background:${P.m}"></i>DRUM</span><span><i style="background:${P.y}"></i>HAT</span><span><i style="background:${P.c}"></i>BASS</span><span><i style="background:${INK}"></i>INK</span></div>`;
-
-const items = [
-  { tag: 'B′', name: '얇은 판', P: P1, mode: 'wash',
-    why: '오버프린트를 차분하게. 방의 바닥은 그 악기 색의 아주 옅은 판이고, 위험은 같은 색의 짙은 판이다. 판끼리는 곱하기로 겹친다. 선은 전부 1px이고, 굵기 대신 "면이냐 선이냐"로 위험을 가른다.',
-    notes: [['읽는 법', '면 = 지금 위험, 실선 = 곧 위험, 점선 = 범위'], ['강점', '겹이 쌓이는 것이 색으로 보이면서도 조용하다'], ['걱정', '옅은 판은 밝은 모니터에서 날아갈 수 있다']] },
-  { tag: 'D′', name: '가라앉은 색면', P: P2, mode: 'field',
-    why: '색면을 유지하되 채도를 내렸다. 방 하나가 통째로 한 색의 판이고, 그 위의 위험은 잉크색이다. 보스전에서는 공격이 큰 판으로 화면을 가르고, 판이 겹친 자리는 더 짙어진다.',
-    notes: [['읽는 법', '색 = 어느 악기의 공간·공격인지, 잉크 = 닿으면 안 되는 것'], ['강점', '멀리서도 읽히고 스크린샷이 강하다'], ['걱정', '방 안에서는 그 색 하나만 보여 단조로울 수 있다']] },
-  { tag: 'B′+D′', name: '선에서 면으로', P: P3, mode: 'line',
-    why: '평소에는 종이와 실선뿐이다. 색은 박이 올 때만 나타난다. 예고는 점선으로 시작해 안에서부터 면이 차오르고, 타격의 순간에 꽉 찬다. 색이 곧 박자다.',
-    notes: [['읽는 법', '화면에 색이 보이면 그건 지금 울리는 소리다'], ['강점', '가장 담백하고, 음악이 쌓일수록 화면에 색이 늘어난다'], ['걱정', '초반(악기가 없을 때)은 화면이 거의 비어 보인다']], strip: true },
+/* ── 어휘 ── */
+const tile = (inner, cap) => `<figure>${sv(220, 150, inner)}<figcaption>${cap}</figcaption></figure>`;
+const voc = [
+  tile(disc(110, 75, 34, 'a'), '<b>드럼</b> · 원반. 꽉 찬 면'),
+  tile(Array.from({ length: 11 }, (_, k) => ln(`M ${60 + k * 10} 35 V 115`, 'b', 2)).join(''), '<b>하이햇</b> · 가는 평행선'),
+  tile(arches(110, 30, 130, 10, 6, 9, 'c', 2), '<b>베이스</b> · 동심 아치'),
+  tile([52, 44, 36].map(r => ring(110, 75, r, 'a', 1.5)).join('') + `<circle cx="110" cy="75" r="9" fill="${V('ink')}"/>`, '<b>예고</b> · 선으로만'),
+  tile(plane(annD(110, 75, 22, 52), 'a') + `<circle cx="110" cy="75" r="9" fill="${V('ink')}"/>`, '<b>타격</b> · 같은 모양이 면으로'),
 ];
 
-document.getElementById('out').innerHTML = items.map(c => `
-<section>
-  <div class="head"><span>${c.tag}</span><h2>${c.name}</h2></div>
-  <p class="why">${c.why}</p>
-  <div class="pair">
-    <figure>${room(c.P, c.mode)}<figcaption>드럼의 방 — 닫힌 문짝 둘, 열린 문짝 둘, 틈, 악기</figcaption></figure>
-    <figure>${boss(c.P, c.mode)}<figcaption>보스전 — 드럼의 고리, 하이햇의 빔, 베이스의 장판</figcaption></figure>
-  </div>
-  ${c.strip ? strip(c.P) : ''}
-  ${sw(c.P)}
-  <ul class="notes">${c.notes.map(([k, v]) => `<li><b>${k}</b> · ${v}</li>`).join('')}</ul>
-</section>`).join('');
+document.getElementById('out').innerHTML = `
+<h2>KEY VISUAL</h2>
+<figure>${key}</figure>
+<h2>IN GAME</h2>
+<div class="pair">
+  <figure>${room}<figcaption>드럼의 방 — 닫힌 문짝은 면, 열린 문짝은 선. 왼쪽 아치 안에 악기, 그 앞에 회피로 건너는 틈</figcaption></figure>
+  <figure>${boss}<figcaption>보스전 — 드럼의 고리(면)와 다음 고리(선), 하이햇의 빔(한쪽은 선, 한쪽은 면), 베이스의 아치</figcaption></figure>
+</div>
+<h2>VOCABULARY</h2>
+<div class="voc">${voc.join('')}</div>
+<ul class="notes">
+  <li><b>악기는 색보다 모양으로</b> · 원반, 평행선, 아치. 팔레트가 바뀌어도 읽힌다</li>
+  <li><b>선에서 면으로</b> · 예고는 선, 타격은 같은 모양의 면. 박이 오면 선이 채워진다</li>
+  <li><b>그라데이션</b> · 면 안에 위아래로 아주 얕게 한 겹만. 테두리선은 없다</li>
+  <li><b>선의 굵기</b> · 구조선 1.25, 악기선 1.6~2. 그 사이 굵기는 쓰지 않는다</li>
+</ul>`;
+
+document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click', () => {
+  document.body.dataset.p = b.dataset.p;
+  document.querySelectorAll('.pal button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+}));
 </script>
 </body>
 </html>
