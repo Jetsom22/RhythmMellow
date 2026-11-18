@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RhythmMellow 비주얼 시안 6</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
+<style>
+body{--bg:#f1e9d8;--ink:#232524;--d:#c4291c;--a:#3f5f6b;--a2:#cf9535;--b:#cf9535;--c:#8b8f8a;--soft:#e6d9bf;--chrome:#232524}
+body[data-p="mid"]{--bg:#efe3c2;--ink:#0d0d12;--d:#d63a24;--a:#3f6b66;--a2:#d9a441;--b:#d9a441;--c:#9db9af;--soft:#e3d5a9;--chrome:#0d0d12}
+body[data-p="navy"]{--bg:#12303f;--ink:#f3ede0;--d:#ff4b5c;--a:#f7a21e;--a2:#12303f;--b:#f3ede0;--c:#3fa9f5;--soft:#1b4051;--chrome:#f3ede0}
+body[data-p="ochre"]{--bg:#ead7ad;--ink:#1a1a1a;--d:#b3261e;--a:#4a3f36;--a2:#ce9535;--b:#b9791c;--c:#ce9535;--soft:#dcc48f;--chrome:#1a1a1a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--chrome);font:15px/1.65 "Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:background .25s,color .25s}
+main{max-width:1240px;margin:0 auto;padding:48px 24px 96px}
+h1{font:300 34px/1.1 Jost,"Apple SD Gothic Neo",sans-serif;letter-spacing:.04em;margin:0 0 10px}
+h2{font:400 13px Jost,sans-serif;letter-spacing:.22em;margin:52px 0 6px;opacity:.75}
+h2+p{margin:0 0 14px;max-width:72ch;opacity:.85}
+.lede{margin:0;max-width:66ch;opacity:.8}
+.bar{display:flex;flex-wrap:wrap;gap:8px 22px;margin:22px 0 0;position:sticky;top:0;padding:10px 0;background:var(--bg);z-index:2;transition:background .25s;align-items:center}
+.grp{display:flex;gap:8px;flex-wrap:wrap}
+button{font:400 12px Jost,"Apple SD Gothic Neo",sans-serif;letter-spacing:.14em;padding:8px 14px;border:1px solid var(--chrome);background:none;color:var(--chrome);cursor:pointer;border-radius:999px;opacity:.6}
+button[aria-pressed="true"]{background:var(--chrome);color:var(--bg);opacity:1}
+figure{margin:0}
+canvas{display:block;width:100%;height:auto;outline:1px solid color-mix(in srgb,var(--chrome) 18%,transparent)}
+#scene,#room{cursor:crosshair;touch-action:none}
+figcaption{font-size:12.5px;margin-top:8px;opacity:.75}
+figcaption b{font-weight:600}
+.row{display:grid;gap:14px;grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.row{grid-template-columns:1fr}}
+.tag{font:400 12px Jost,sans-serif;letter-spacing:.2em;opacity:.7;margin:18px 0 8px}
+.notes{margin:16px 0 0;padding:0;list-style:none;font-size:13.5px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px 36px}
+a{color:inherit}
+</style>
+</head>
+<body data-p="rust">
+<main>
+<h1>비주얼 시안 6 — 선으로 그린 땅</h1>
+<p class="lede">바닥은 배경색 그대로 두고, 땅의 끝을 선으로 긋는다. 가장자리에 다가가면 그 선에서 가는 선이 퍼져 나온다. 예고는 번지되 불투명도만 계단으로 오르고, 여운의 선은 공격의 크기만큼만 퍼진다. <a href="round5.html">이전 시안</a></p>
+<div class="bar">
+  <div class="grp" id="legend" style="font:400 12px Jost,sans-serif;letter-spacing:.14em;gap:16px;order:2"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--d);margin-right:6px"></i>위험(가까울 때만)</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--a);margin-right:6px"></i>드럼</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--b);margin-right:6px"></i>하이햇</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--c);margin-right:6px"></i>베이스</span></div>
+  <div class="grp" role="group" aria-label="팔레트" id="pal">
+    <button data-p="rust" aria-pressed="true">RUST</button><button data-p="mid" aria-pressed="false">MID-CENTURY</button><button data-p="navy" aria-pressed="false">NAVY</button><button data-p="ochre" aria-pressed="false">OCHRE</button>
+  </div>
+</div>
+
+<h2>1 · 땅의 끝</h2>
+<p>드럼의 방. 바닥에는 색이 없고, 땅의 끝은 보통 색의 가는 선이다. 플레이어를 가장자리로 가져가면 같은 색의 옅은 선이 땅 안쪽으로 촘촘히 번지고, 바깥에는 위험색 점이 드러난다. 평소엔 둘 다 보이지 않는다. 마우스나 손가락으로 움직여 보면 된다.</p>
+<div class="grp" role="group" aria-label="점" id="dotsOpt" style="margin-bottom:12px">
+  <button data-dots="1" aria-pressed="true">선 + 점</button><button data-dots="0" aria-pressed="false">선만</button>
+</div>
+<canvas id="room" width="1920" height="1080"></canvas>
+
+<h2>2 · 예고와 여운</h2>
+<p>면은 안에서 밖으로 번지고, 번진 면의 불투명도는 16분음마다 한 칸씩 오른다. 여운의 선은 모양의 두께에 맞춰 퍼진다. 가는 띠는 한 겹만 조금, 넓은 면은 여러 겹으로 멀리.</p>
+<div class="row">
+  <figure><canvas class="tile" data-shape="ring" width="800" height="520"></canvas><figcaption><b>드럼</b> · 고리. 두 겹</figcaption></figure>
+  <figure><canvas class="tile" data-shape="band" width="800" height="520"></canvas><figcaption><b>하이햇</b> · 가는 띠. 한 겹, 조금만</figcaption></figure>
+  <figure><canvas class="tile" data-shape="plane" width="800" height="520"></canvas><figcaption><b>베이스</b> · 넓은 면. 굵은 선 다섯 겹이 밖으로도 안으로도</figcaption></figure>
+</div>
+
+<h2>3 · 보스전에 얹어 보면</h2>
+<p>여덟 박짜리 악구가 되풀이된다. 경기장도 선 하나로만 그렸다. 공격의 여운은 경기장 밖으로도 퍼지고, 베이스는 굵은 선이 안팎으로 번진다.</p>
+<canvas id="scene" width="1920" height="1080"></canvas>
+<ul class="notes">
+  <li><b>바닥</b> · 배경색 그대로. 땅은 색이 아니라 테두리로 읽는다</li>
+  <li><b>땅의 끝</b> · 보통 색의 가는 선 하나. 다가가면 같은 색의 옅고 촘촘한 선이 땅 안쪽으로 번지고, 바깥에는 위험색 점이 드러난다. 평소엔 둘 다 보이지 않는다</li>
+  <li><b>예고</b> · 번지는 면. 불투명도는 16분음 계단</li>
+  <li><b>여운</b> · 외곽선이 옅어지며 퍼진다. 겹 수와 거리와 굵기는 모양의 두께를 따르고, 경기장 밖으로도 나간다</li>
+</ul>
+</main>
+<script>
+const BPM = 110, TAU = Math.PI * 2;
+let col = {};
+const readColors = () => { const cs = getComputedStyle(document.body); for (const k of ['bg', 'ink', 'd', 'a', 'a2', 'b', 'c', 'soft']) col[k] = cs.getPropertyValue('--' + k).trim(); };
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const easeOut = t => 1 - (1 - t) ** 3;
+
+function path(g, s, grow = 1) {
+  g.beginPath();
+  if (s.kind === 'ring') { g.arc(s.x, s.y, s.r1 + (s.r2 - s.r1) * grow, 0, TAU); g.arc(s.x, s.y, s.r1, 0, TAU, true); }
+  else if (s.kind === 'band') {
+    const c = Math.cos(s.ang), n = Math.sin(s.ang), h = s.w / 2, L = s.len * grow;
+    g.moveTo(s.x + n * h, s.y - c * h); g.lineTo(s.x + c * L + n * h, s.y + n * L - c * h);
+    g.lineTo(s.x + c * L - n * h, s.y + n * L + c * h); g.lineTo(s.x - n * h, s.y + c * h); g.closePath();
+  } else if (s.kind === 'half') {
+    // 반원: 가운데 지름에서 바깥 호 쪽으로 차오른다.
+    const w = s.r * grow;
+    if (grow >= 1) { g.arc(s.x, s.y, s.r, -Math.PI / 2, Math.PI / 2); g.closePath(); }
+    else { const dy = Math.sqrt(Math.max(0, s.r * s.r - w * w)); g.moveTo(s.x, s.y - s.r); g.arc(s.x, s.y, s.r, -Math.PI / 2, -Math.atan2(dy, w)); g.lineTo(s.x + w, s.y + dy); g.arc(s.x, s.y, s.r, Math.atan2(dy, w), Math.PI / 2); g.closePath(); }
+  } else { const w = s.w * grow; if (s.dir > 0) g.rect(s.x, s.y, w, s.h); else g.rect(s.x + s.w - w, s.y, w, s.h); }
+}
+/* 외곽선. off가 양수면 바깥으로, 음수면 안으로 민 선 */
+function outline(g, s, off) {
+  g.beginPath();
+  if (s.kind === 'ring') { g.arc(s.x, s.y, s.r2 + off, 0, TAU); if (s.r1 - off > 2) { g.moveTo(s.x + s.r1 - off, s.y); g.arc(s.x, s.y, s.r1 - off, 0, TAU); } }
+  else if (s.kind === 'band') { const c = Math.cos(s.ang), n = Math.sin(s.ang); for (const sg of [1, -1]) { const h = (s.w / 2 + off) * sg; g.moveTo(s.x + n * h, s.y - c * h); g.lineTo(s.x + c * s.len + n * h, s.y + n * s.len - c * h); } }
+  else if (s.kind === 'half') { const R = s.r + off; if (R > 2) { g.moveTo(s.x - off, s.y - R); g.lineTo(s.x, s.y - R); g.arc(s.x, s.y, R, -Math.PI / 2, Math.PI / 2); g.lineTo(s.x - off, s.y + R); g.closePath(); } }
+  else if (s.w + off * 2 > 2 && s.h + off * 2 > 2) g.rect(s.x - off, s.y - off, s.w + off * 2, s.h + off * 2);
+}
+/* 모양의 두께: 여운이 얼마나, 몇 겹으로 퍼질지를 정한다 */
+const thickness = s => s.kind === 'ring' ? s.r2 - s.r1 : s.kind === 'band' ? s.w : s.kind === 'half' ? s.r : Math.min(s.w, s.h);
+
+function drawAttack(g, atk, beat, part) {
+  const s = atk.shape, color = col[atk.color];
+  const p = (beat - (atk.hit - atk.tele)) / atk.tele, e = beat - atk.hit, hold = atk.hold || 0;
+  g.save();
+  if (part !== 'echo') {
+    if (p >= 0 && p < 1) {
+      // 번짐: 면은 고르게 자라고, 불투명도만 16분음마다 한 칸 오른다.
+      const steps = atk.tele * 4, k = Math.floor(p * steps) + 1;
+      g.fillStyle = color;
+      g.globalAlpha = .11; path(g, s); g.fill('evenodd');
+      g.globalAlpha = .16 + .44 * (k / steps); path(g, s, clamp(p)); g.fill('evenodd');
+      g.globalAlpha = .5; g.strokeStyle = color; g.lineWidth = 1.25; outline(g, s, 0); g.stroke();
+    } else if (e >= 0 && e < hold + .7) {
+      const fade = e < hold + .1 ? 1 : 1 - clamp((e - hold - .1) / .5);
+      g.fillStyle = color; g.globalAlpha = fade * (e < .1 ? 1 : .88); path(g, s); g.fill('evenodd');
+    }
+  }
+  if (part !== 'body' && e >= 0) {
+    // 여운: 겹 수, 거리, 굵기가 모양의 두께를 따른다. 큰 면은 안으로도 퍼진다.
+    const th = thickness(s), big = th >= 80;
+    const lines = th < 24 ? 1 : big ? 5 : 2;
+    const spread = clamp(th * .42, 5, 60);
+    const life = big ? 1.7 : .7 + lines * .12;
+    g.strokeStyle = color;
+    // 머무는 공격은 떨어질 때 한 번, 걷힐 때 한 번 더 퍼진다.
+    for (const start of hold > 0 ? [0, hold] : [0]) {
+      for (let k = 0; k < lines; k++) {
+        const te = (e - start - k * (big ? .13 : .16)) / life;
+        if (te <= 0 || te >= 1) continue;
+        const d = 2 + easeOut(te) * spread * (1 + k * (big ? .28 : .5));
+        g.globalAlpha = (big ? .9 : .7) * (1 - te) ** 1.4;
+        g.lineWidth = (big ? 2.4 : 1.4) - te * (big ? 1.2 : .5);
+        outline(g, s, d); g.stroke();
+        if (big) { g.globalAlpha *= .7; outline(g, s, -d * .8); g.stroke(); }
+      }
+    }
+  }
+  g.restore();
+}
+
+/* ── 땅의 끝: 테두리 선, 그리고 다가가면 퍼져 나오는 가는 선 ── */
+const off = document.createElement('canvas'); off.width = 1920; off.height = 1080;
+const og = off.getContext('2d');
+/** shape: Path2D(땅). 플레이어가 가장자리에서 얼마나 가까운지(0~1)를 돌려준다. */
+function proximity(g, shape, x, y, reach) {
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+  let lo = 0, hi = reach;
+  g.lineWidth = hi * 2;
+  if (!g.isPointInStroke(shape, x, y)) { g.restore(); return 0; }
+  for (let i = 0; i < 6; i++) { const mid = (lo + hi) / 2; g.lineWidth = mid * 2; if (g.isPointInStroke(shape, x, y)) hi = mid; else lo = mid; }
+  g.restore();
+  return 1 - hi / reach;
+}
+function drawEdge(g, shapes, pl, withDots, bounds) {
+  const union = new Path2D();
+  for (const sh of shapes) union.addPath(sh);
+  g.save();
+  g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .75;
+  g.stroke(union);
+  g.restore();
+  let prox = 0;
+  for (const sh of shapes) prox = Math.max(prox, proximity(g, sh, pl.x, pl.y, 130));
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); const inside = g.isPointInPath(union, pl.x, pl.y); g.restore();
+  if (!inside) prox = 1;
+  if (prox > .01) {
+    // 테두리를 안쪽으로 민 가는 선 여러 겹. 촘촘하고 옅게, 플레이어 둘레에서만.
+    const n = 14, gap = 1.6 + 2.2 * prox, R = 50 + 150 * prox;
+    const x0 = Math.max(0, Math.floor(pl.x - R)), y0 = Math.max(0, Math.floor(pl.y - R));
+    const w = Math.min(960, Math.ceil(pl.x + R)) - x0, h = Math.min(540, Math.ceil(pl.y + R)) - y0;
+    if (w > 0 && h > 0) {
+      og.save();
+      og.setTransform(2, 0, 0, 2, 0, 0);
+      og.beginPath(); og.rect(x0, y0, w, h); og.clip();
+      og.clearRect(x0, y0, w, h);
+      og.lineJoin = 'round';
+      // 바깥 겹부터: 띠를 긋고 그 속을 파내면 선 하나가 남는다.
+      for (let k = n; k >= 1; k--) {
+        const d = k * gap;
+        og.globalCompositeOperation = 'source-over';
+        og.globalAlpha = 1 - (k - 1) / n; og.strokeStyle = col.ink; og.lineWidth = d * 2 + .8;
+        og.stroke(union);
+        og.globalCompositeOperation = 'destination-out';
+        og.globalAlpha = 1; og.strokeStyle = '#000'; og.lineWidth = d * 2 - .8;
+        og.stroke(union);
+      }
+      og.globalAlpha = 1; og.fillStyle = '#000';
+      og.globalCompositeOperation = 'destination-in'; og.fill(union);      // 땅 안쪽만 남긴다
+      const grad = og.createRadialGradient(pl.x, pl.y, 0, pl.x, pl.y, R);
+      grad.addColorStop(0, 'rgba(0,0,0,1)'); grad.addColorStop(.5, 'rgba(0,0,0,.6)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
+      og.fillStyle = grad; og.fillRect(x0, y0, w, h);
+      og.restore();
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalAlpha = prox * .5;
+      g.drawImage(off, x0 * 2, y0 * 2, w * 2, h * 2, x0 * 2, y0 * 2, w * 2, h * 2);
+      g.restore();
+    }
+  }
+  if (withDots) {
+    g.save(); g.fillStyle = col.d;
+    for (let j = 0; j * 13.9 < 554; j++) for (let i = 0; i * 16 < 976; i++) {
+      const x = i * 16 + (j % 2 ? 8 : 0), y = j * 13.9;
+      if (bounds(x, y)) continue;
+      const kk = clamp(1 - Math.hypot(x - pl.x, y - pl.y) / 170) ** 1.5;
+      if (kk < .03) continue;
+      g.globalAlpha = .8 * kk; g.beginPath(); g.arc(x, y, .5 + 3.2 * kk, 0, TAU); g.fill();
+    }
+    g.restore();
+  }
+}
+const drawPlayer = (g, pl, pulse) => {
+  g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .5; g.beginPath(); g.arc(pl.x, pl.y, 15, 0, TAU); g.stroke(); g.globalAlpha = 1;
+  g.fillStyle = col.ink; g.beginPath(); g.arc(pl.x, pl.y, 8 * (1 + .12 * pulse), 0, TAU); g.fill();
+};
+const label = (g, big, small) => {
+  g.fillStyle = col.ink; g.textBaseline = 'alphabetic';
+  g.font = '300 22px Jost, sans-serif'; g.globalAlpha = .9; g.fillText(big, 56, 64);
+  g.font = '400 10.5px Jost, sans-serif'; g.globalAlpha = .6; g.fillText(small, 56, 84); g.globalAlpha = 1;
+};
+const follow = (cv, pl) => {
+  const at = e => { const r = cv.getBoundingClientRect(); pl.tx = (e.clientX - r.left) / r.width * 960; pl.ty = (e.clientY - r.top) / r.height * 540; pl.touched = true; };
+  cv.addEventListener('pointermove', at); cv.addEventListener('pointerdown', at);
+  cv.addEventListener('pointerleave', () => { pl.touched = false; });
+};
+
+/* ── 1. 드럼의 방 ── */
+const room = document.getElementById('room'), rg = room.getContext('2d');
+const alcove = new Path2D(); alcove.roundRect(110, 200, 220, 140, [70, 0, 0, 70]);
+const hall = new Path2D(); hall.moveTo(400, 205); hall.lineTo(684.8, 205); hall.arc(820, 270, 150, -2.694, 2.694, false); hall.lineTo(400, 335); hall.closePath();
+const roomShapes = [alcove, hall];
+const inRoom = (x, y) => (x >= 180 && x <= 330 && y >= 200 && y <= 340) || Math.hypot(x - 180, y - 270) <= 70 || (x >= 400 && x <= 700 && y >= 205 && y <= 335) || Math.hypot(x - 820, y - 270) <= 150;
+const rp = { x: 560, y: 270, tx: 560, ty: 270, touched: false };
+let roomDots = 1;
+const GATES = [{ x: 640, ph: 0 }, { x: 560, ph: 1 }, { x: 480, ph: 0 }];
+function drawRoom(beat, t) {
+  const g = rg;
+  g.setTransform(2, 0, 0, 2, 0, 0);
+  g.fillStyle = col.bg; g.fillRect(0, 0, 960, 540);
+  if (!rp.touched) { const u = (Math.sin(t * .45) + 1) / 2; rp.tx = 260 + u * 520; rp.ty = 270 + Math.sin(t * 1.3) * 58; }
+  rp.x += (rp.tx - rp.x) * .16; rp.y += (rp.ty - rp.y) * .16;
+  const pulse = Math.exp(-(beat % 1) * 5);
+  // 구도선
+  g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .6;
+  g.beginPath(); g.moveTo(880, 40); g.lineTo(880, 500); g.moveTo(898, 110); g.lineTo(898, 430); g.stroke(); g.globalAlpha = 1;
+  // 문짝: 두 박마다 닫힌다. 예고 한 박, 타격, 여운.
+  const gates = [];
+  for (const gt of GATES) for (const shift of [0, 2]) gates.push([{ color: 'a', hit: 1, tele: 1, hold: .35, shape: { kind: 'plane', x: gt.x - 13, y: 205, w: 26, h: 130, dir: 1 } }, (beat + gt.ph) % 2 + shift]);
+  g.save(); g.clip(hall);
+  for (const [atk, b] of gates) drawAttack(g, atk, b, 'body');
+  g.restore();
+  for (const [atk, b] of gates) drawAttack(g, atk, b, 'echo');
+  drawEdge(g, roomShapes, rp, roomDots, inRoom);
+  // 악기
+  g.fillStyle = col.a; g.beginPath(); g.arc(180, 270, 17 * (1 + .1 * pulse), 0, TAU); g.fill();
+  g.strokeStyle = col.a; g.lineWidth = 1; g.globalAlpha = .5 * (1 - (beat % 1)); g.beginPath(); g.arc(180, 270, 20 + 16 * easeOut(beat % 1), 0, TAU); g.stroke(); g.globalAlpha = 1;
+  drawPlayer(g, rp, pulse);
+  label(g, '01', 'K I C K  ·  S N A R E');
+  g.fillStyle = col.ink;
+  for (let i = 0; i < 4; i++) { g.globalAlpha = Math.floor(beat % 4) === i ? 1 : .28; g.beginPath(); g.arc(456 + i * 16, 512, 2.6, 0, TAU); g.fill(); }
+  g.globalAlpha = 1;
+}
+
+/* ── 2. 작은 판 ── */
+const SHAPES = {
+  ring: { color: 'a', shape: { kind: 'ring', x: 200, y: 122, r1: 34, r2: 78 } },
+  band: { color: 'b', shape: { kind: 'band', x: 52, y: 170, ang: -.33, w: 14, len: 320 } },
+  plane: { color: 'c', shape: { kind: 'half', x: 150, y: 122, r: 86 } },
+};
+function drawTile(cv, beat) {
+  const g = cv.getContext('2d');
+  g.setTransform(2, 0, 0, 2, 0, 0);
+  g.fillStyle = col.bg; g.fillRect(0, 0, 400, 260);
+  const b = beat % 4, def = SHAPES[cv.dataset.shape];
+  drawAttack(g, { ...def, hit: 2, tele: 2, hold: cv.dataset.shape === 'plane' ? .5 : 0 }, b);
+  if (cv.dataset.shape === 'ring') { g.fillStyle = col.ink; g.beginPath(); g.arc(200, 122, 8, 0, TAU); g.fill(); }
+  for (let i = 0; i < 4; i++) { g.fillStyle = col.ink; g.globalAlpha = Math.floor(b) === i ? 1 : .28; g.beginPath(); g.arc(176 + i * 16, 236, i === 2 ? 4 : 2.6, 0, TAU); g.fill(); }
+  g.globalAlpha = 1;
+}
+
+/* ── 3. 보스전 ── */
+const AR = { x: 480, y: 266, r: 232 };
+const arena = new Path2D(); arena.arc(AR.x, AR.y, AR.r, 0, TAU);
+const PHRASE = [
+  { color: 'a', hit: 2, tele: 2, shape: { kind: 'ring', x: AR.x, y: AR.y, r1: 96, r2: 150 } },
+  { color: 'b', hit: 3, tele: 1, shape: { kind: 'band', x: AR.x, y: AR.y, ang: -.5, w: 14, len: 260 } },
+  { color: 'b', hit: 3, tele: 1, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 2.64, w: 14, len: 260 } },
+  { color: 'a', hit: 4, tele: 2, shape: { kind: 'ring', x: AR.x, y: AR.y, r1: 150, r2: 204 } },
+  { color: 'b', hit: 5, tele: 1, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 1.07, w: 14, len: 260 } },
+  { color: 'b', hit: 5, tele: 1, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 4.21, w: 14, len: 260 } },
+  { color: 'c', hit: 7, tele: 3, hold: 1, shape: { kind: 'half', x: AR.x, y: AR.y, r: AR.r } },
+];
+const scene = document.getElementById('scene'), sg = scene.getContext('2d');
+const pl = { x: 330, y: 400, tx: 330, ty: 400, touched: false };
+function drawScene(beat, t) {
+  const g = sg;
+  g.setTransform(2, 0, 0, 2, 0, 0);
+  g.fillStyle = col.bg; g.fillRect(0, 0, 960, 540);
+  if (!pl.touched) { const rr = 150 + 75 * Math.sin(t * .37); pl.tx = AR.x + Math.cos(t * .5 + 2.4) * rr; pl.ty = AR.y + Math.sin(t * .5 + 2.4) * rr; }
+  pl.x += (pl.tx - pl.x) * .16; pl.y += (pl.ty - pl.y) * .16;
+  const pulse = Math.exp(-(beat % 1) * 5);
+  g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .6;
+  g.beginPath(); g.moveTo(196, 36); g.lineTo(196, 504); g.moveTo(214, 96); g.lineTo(214, 440); g.stroke(); g.globalAlpha = 1;
+  const b = beat % 8;
+  g.save(); g.clip(arena);
+  for (const atk of PHRASE) { drawAttack(g, atk, b, 'body'); drawAttack(g, atk, b + 8, 'body'); }
+  g.restore();
+  // 여운은 경기장 밖으로도 퍼져 나간다.
+  for (const atk of PHRASE) { drawAttack(g, atk, b, 'echo'); drawAttack(g, atk, b + 8, 'echo'); }
+  drawEdge(g, [arena], pl, roomDots, (x, y) => Math.hypot(x - AR.x, y - AR.y) < AR.r + 3);
+  g.strokeStyle = col.ink; g.lineWidth = 1;
+  [56, 64, 72].forEach((r, i) => { g.globalAlpha = .42 - i * .1; g.beginPath(); g.arc(AR.x, AR.y, r + pulse * 2, 0, TAU); g.stroke(); });
+  g.globalAlpha = 1;
+  g.strokeStyle = col.ink; g.lineWidth = 6; g.beginPath(); g.arc(AR.x, AR.y, 44, -Math.PI / 2, -Math.PI / 2 + TAU * .66); g.stroke();
+  const br = 27 * (1 + .09 * pulse);
+  g.fillStyle = col.ink; g.beginPath(); g.arc(AR.x, AR.y, br, 0, TAU); g.fill();
+  g.fillStyle = col.a2; g.beginPath(); g.moveTo(AR.x, AR.y); g.arc(AR.x, AR.y, br, -Math.PI / 2, 0); g.closePath(); g.fill();
+  drawPlayer(g, pl, pulse);
+  label(g, 'III', 'T U T T I');
+  g.fillStyle = col.ink;
+  for (let i = 0; i < 8; i++) { g.globalAlpha = Math.floor(b) === i ? 1 : .28; g.beginPath(); g.arc(424 + i * 16, 520, i % 4 === 0 ? 3.4 : 2.4, 0, TAU); g.fill(); }
+  g.globalAlpha = 1;
+}
+
+const tiles = [...document.querySelectorAll('canvas.tile')];
+const t0 = performance.now();
+function frame(now) {
+  const t = (now - t0) / 1000, beat = t * BPM / 60;
+  drawRoom(beat, t);
+  for (const cv of tiles) drawTile(cv, beat);
+  drawScene(beat, t);
+  requestAnimationFrame(frame);
+}
+follow(room, rp); follow(scene, pl);
+const press = (root, attr, fn) => root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  root.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  fn(b.dataset[attr]);
+}));
+press(document.getElementById('pal'), 'p', v => { document.body.dataset.p = v; readColors(); });
+press(document.getElementById('dotsOpt'), 'dots', v => { roomDots = +v; });
+readColors();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
