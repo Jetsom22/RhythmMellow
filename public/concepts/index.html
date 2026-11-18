@@ -71,7 +71,7 @@ a{color:inherit}
   <figure><canvas class="ptile" data-kind="bass" width="640" height="440"></canvas><figcaption><b>베이스</b> · 긴 음 동안 이어지는 떨리는 줄</figcaption></figure>
 </div>
 <h2>4 · 피격과 부활</h2>
-<p>맞으면 플레이어가 가루로 흩어진다. 가루는 멈추지 않고 천천히 계속 퍼지며 박마다 움찔거리다가, 살짝 뒤로 당겼다 속도를 올려 되살아날 자리로 흘러가 원으로 뭉친다. 여덟 박에 한 번씩 되풀이된다.</p>
+<p>맞으면 플레이어가 가루로 흩어진다. 가루는 멈추지 않고 천천히 계속 퍼지고, 그중 일부만 8분·16분 박에 맞춰 아주 작게 떨다가, 살짝 뒤로 당겼다 속도를 올려 되살아날 자리로 흘러가 원으로 뭉친다. 여덟 박에 한 번씩 되풀이된다.</p>
 <canvas id="dust" width="1920" height="640"></canvas>
 <ul class="notes">
   <li><b>색</b> · 붉은 계열은 적, 푸른 계열은 플레이어. 계열 안에서 밝기와 색조로 악기 셋을 가른다</li>
@@ -398,21 +398,26 @@ const GRAINS = (() => {
   for (let i = 0; i < N; i++) {
     const r = 8 * Math.sqrt((i + .5) / N), a = i * 2.39996;
     const dir = a + (rnd() - .5) * 1.1;
-    out.push({ ox: r * Math.cos(a), oy: r * Math.sin(a), dx: Math.cos(dir), dy: Math.sin(dir), far: 18 + rnd() * 62 + r * 3, size: .8 + rnd() * 1.5, lag: rnd() * .35, spin: (rnd() - .5) * 2.2, drift: rnd() * TAU });
+    out.push({ ox: r * Math.cos(a), oy: r * Math.sin(a), dx: Math.cos(dir), dy: Math.sin(dir), far: 18 + rnd() * 62 + r * 3, size: .8 + rnd() * 1.5, lag: rnd() * .35, spin: (rnd() - .5) * 2.2, drift: rnd() * TAU,
+      // 셋 중 하나쯤만 박에 반응한다. 저마다 8분이나 16분의 한 자리를 맡아, 그 자리에서만 아주 작게 떤다.
+      tw: rnd() < .36, sub: rnd() < .5 ? 2 : 4, slot: Math.floor(rnd() * 4), amp: .9 + rnd() * 1.5 });
   }
   return out;
 })();
 /**
  * 가루를 그린다. age: 맞은 뒤 흐른 박. gStart부터 gDur 박에 걸쳐 되살아날 자리로 모인다.
- * (hx,hy) 맞은 자리, (rx,ry) 되살아날 자리, (kx,ky) 가루가 쏠리는 쪽, pulse: 박의 맥(박에 1, 곧 0으로).
+ * (hx,hy) 맞은 자리, (rx,ry) 되살아날 자리, (kx,ky) 가루가 쏠리는 쪽, beat: 지금 박(일부 알갱이가 세부 박에 맞춰 작게 떤다).
  */
-function drawGrains(g, hx, hy, rx, ry, kx, ky, age, gStart, gDur, pulse, t) {
+function drawGrains(g, hx, hy, rx, ry, kx, ky, age, gStart, gDur, beat, t) {
+  // 부드러운 떨림: 빠르게 올라갔다가 천천히 가라앉는다. 뚝 튀지 않는다.
+  const bump = x => x < .22 ? Math.sin(x / .22 * Math.PI / 2) : Math.exp(-(x - .22) * 5.5);
   g.save(); g.fillStyle = col.ink;
   for (const p of GRAINS) {
-    // 흩어짐: 처음에 세게 튀고, 그 뒤로도 멈추지 않고 아주 천천히 계속 퍼진다. 박마다 한 번씩 움찔한다.
+    // 흩어짐: 처음에 세게 튀고, 그 뒤로도 멈추지 않고 아주 천천히 계속 퍼진다.
     const a = Math.max(0, age - p.lag * .12);
     const burst = easeOut(clamp(a / .55));
-    const spread = burst * (1 + .11 * a) + .085 * pulse * burst;
+    const spread = burst * (1 + .11 * a);
+    const pos = beat * p.sub, tick = p.tw && Math.floor(pos) % p.sub === p.slot % p.sub ? bump(pos - Math.floor(pos)) * p.amp * burst : 0;
     const fx = hx + p.ox + (p.dx * p.far + kx * p.far * .55) * spread + Math.cos(t * 1.3 + p.drift) * 2.4 * burst;
     const fy = hy + p.oy + (p.dy * p.far + ky * p.far * .55) * spread + Math.sin(t * 1.1 + p.drift) * 2.4 * burst;
     // 모임: 살짝 뒤로 당겼다가(예비 동작) 속도를 올리고, 닿기 전에 줄인다. 알갱이마다 떠나는 때가 다르다.
@@ -421,10 +426,10 @@ function drawGrains(g, hx, hy, rx, ry, kx, ky, age, gStart, gDur, pulse, t) {
     const e = sm - .16 * Math.sin(u * Math.PI) * (1 - u) ** 2;
     const tx = rx + p.ox, ty = ry + p.oy, vx = fx - tx, vy = fy - ty;
     const ang = p.spin * sm * (1 - sm) * .55, c = Math.cos(ang), n = Math.sin(ang);
-    const k = (1 - e) * (1 + .04 * pulse * (1 - sm));
-    const x = tx + (vx * c - vy * n) * k, y = ty + (vx * n + vy * c) * k;
+    const k = 1 - e, tk = tick * (1 - sm);
+    const x = tx + (vx * c - vy * n) * k + p.dx * tk, y = ty + (vx * n + vy * c) * k + p.dy * tk;
     g.globalAlpha = u > 0 ? .6 + .4 * sm : 1 - .4 * burst;
-    g.beginPath(); g.arc(x, y, p.size * (1 - .22 * burst + .22 * sm) * (1 + .3 * pulse * burst * (1 - sm)), 0, TAU); g.fill();
+    g.beginPath(); g.arc(x, y, p.size * (1 - .22 * burst + .22 * sm), 0, TAU); g.fill();
   }
   g.restore();
 }
@@ -449,7 +454,7 @@ function drawDust(beat, t) {
   else if (b < 5.9) {
     const age = b - 2, G0 = 1.5, GD = 1.9;
     if (age < .22) { g.strokeStyle = col.e1; g.lineWidth = 2; g.globalAlpha = 1 - age / .22; g.beginPath(); g.arc(HX, HY, 10 + 26 * easeOut(age / .22), 0, TAU); g.stroke(); g.globalAlpha = 1; }
-    drawGrains(g, HX, HY, RX, RY, -1, 0, age, G0, GD, pulse, t);
+    drawGrains(g, HX, HY, RX, RY, -1, 0, age, G0, GD, beat, t);
     const k = clamp((age - G0 - GD * .78) / (GD * .4));                                // 가루가 다 닿을 즈음 원이 차오른다
     if (k > 0) { g.fillStyle = col.ink; g.globalAlpha = k; g.beginPath(); g.arc(RX, RY, 8 * easeOut(k), 0, TAU); g.fill(); g.globalAlpha = 1; }
   } else {
