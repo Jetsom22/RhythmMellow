@@ -75,6 +75,8 @@ export class StageRenderer {
   private cam = { x: 0, y: 0, z: 1, set: false, last: 0 };
   /** Spans of song time (in steps) during which the camera pulls back to show the whole map. */
   private overviews: [number, number][] = [];
+  /** Places the camera goes to look at and then comes back from: [from step, until step, x, y]. A way that opened. */
+  private visits: [number, number, number, number][] = [];
   private bounds = { x: 0, y: 0, r: 1 };
   private chunks = new Map<string, number[][][] | null>();
   private chunkVersion = -1;
@@ -144,15 +146,19 @@ export class StageRenderer {
 
   /**
    * Usually the camera follows the player. In a fight it holds the whole arena.
-   * At a few moments it pulls back to show the whole map and then returns:
-   * after being hit (until re-formed), after taking an instrument, and when a way opens.
+   * When a way opens, the camera goes to where it opened, stays a moment and comes back.
+   * Only after the lives run out (starting again from the save) does it pull back to show the whole map.
    */
   private moveCamera(s: StageSim, stepF: number): void {
     const w = this.width, h = this.height, cam = this.cam, fight = s.fight;
     let tx = s.x, ty = s.y, tz = this.zoom;
     this.overviews = this.overviews.filter(o => stepF < o[1]);
+    this.visits = this.visits.filter(v => stepF < v[1]);
+    const visit = this.visits.find(v => stepF >= v[0]);
     if (this.overviews.some(o => stepF >= o[0])) {
       tx = this.bounds.x; ty = this.bounds.y; tz = Math.min(this.zoom, Math.min(w, h) / (this.bounds.r * 2.1));
+    } else if (visit) {
+      tx = visit[2]; ty = visit[3];
     } else if (fight) {
       tx = fight.x; ty = fight.y; tz = Math.min(this.zoom, Math.min(w, h) / (fight.r * 2.3));
     }
@@ -202,7 +208,14 @@ export class StageRenderer {
       } else if (e.type === 'broken') {
         this.pfx.push({ kind: 'ring', at: stepF, x: e.pos.x, y: e.pos.y, color: this.pal.ink });
       } else if (e.type === 'gate') {
-        // A way has opened. The camera keeps following (it pulls back only after the lives run out).
+        // A way has opened: the camera goes there, stays a moment and comes back. A ring marks the place as it arrives.
+        const g = s.gates.find(q => q.id === e.id);
+        if (g) {
+          const q = centreOf(g.shape), spb = s.meter.stepsPerBeat, color = g.requires.layer ? this.pal.player[g.requires.layer] : this.pal.ink;
+          this.visits.push([stepF + .25 * spb, stepF + 4.25 * spb, q.x, q.y]);
+          this.pfx.push({ kind: 'ring', at: stepF + 1.1 * spb, x: q.x, y: q.y, color });
+          this.pfx.push({ kind: 'ring', at: stepF + 1.6 * spb, x: q.x, y: q.y, color });
+        }
       } else if (e.type === 'strike') {
         // An attack has just landed: flash it and send out its echo.
         const a = e.inst;
