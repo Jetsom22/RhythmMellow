@@ -3,193 +3,253 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RhythmMellow 비주얼 시안 4</title>
+<title>RhythmMellow 비주얼 시안 5</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
 <style>
-body{--bg:#f1e9d8;--ink:#232524;--a:#b8371a;--a2:#86190f;--b:#cf9535;--c:#7e8686;--soft:#e6d9bf;--chrome:#232524}
-body[data-p="mid"]{--bg:#efe3c2;--ink:#0d0d12;--a:#e0603a;--a2:#b9452a;--b:#d9a441;--c:#8fb0a6;--soft:#e3d5a9;--chrome:#0d0d12}
-body[data-p="navy"]{--bg:#12303f;--ink:#f3ede0;--a:#f7931e;--a2:#d9701a;--b:#f3ede0;--c:#3fa9f5;--soft:#1b4051;--chrome:#f3ede0}
-body[data-p="ochre"]{--bg:#ead7ad;--ink:#1a1a1a;--a:#1a1a1a;--a2:#3a3a3a;--b:#b9791c;--c:#ce9535;--soft:#dcc48f;--chrome:#1a1a1a}
+body{--bg:#f1e9d8;--ink:#232524;--d:#c4291c;--a:#3f5f6b;--a2:#cf9535;--b:#cf9535;--c:#8b8f8a;--soft:#e6d9bf;--chrome:#232524}
+body[data-p="mid"]{--bg:#efe3c2;--ink:#0d0d12;--d:#d63a24;--a:#3f6b66;--a2:#d9a441;--b:#d9a441;--c:#9db9af;--soft:#e3d5a9;--chrome:#0d0d12}
+body[data-p="navy"]{--bg:#12303f;--ink:#f3ede0;--d:#ff4b5c;--a:#f7a21e;--a2:#12303f;--b:#f3ede0;--c:#3fa9f5;--soft:#1b4051;--chrome:#f3ede0}
+body[data-p="ochre"]{--bg:#ead7ad;--ink:#1a1a1a;--d:#b3261e;--a:#4a3f36;--a2:#ce9535;--b:#b9791c;--c:#ce9535;--soft:#dcc48f;--chrome:#1a1a1a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--chrome);font:15px/1.65 "Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;transition:background .25s,color .25s}
 main{max-width:1240px;margin:0 auto;padding:48px 24px 96px}
 h1{font:300 34px/1.1 Jost,"Apple SD Gothic Neo",sans-serif;letter-spacing:.04em;margin:0 0 10px}
 h2{font:400 13px Jost,sans-serif;letter-spacing:.22em;margin:52px 0 6px;opacity:.75}
-h2+p{margin:0 0 14px;max-width:70ch;opacity:.85}
+h2+p{margin:0 0 14px;max-width:72ch;opacity:.85}
 .lede{margin:0;max-width:66ch;opacity:.8}
-.pal{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;position:sticky;top:0;padding:10px 0;background:var(--bg);z-index:2;transition:background .25s}
-.pal button,.opt button{font:400 12px Jost,sans-serif;letter-spacing:.16em;padding:8px 14px;border:1px solid var(--chrome);background:none;color:var(--chrome);cursor:pointer;border-radius:999px;opacity:.6}
-.pal button[aria-pressed="true"],.opt button[aria-pressed="true"]{background:var(--chrome);color:var(--bg);opacity:1}
-.opt{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:10px 0 0;font-size:13px}
-.opt label{display:flex;gap:8px;align-items:center}
-.opt input[type=range]{accent-color:var(--chrome);width:150px}
+.bar{display:flex;flex-wrap:wrap;gap:8px 22px;margin:22px 0 0;position:sticky;top:0;padding:10px 0;background:var(--bg);z-index:2;transition:background .25s;align-items:center}
+.grp{display:flex;gap:8px;flex-wrap:wrap}
+button{font:400 12px Jost,"Apple SD Gothic Neo",sans-serif;letter-spacing:.14em;padding:8px 14px;border:1px solid var(--chrome);background:none;color:var(--chrome);cursor:pointer;border-radius:999px;opacity:.6}
+button[aria-pressed="true"]{background:var(--chrome);color:var(--bg);opacity:1}
 figure{margin:0}
-svg,canvas{display:block;width:100%;height:auto}
-.shot{outline:1px solid color-mix(in srgb,var(--chrome) 18%,transparent)}
-canvas.shot{cursor:crosshair;touch-action:none}
+canvas{display:block;width:100%;height:auto;outline:1px solid color-mix(in srgb,var(--chrome) 18%,transparent)}
+#scene{cursor:crosshair;touch-action:none}
 figcaption{font-size:12.5px;margin-top:8px;opacity:.75}
 figcaption b{font-weight:600}
-.row{display:grid;gap:14px}
-.r4{grid-template-columns:repeat(4,1fr)}.r3{grid-template-columns:repeat(3,1fr)}
-@media(max-width:820px){.r4,.r3{grid-template-columns:repeat(2,1fr)}}
+.row{display:grid;gap:14px;grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.row{grid-template-columns:1fr}}
+.tag{font:400 12px Jost,sans-serif;letter-spacing:.2em;opacity:.7;margin:18px 0 8px}
+.notes{margin:16px 0 0;padding:0;list-style:none;font-size:13.5px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px 36px}
 a{color:inherit}
-/* 네 박 한 바퀴(2.18초): 0~50% 예고, 50% 타격, 75%까지 잔상 */
-.cyc{animation-duration:2.18s;animation-iteration-count:infinite;animation-timing-function:linear}
-@keyframes t1{0%{opacity:0}49.9%{opacity:.42}50%,55%{opacity:1}75%,100%{opacity:0}}
-@keyframes t2base{0%,49.9%{opacity:.14}50%,55%{opacity:1}75%,100%{opacity:0}}
-@keyframes t2grow{0%{transform:scale(.39);opacity:.4}49.9%{transform:scale(1);opacity:.4}50%,100%{transform:scale(1);opacity:0}}
-@keyframes t3{0%,12.4%{opacity:.12}12.5%,24.9%{opacity:.24}25%,37.4%{opacity:.36}37.5%,49.9%{opacity:.5}50%,55%{opacity:1}75%,100%{opacity:0}}
-@keyframes t4in{0%{transform:scale(1.75);opacity:0}8%{opacity:.16}49.9%{transform:scale(1);opacity:.3}50%,100%{transform:scale(1);opacity:0}}
-@keyframes tick{0%,24.9%{opacity:1}25%,100%{opacity:.25}}
-@keyframes hitTick{0%,49.9%{opacity:.25}50%,74.9%{opacity:1}75%,100%{opacity:.25}}
-@keyframes envDrum{0%{opacity:1}30%{opacity:.12}60%,100%{opacity:0}}
-@keyframes envHat{0%,24%{opacity:.7}25%,49%{opacity:0}50%,74%{opacity:.4}75%,100%{opacity:0}}
-@keyframes envBass{0%{opacity:0}35%{opacity:.6}70%{opacity:.6}100%{opacity:0}}
-.o{transform-box:fill-box;transform-origin:center}
-@media (prefers-reduced-motion:reduce){.cyc,.env{animation:none!important}}
 </style>
 </head>
 <body data-p="rust">
 <main>
-<h1>비주얼 시안 4 — 불투명도와 점</h1>
-<p class="lede">색감과 방향은 그대로 두고, 예고와 악기의 표현을 다시 짰다. 이번엔 움직임이 핵심이라 전부 움직이는 시안이다. <a href="round3.html">이전 시안</a></p>
-<div class="pal" role="group" aria-label="팔레트">
-  <button data-p="rust" aria-pressed="true">RUST</button><button data-p="mid" aria-pressed="false">MID-CENTURY</button><button data-p="navy" aria-pressed="false">NAVY</button><button data-p="ochre" aria-pressed="false">OCHRE</button>
+<h1>비주얼 시안 5 — 면과 여운</h1>
+<p class="lede">예고는 면의 불투명도로, 타격의 여운은 선으로. 공격이 떨어지면 그 모양의 외곽선이 옅어지며 바깥으로 퍼진다. 선은 빼지 않고 "지나간 소리"의 자리로 옮겼다. <a href="round4.html">이전 시안</a></p>
+<div class="bar">
+  <div class="grp" id="legend" style="font:400 12px Jost,sans-serif;letter-spacing:.14em;gap:16px;order:2"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--d);margin-right:6px"></i>위험</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--a);margin-right:6px"></i>드럼</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--b);margin-right:6px"></i>하이햇</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--c);margin-right:6px"></i>베이스</span></div>
+  <div class="grp" role="group" aria-label="팔레트" id="pal">
+    <button data-p="rust" aria-pressed="true">RUST</button><button data-p="mid" aria-pressed="false">MID-CENTURY</button><button data-p="navy" aria-pressed="false">NAVY</button><button data-p="ochre" aria-pressed="false">OCHRE</button>
+  </div>
 </div>
 
-<h2>1 · 점박이 — 죽는 땅</h2>
-<p>바닥이 아닌 곳 전체에 점이 깔려 있고, 플레이어가 가까이 가야 보인다. 가까울수록 커지고 진해진다. 마우스나 손가락으로 플레이어를 움직여 보면 된다.</p>
-<canvas id="dots" class="shot" width="1920" height="1080"></canvas>
-<div class="opt">
-  <label>보이는 거리 <input id="rad" type="range" min="80" max="320" value="180"></label>
-  <label>점 간격 <input id="gap" type="range" min="10" max="28" value="16"></label>
-  <span class="opt" role="group" aria-label="평소 상태"><button data-base="0" aria-pressed="true">평소엔 안 보임</button><button data-base="1" aria-pressed="false">평소에도 옅게</button></span>
-  <span class="opt" role="group" aria-label="배열"><button data-hex="1" aria-pressed="true">엇갈린 배열</button><button data-hex="0" aria-pressed="false">바둑판 배열</button></span>
+<h2>1 · 예고에서 여운까지</h2>
+<p>네 박이 한 바퀴. 예고 두 박, 셋째 박에 타격, 그 뒤로 외곽선이 퍼지며 사라진다. 위 줄은 번짐(B), 아래 줄은 계단(C)이다.</p>
+<div class="tag">B · 번짐 — 옅은 면 위로 짙은 면이 번져 나간다</div>
+<div class="row">
+  <figure><canvas class="tile" data-shape="ring" data-mode="B" width="800" height="520"></canvas><figcaption><b>드럼</b> · 고리. 여운은 안팎으로 퍼지는 동심원</figcaption></figure>
+  <figure><canvas class="tile" data-shape="band" data-mode="B" width="800" height="520"></canvas><figcaption><b>하이햇</b> · 띠. 여운은 양옆으로 갈라지는 평행선</figcaption></figure>
+  <figure><canvas class="tile" data-shape="plane" data-mode="B" width="800" height="520"></canvas><figcaption><b>베이스</b> · 넓은 면. 여운은 가장자리를 따라 밀려나는 등고선</figcaption></figure>
+</div>
+<div class="tag">C · 계단 — 16분음마다 한 칸씩 짙어진다</div>
+<div class="row">
+  <figure><canvas class="tile" data-shape="ring" data-mode="C" width="800" height="520"></canvas></figure>
+  <figure><canvas class="tile" data-shape="band" data-mode="C" width="800" height="520"></canvas></figure>
+  <figure><canvas class="tile" data-shape="plane" data-mode="C" width="800" height="520"></canvas></figure>
 </div>
 
-<h2>2 · 예고 — 불투명도로</h2>
-<p>공격은 처음부터 제 모양의 면으로 나타나고, 불투명도가 박을 센다. 네 박이 한 바퀴다. 아래 네 점 중 셋째에서 터진다.</p>
-<div class="row r4" id="tele"></div>
-
-<h2>3 · 악기 — 소리가 나는 모양대로</h2>
-<p>악기를 무늬가 아니라 소리의 성질로 나눠 봤다. 생김새는 공격이 퍼지는 방식이고, 불투명도의 움직임은 그 소리의 길이다.</p>
-<div class="row r3" id="inst"></div>
-
-<h2>4 · 합쳐 보면</h2>
-<p>보스전 한 장면. 면이 겹친 자리는 저절로 짙어지고, 경기장 밖의 점은 플레이어 근처에서만 드러난다.</p>
-<figure id="comp"></figure>
+<h2>2 · 보스전에 얹어 보면</h2>
+<p>여덟 박짜리 악구가 되풀이된다. 마우스나 손가락으로 플레이어를 움직일 수 있다. 경기장 밖의 점(죽는 땅)은 전용 위험색으로 항상 옅게 보이고, 가까이 가면 커지고 진해진다.</p>
+<div class="grp" role="group" aria-label="예고 방식" id="mode" style="margin-bottom:12px">
+  <button data-mode="B" aria-pressed="false">예고 B · 번짐</button><button data-mode="C" aria-pressed="true">예고 C · 계단</button><button data-mode="BC" aria-pressed="false">섞기 · 짧으면 C, 길면 B</button>
+</div>
+<canvas id="scene" width="1920" height="1080"></canvas>
+<ul class="notes">
+  <li><b>면</b> · 지금 울리는 소리. 예고는 옅게, 타격은 꽉 차게</li>
+  <li><b>선</b> · 지나간 소리의 여운, 그리고 예고의 테두리. 굵기는 1~1.5뿐</li>
+  <li><b>점</b> · 죽는 땅. 악기와 겹치지 않는 전용 위험색으로 항상 보이고, 가까울수록 커지고 진해진다</li>
+  <li><b>고정된 선</b> · 보스 둘레의 동심선(화성), 화면을 가르는 세로선(구도)</li>
+</ul>
 </main>
 <script>
-const V = n => `var(--${n})`;
-const sv = (w, h, inner) => `<svg class="shot" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img"><rect width="${w}" height="${h}" fill="${V('bg')}"/>${inner}</svg>`;
-const annD = (x, y, r1, r2) => `M ${x - r2} ${y} a ${r2} ${r2} 0 1 0 ${2 * r2} 0 a ${r2} ${r2} 0 1 0 ${-2 * r2} 0 Z M ${x - r1} ${y} a ${r1} ${r1} 0 1 1 ${2 * r1} 0 a ${r1} ${r1} 0 1 1 ${-2 * r1} 0 Z`;
-const band = (cx, cy, ang, w, l0, l1) => { const a = ang * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), h = w / 2; return `M ${cx + c * l0 + s * h} ${cy + s * l0 - c * h} L ${cx + c * l1 + s * h} ${cy + s * l1 - c * h} L ${cx + c * l1 - s * h} ${cy + s * l1 + c * h} L ${cx + c * l0 - s * h} ${cy + s * l0 + c * h} Z`; };
+const BPM = 110, TAU = Math.PI * 2;
+let col = {};
+const readColors = () => { const cs = getComputedStyle(document.body); for (const k of ['bg', 'ink', 'd', 'a', 'a2', 'b', 'c', 'soft']) col[k] = cs.getPropertyValue('--' + k).trim(); };
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const easeOut = t => 1 - (1 - t) ** 3;
 
-/* ── 2. 예고 ── */
-const ticks = `<g fill="${V('ink')}">${[0, 1, 2, 3].map(i => `<circle class="cyc" style="animation-name:${i === 2 ? 'hitTick' : 'tick'};animation-delay:${i === 2 ? 0 : i * .545}s" cx="${96 + i * 16}" cy="164" r="${i === 2 ? 4 : 2.6}"/>`).join('')}</g>`;
-const core = `<circle cx="120" cy="84" r="8" fill="${V('ink')}"/>`;
-const ring = annD(120, 84, 26, 64);
-const tele = [
-  [`<path class="cyc" style="animation-name:t1" d="${ring}" fill="${V('a')}"/>`, '<b>A · 서서히</b> — 옅게 시작해 고르게 짙어지다 박에 꽉 찬다. 가장 조용하다'],
-  [`<clipPath id="cl2"><path d="${ring}" clip-rule="evenodd"/></clipPath><path class="cyc" style="animation-name:t2base" d="${ring}" fill="${V('a')}"/><g clip-path="url(#cl2)"><circle class="cyc o" style="animation-name:t2grow" cx="120" cy="84" r="64" fill="${V('a')}"/></g>`, '<b>B · 번짐</b> — 옅은 면 위로 짙은 면이 안에서 밖으로 번진다. 남은 시간이 길이로 보인다'],
-  [`<path class="cyc" style="animation-name:t3" d="${ring}" fill="${V('a')}"/>`, '<b>C · 계단</b> — 16분음마다 한 칸씩 짙어진다. 박을 눈으로 셀 수 있다'],
-  [`<path class="cyc" style="animation-name:t2base" d="${ring}" fill="${V('a')}"/><circle class="cyc o" style="animation-name:t4in" cx="120" cy="84" r="64" fill="${V('a')}"/>`, '<b>D · 모여듦</b> — 넓고 옅은 면이 제 크기로 줄어들며 박에 맞는다. 리듬 게임다운 방식'],
-];
-document.getElementById('tele').innerHTML = tele.map(([g, cap]) => `<figure>${sv(240, 180, g + core + ticks)}<figcaption>${cap}</figcaption></figure>`).join('');
-
-/* ── 3. 악기 ── */
-const env = (name, dur) => `class="env" style="animation:${name} ${dur}s linear infinite"`;
-const inst = [
-  [`<circle cx="120" cy="90" r="52" fill="${V('a')}" opacity=".1"/><circle ${env('envDrum', .545)} cx="120" cy="90" r="52" fill="${V('a')}"/><circle cx="120" cy="90" r="7" fill="${V('ink')}"/>`, '<b>드럼 · 한 점에서 퍼지는 원</b> — 박에 번쩍 켜지고 바로 꺼진다. 짧고 단단하다'],
-  [`<path d="${band(120, 90, -20, 12, -110, 110)}" fill="${V('b')}" opacity=".12"/><path ${env('envHat', .545)} d="${band(120, 90, -20, 12, -110, 110)}" fill="${V('b')}"/><path d="${band(120, 90, 34, 12, -110, 110)}" fill="${V('b')}" opacity=".12"/><path ${env('envHat', .545)} style="animation:envHat .545s linear infinite;animation-delay:-.136s" d="${band(120, 90, 34, 12, -110, 110)}" fill="${V('b')}"/>`, '<b>하이햇 · 가늘고 곧은 띠</b> — 잘게 깜빡인다. 여러 줄이 엇갈려 켜진다'],
-  [`<path d="M 0 180 V 96 Q 120 40 240 96 V 180 Z" fill="${V('c')}" opacity=".1"/><path ${env('envBass', 2.18)} d="M 0 180 V 96 Q 120 40 240 96 V 180 Z" fill="${V('c')}"/>`, '<b>베이스 · 넓게 덮는 면</b> — 천천히 차올라 오래 머물다 빠진다. 피할 곳을 찾아 걸어야 한다'],
-];
-document.getElementById('inst').innerHTML = inst.map(([g, cap]) => `<figure>${sv(240, 180, g)}<figcaption>${cap}</figcaption></figure>`).join('');
-
-/* ── 4. 합성 ── */
-{
-  const cx = 480, cy = 266, R = 232, px = 318, py = 404;
-  let dots = '';
-  for (let j = 0; j * 14 < 540; j++) for (let i = 0; i * 16 < 976; i++) {
-    const x = i * 16 + (j % 2 ? 8 : 0), y = j * 14;
-    if (Math.hypot(x - cx, y - cy) < R + 4) continue;
-    const k = Math.max(0, 1 - Math.hypot(x - px, y - py) / 190) ** 1.5;
-    if (k > .02) dots += `<circle cx="${x}" cy="${y}" r="${(.6 + 3.6 * k).toFixed(2)}" fill="${V('ink')}" opacity="${(.9 * k).toFixed(2)}"/>`;
+/* 모양 하나를 경로로. grow(0~1)는 번짐이 얼마나 나갔는지, off는 외곽선을 바깥으로 민 거리 */
+function path(g, s, grow = 1, off = 0) {
+  g.beginPath();
+  if (s.kind === 'ring') {
+    const r2 = s.r1 + (s.r2 - s.r1) * grow + off, r1 = Math.max(0, s.r1 - off);
+    g.arc(s.x, s.y, r2, 0, TAU); g.arc(s.x, s.y, r1, 0, TAU, true);
+  } else if (s.kind === 'band') {
+    const c = Math.cos(s.ang), n = Math.sin(s.ang), h = s.w / 2 + off, L = s.len * grow;
+    g.moveTo(s.x + n * h, s.y - c * h); g.lineTo(s.x + c * L + n * h, s.y + n * L - c * h);
+    g.lineTo(s.x + c * L - n * h, s.y + n * L + c * h); g.lineTo(s.x - n * h, s.y + c * h); g.closePath();
+  } else { // plane: 한쪽 변에서 차오르는 사각 면 (dir: 1이면 왼→오)
+    const w = s.w * grow + off;
+    if (s.dir > 0) g.rect(s.x, s.y - off, w, s.h + off * 2); else g.rect(s.x + s.w - w, s.y - off, w, s.h + off * 2);
   }
-  document.getElementById('comp').innerHTML = sv(960, 540, `
-    <circle cx="${cx}" cy="${cy}" r="${R}" fill="${V('soft')}"/>
-    ${dots}
-    <clipPath id="arena"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath>
-    <g clip-path="url(#arena)">
-      <path ${env('envBass', 2.18)} d="M 480 0 H 760 V 540 H 480 Z" fill="${V('c')}"/>
-      <path d="M 480 0 H 760 V 540 H 480 Z" fill="${V('c')}" opacity=".1"/>
-      <path class="cyc" style="animation-name:t3" d="${annD(cx, cy, 104, 158)}" fill="${V('a')}"/>
-      <path d="${band(cx, cy, 152, 12, 0, 300)}" fill="${V('b')}" opacity=".14"/><path ${env('envHat', .545)} d="${band(cx, cy, 152, 12, 0, 300)}" fill="${V('b')}"/>
-      <path d="${band(cx, cy, -28, 12, 0, 300)}" fill="${V('b')}" opacity=".14"/><path class="env" style="animation:envHat .545s linear infinite;animation-delay:-.136s" d="${band(cx, cy, -28, 12, 0, 300)}" fill="${V('b')}"/>
-    </g>
-    <path d="M ${cx} ${cy - 46} A 46 46 0 1 1 ${cx - 39.8} ${cy + 23}" fill="none" stroke="${V('ink')}" stroke-width="6"/>
-    <circle cx="${cx}" cy="${cy}" r="28" fill="${V('ink')}"/><path d="M ${cx} ${cy} V ${cy - 28} A 28 28 0 0 1 ${cx + 28} ${cy} Z" fill="${V('a2')}"/>
-    <circle cx="${px}" cy="${py}" r="15" fill="none" stroke="${V('ink')}" stroke-width="1" opacity=".5"/><circle cx="${px}" cy="${py}" r="8" fill="${V('ink')}"/>
-    <text x="56" y="64" font-family="Jost,sans-serif" font-size="22" font-weight="300" letter-spacing="2" fill="${V('ink')}" opacity=".9">III</text>
-    <text x="56" y="84" font-family="Jost,sans-serif" font-size="10.5" letter-spacing="3" fill="${V('ink')}" opacity=".6">TUTTI</text>`);
+}
+/* 외곽선만: 고리는 두 원, 띠는 두 평행선, 면은 차오르는 쪽 가장자리 */
+function outline(g, s, off) {
+  g.beginPath();
+  if (s.kind === 'ring') { g.arc(s.x, s.y, s.r2 + off, 0, TAU); if (s.r1 - off > 2) { g.moveTo(s.x + s.r1 - off, s.y); g.arc(s.x, s.y, s.r1 - off, 0, TAU); } }
+  else if (s.kind === 'band') { const c = Math.cos(s.ang), n = Math.sin(s.ang); for (const sg of [1, -1]) { const h = (s.w / 2 + off) * sg; g.moveTo(s.x + n * h, s.y - c * h); g.lineTo(s.x + c * s.len + n * h, s.y + n * s.len - c * h); } }
+  else { const x = s.dir > 0 ? s.x + s.w + off : s.x - off; g.moveTo(x, s.y); g.lineTo(x, s.y + s.h); if (off < 1) { g.rect(s.x, s.y, s.w, s.h); } }
 }
 
-/* ── 1. 점박이: 직접 움직여 보는 판 ── */
-{
-  const cv = document.getElementById('dots'), g = cv.getContext('2d'), W = 960, H = 540;
-  g.scale(2, 2);
-  const st = { x: 560, y: 270, tx: 560, ty: 270, rad: 180, gap: 16, base: 0, hex: 1, touched: false, t: 0 };
-  let col = {};
-  const readColors = () => { const cs = getComputedStyle(document.body); for (const k of ['bg', 'ink', 'a', 'soft', 'c']) col[k] = cs.getPropertyValue('--' + k).trim(); };
-  const rr = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
-  // 바닥: 왼쪽 단, 통로, 오른쪽 큰 원. 그 밖은 전부 죽는 땅.
-  const onFloor = (x, y) =>
-    (x >= 170 && x <= 330 && y >= 200 && y <= 340) || Math.hypot(x - 170, y - 270) <= 70 ||
-    (x >= 400 && x <= 720 && y >= 205 && y <= 335) || Math.hypot(x - 820, y - 270) <= 150;
-  function draw() {
-    st.t += 1 / 60;
-    if (!st.touched) { st.tx = 470 + Math.cos(st.t * .7) * 150; st.ty = 270 + Math.sin(st.t * 1.1) * 95; }
-    st.x += (st.tx - st.x) * .18; st.y += (st.ty - st.y) * .18;
-    g.fillStyle = col.bg; g.fillRect(0, 0, W, H);
-    g.fillStyle = col.soft;
-    g.beginPath(); g.arc(820, 270, 150, 0, 7); g.fill();
-    rr(400, 205, 320, 130, 0); g.fill();
-    rr(100, 200, 230, 140, [70, 0, 0, 70]); g.fill();
-    g.fillStyle = col.a; g.beginPath(); g.arc(170, 270, 18, 0, 7); g.fill();
-    const dead = !onFloor(st.x, st.y);
-    const gy = st.hex ? st.gap * .866 : st.gap;
-    g.fillStyle = dead ? col.a : col.ink;
-    for (let j = 0; j * gy < H + gy; j++) for (let i = 0; i * st.gap < W + st.gap; i++) {
-      const x = i * st.gap + (st.hex && j % 2 ? st.gap / 2 : 0), y = j * gy;
-      if (onFloor(x, y)) continue;
-      const k = Math.max(0, 1 - Math.hypot(x - st.x, y - st.y) / st.rad) ** 1.5;
-      const a = Math.max(st.base ? .1 : 0, .92 * k);
-      if (a < .015) continue;
-      g.globalAlpha = a;
-      g.beginPath(); g.arc(x, y, (st.base ? .9 : .5) + st.gap * .24 * k, 0, 7); g.fill();
+/**
+ * 공격 하나를 그린다. beat는 지금 박, atk.hit는 타격 박, atk.tele는 예고 길이(박), atk.hold는 머무는 길이(박).
+ * mode: 'B' 번짐, 'C' 계단.
+ */
+function drawAttack(g, atk, beat, mode) {
+  const s = atk.shape, color = col[atk.color];
+  const p = (beat - (atk.hit - atk.tele)) / atk.tele;       // 예고 진행 0~1
+  const e = beat - atk.hit;                                  // 타격 뒤로 흐른 박
+  const hold = atk.hold || 0;
+  g.save();
+  if (p >= 0 && p < 1) {
+    g.fillStyle = color;
+    if (mode === 'B') {
+      g.globalAlpha = .13; path(g, s); g.fill('evenodd');
+      g.globalAlpha = .42; path(g, s, clamp(p)); g.fill('evenodd');
+    } else {
+      const steps = atk.tele * 4, k = Math.floor(p * steps) + 1;
+      g.globalAlpha = .1 + .46 * (k / steps); path(g, s); g.fill('evenodd');
     }
-    g.globalAlpha = 1;
-    g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .5; g.beginPath(); g.arc(st.x, st.y, 15, 0, 7); g.stroke(); g.globalAlpha = 1;
-    g.fillStyle = col.ink; g.beginPath(); g.arc(st.x, st.y, 8, 0, 7); g.fill();
-    requestAnimationFrame(draw);
+    g.globalAlpha = .55; g.strokeStyle = color; g.lineWidth = 1.25; outline(g, s, 0); g.stroke();
+  } else if (e >= 0 && e < hold + .7) {
+    // 타격: 꽉 찬 면. 머문 뒤 옅어진다.
+    const fade = e < hold + .1 ? 1 : 1 - clamp((e - hold - .1) / .5);
+    g.fillStyle = color; g.globalAlpha = fade * (e < .1 ? 1 : .88); path(g, s); g.fill('evenodd');
   }
-  const at = e => { const r = cv.getBoundingClientRect(); st.tx = (e.clientX - r.left) / r.width * W; st.ty = (e.clientY - r.top) / r.height * H; st.touched = true; };
-  cv.addEventListener('pointermove', at); cv.addEventListener('pointerdown', at);
-  cv.addEventListener('pointerleave', () => { st.touched = false; });
-  document.getElementById('rad').addEventListener('input', e => { st.rad = +e.target.value; });
-  document.getElementById('gap').addEventListener('input', e => { st.gap = +e.target.value; });
-  for (const key of ['base', 'hex']) document.querySelectorAll(`[data-${key}]`).forEach(b => b.addEventListener('click', () => {
-    st[key] = +b.dataset[key];
-    document.querySelectorAll(`[data-${key}]`).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-  }));
-  document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click', () => {
-    document.body.dataset.p = b.dataset.p;
-    document.querySelectorAll('.pal button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    readColors();
-  }));
-  readColors();
-  draw();
+  // 여운: 외곽선이 바깥으로 퍼지며 옅어진다. 세 겹이 차례로.
+  if (e >= 0) {
+    g.strokeStyle = color;
+    for (let k = 0; k < 3; k++) {
+      const te = (e - k * .14) / 1.05;
+      if (te <= 0 || te >= 1) continue;
+      g.globalAlpha = .75 * (1 - te) ** 1.4;
+      g.lineWidth = 1.5 - te * .6;
+      outline(g, s, 4 + easeOut(te) * (atk.spread || 30) * (1 + k * .45));
+      g.stroke();
+    }
+  }
+  g.restore();
 }
+
+/* ── 작은 판: 모양 하나 × 예고 방식 하나 ── */
+const SHAPES = {
+  ring: { color: 'a', shape: { kind: 'ring', x: 200, y: 122, r1: 34, r2: 78 }, spread: 26 },
+  band: { color: 'b', shape: { kind: 'band', x: 52, y: 170, ang: -.33, w: 16, len: 320 }, spread: 22 },
+  plane: { color: 'c', shape: { kind: 'plane', x: 70, y: 56, w: 200, h: 140, dir: 1 }, spread: 34 },
+};
+function drawTile(cv, beat) {
+  const g = cv.getContext('2d');
+  g.setTransform(2, 0, 0, 2, 0, 0);
+  g.fillStyle = col.bg; g.fillRect(0, 0, 400, 260);
+  const b = beat % 4, def = SHAPES[cv.dataset.shape];
+  drawAttack(g, { ...def, hit: 2, tele: 2, hold: cv.dataset.shape === 'plane' ? .5 : 0 }, b, cv.dataset.mode);
+  if (cv.dataset.shape === 'ring') { g.fillStyle = col.ink; g.beginPath(); g.arc(200, 122, 8, 0, TAU); g.fill(); }
+  // 네 박
+  for (let i = 0; i < 4; i++) {
+    const on = Math.floor(b) === i;
+    g.fillStyle = col.ink; g.globalAlpha = on ? 1 : .28;
+    g.beginPath(); g.arc(176 + i * 16, 236, i === 2 ? 4 : 2.6, 0, TAU); g.fill();
+  }
+  g.globalAlpha = 1;
+}
+
+/* ── 보스전 ── */
+const AR = { x: 480, y: 266, r: 232 };
+const PHRASE = [
+  { color: 'a', hit: 2, tele: 2, spread: 22, shape: { kind: 'ring', x: AR.x, y: AR.y, r1: 96, r2: 150 } },
+  { color: 'b', hit: 3, tele: 1, spread: 20, shape: { kind: 'band', x: AR.x, y: AR.y, ang: -.5, w: 14, len: 260 } },
+  { color: 'b', hit: 3, tele: 1, spread: 20, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 2.64, w: 14, len: 260 } },
+  { color: 'a', hit: 4, tele: 2, spread: 22, shape: { kind: 'ring', x: AR.x, y: AR.y, r1: 150, r2: 204 } },
+  { color: 'b', hit: 5, tele: 1, spread: 20, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 1.07, w: 14, len: 260 } },
+  { color: 'b', hit: 5, tele: 1, spread: 20, shape: { kind: 'band', x: AR.x, y: AR.y, ang: 4.21, w: 14, len: 260 } },
+  { color: 'c', hit: 7, tele: 3, hold: 1, spread: 30, shape: { kind: 'plane', x: AR.x, y: AR.y - AR.r, w: AR.r, h: AR.r * 2, dir: 1 } },
+];
+const scene = document.getElementById('scene'), sg = scene.getContext('2d');
+const pl = { x: 330, y: 400, tx: 330, ty: 400, touched: false };
+let sceneMode = 'C';
+function drawScene(beat, t) {
+  const g = sg;
+  g.setTransform(2, 0, 0, 2, 0, 0);
+  g.fillStyle = col.bg; g.fillRect(0, 0, 960, 540);
+  if (!pl.touched) { pl.tx = AR.x + Math.cos(t * .5 + 2.4) * 205; pl.ty = AR.y + Math.sin(t * .5 + 2.4) * 205; }
+  pl.x += (pl.tx - pl.x) * .16; pl.y += (pl.ty - pl.y) * .16;
+  const pulse = Math.exp(-(beat % 1) * 5);
+  // 경기장
+  g.fillStyle = col.soft; g.beginPath(); g.arc(AR.x, AR.y, AR.r, 0, TAU); g.fill();
+  // 점: 죽는 땅
+  const dead = Math.hypot(pl.x - AR.x, pl.y - AR.y) > AR.r;
+  // 위험색은 악기 색과 겹치지 않는 전용 색. 멀리서도 옅게 보이고, 가까울수록 커지고 진해진다.
+  g.fillStyle = col.d;
+  for (let j = 0; j * 13.9 < 554; j++) for (let i = 0; i * 16 < 976; i++) {
+    const x = i * 16 + (j % 2 ? 8 : 0), y = j * 13.9;
+    if (Math.hypot(x - AR.x, y - AR.y) < AR.r + 3) continue;
+    const k = clamp(1 - Math.hypot(x - pl.x, y - pl.y) / 180) ** 1.5;
+    g.globalAlpha = Math.min(1, (dead ? .5 : .3) + .7 * k); g.beginPath(); g.arc(x, y, 1.1 + 3.6 * k, 0, TAU); g.fill();
+  }
+  g.globalAlpha = 1;
+  // 구도선
+  g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .7;
+  g.beginPath(); g.moveTo(214, 36); g.lineTo(214, 504); g.moveTo(232, 96); g.lineTo(232, 440); g.stroke();
+  g.globalAlpha = 1;
+  // 공격 (경기장 안으로 잘라서)
+  g.save(); g.beginPath(); g.arc(AR.x, AR.y, AR.r, 0, TAU); g.clip();
+  const b = beat % 8;
+  for (const atk of PHRASE) {
+    const mode = sceneMode === 'BC' ? (atk.tele >= 2 ? 'B' : 'C') : sceneMode;
+    drawAttack(g, atk, b, mode);
+    drawAttack(g, atk, b + 8, mode);   // 악구 끝을 넘어가는 여운
+  }
+  g.restore();
+  // 화성: 보스 둘레의 동심선
+  g.strokeStyle = col.ink; g.lineWidth = 1;
+  [56, 64, 72].forEach((r, i) => { g.globalAlpha = .42 - i * .1; g.beginPath(); g.arc(AR.x, AR.y, r + pulse * 2, 0, TAU); g.stroke(); });
+  g.globalAlpha = 1;
+  // 보스
+  g.strokeStyle = col.ink; g.lineWidth = 6; g.beginPath(); g.arc(AR.x, AR.y, 44, -Math.PI / 2, -Math.PI / 2 + TAU * .66); g.stroke();
+  const br = 27 * (1 + .09 * pulse);
+  g.fillStyle = col.ink; g.beginPath(); g.arc(AR.x, AR.y, br, 0, TAU); g.fill();
+  g.fillStyle = col.a2; g.beginPath(); g.moveTo(AR.x, AR.y); g.arc(AR.x, AR.y, br, -Math.PI / 2, 0); g.closePath(); g.fill();
+  // 플레이어
+  g.strokeStyle = col.ink; g.lineWidth = 1; g.globalAlpha = .5; g.beginPath(); g.arc(pl.x, pl.y, 15, 0, TAU); g.stroke(); g.globalAlpha = 1;
+  g.fillStyle = col.ink; g.beginPath(); g.arc(pl.x, pl.y, 8 * (1 + .12 * pulse), 0, TAU); g.fill();
+  // 글자와 박
+  g.fillStyle = col.ink; g.textBaseline = 'alphabetic';
+  g.font = '300 22px Jost, sans-serif'; g.globalAlpha = .9; g.fillText('III', 56, 64);
+  g.font = '400 10.5px Jost, sans-serif'; g.globalAlpha = .6; g.fillText('T U T T I', 56, 84);
+  for (let i = 0; i < 8; i++) { g.globalAlpha = Math.floor(b) === i ? 1 : .28; g.beginPath(); g.arc(424 + i * 16, 512, i % 4 === 0 ? 3.4 : 2.4, 0, TAU); g.fill(); }
+  g.globalAlpha = 1;
+}
+
+const tiles = [...document.querySelectorAll('canvas.tile')];
+const t0 = performance.now();
+function frame(now) {
+  const t = (now - t0) / 1000, beat = t * BPM / 60;
+  for (const cv of tiles) drawTile(cv, beat);
+  drawScene(beat, t);
+  requestAnimationFrame(frame);
+}
+const at = e => { const r = scene.getBoundingClientRect(); pl.tx = (e.clientX - r.left) / r.width * 960; pl.ty = (e.clientY - r.top) / r.height * 540; pl.touched = true; };
+scene.addEventListener('pointermove', at); scene.addEventListener('pointerdown', at);
+scene.addEventListener('pointerleave', () => { pl.touched = false; });
+const press = (root, attr, fn) => root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  root.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  fn(b.dataset[attr]);
+}));
+press(document.getElementById('pal'), 'p', v => { document.body.dataset.p = v; readColors(); });
+press(document.getElementById('mode'), 'mode', v => { sceneMode = v; });
+readColors();
+requestAnimationFrame(frame);
 </script>
 </body>
 </html>
