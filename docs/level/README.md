@@ -1,6 +1,6 @@
 # 레벨디자인 기록
 
-레벨디자인 세션이 맡는 일: 맵, 기믹 설계와 배치, 보스 패턴, 난이도의 흐름. 세션 사이의 약속은 `docs/handoff/README.md`, 새 구조는 `docs/superpowers/specs/2026-11-18-stage-system-design.md`(승인 대기).
+레벨디자인 세션이 맡는 일: 맵, 기믹 설계와 배치, 보스 패턴, 난이도의 흐름. 세션 사이의 약속은 `docs/handoff/README.md`, 새 구조는 `docs/superpowers/specs/2026-11-18-stage-system-design.md`(승인됨, 고닷에서 바로 짓는다).
 
 표기: **[결정]** 은 기획자가 정한 것, **[까미]** 는 레벨디자인 세션의 제안(바꿔도 됨)이다.
 
