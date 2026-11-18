@@ -1,0 +1,1602 @@
+{
+ "id": "stage-01",
+ "name": "첫 스테이지",
+ "meter": {
+  "bpm": 110,
+  "stepsPerBeat": 4,
+  "beatsPerBar": 4
+ },
+ "seed": 7,
+ "lives": 3,
+ "start": [
+  0,
+  10.5
+ ],
+ "map": {
+  "ground": [
+   {
+    "kind": "circle",
+    "x": 0,
+    "y": 0,
+    "r": 14.0
+   },
+   {
+    "kind": "sector",
+    "x": 0,
+    "y": 0,
+    "r0": 13.5,
+    "r1": 30.0,
+    "a0": 94,
+    "a1": 206
+   },
+   {
+    "kind": "sector",
+    "x": 0,
+    "y": 0,
+    "r0": 13.5,
+    "r1": 30.0,
+    "a0": 214,
+    "a1": 326
+   },
+   {
+    "kind": "sector",
+    "x": 0,
+    "y": 0,
+    "r0": 13.5,
+    "r1": 30.0,
+    "a0": -26,
+    "a1": 86
+   }
+  ],
+  "holes": [
+   {
+    "kind": "sector",
+    "x": 0,
+    "y": 0,
+    "r0": 4.6,
+    "r1": 7.0,
+    "a0": 0,
+    "a1": 360
+   },
+   {
+    "kind": "circle",
+    "x": -16.887,
+    "y": 9.75,
+    "r": 1.6
+   },
+   {
+    "kind": "circle",
+    "x": -5.814,
+    "y": 15.975,
+    "r": 1.4
+   },
+   {
+    "kind": "circle",
+    "x": -20.267,
+    "y": 4.679,
+    "r": 1.2
+   },
+   {
+    "kind": "circle",
+    "x": -10.25,
+    "y": 17.754,
+    "r": 1.2
+   },
+   {
+    "kind": "circle",
+    "x": 11.892,
+    "y": -14.172,
+    "r": 1.5
+   },
+   {
+    "kind": "circle",
+    "x": -12.621,
+    "y": -16.154,
+    "r": 1.5
+   },
+   {
+    "kind": "sector",
+    "x": 0,
+    "y": 0,
+    "r0": 17.8,
+    "r1": 20.8,
+    "a0": -26,
+    "a1": 86
+   }
+  ]
+ },
+ "attacks": {
+  "circle": {
+   "shape": {
+    "kind": "circle",
+    "r": 0.5833333333333334
+   },
+   "tele": 8,
+   "anchor": "target",
+   "layer": "lead"
+  },
+  "circle-1": {
+   "shape": {
+    "kind": "circle",
+    "r": 0.5833333333333334
+   },
+   "tele": 4,
+   "anchor": "target",
+   "layer": "lead"
+  },
+  "around": {
+   "shape": {
+    "kind": "circle",
+    "r": 1.0
+   },
+   "tele": 8,
+   "layer": "lead"
+  },
+  "ring-1": {
+   "shape": {
+    "kind": "ring",
+    "r0": 0.3333333333333333,
+    "r1": 1.25
+   },
+   "tele": 4,
+   "layer": "drum"
+  },
+  "ring-2": {
+   "shape": {
+    "kind": "ring",
+    "r0": 1.25,
+    "r1": 2.1666666666666665
+   },
+   "tele": 4,
+   "layer": "drum"
+  },
+  "ring-3": {
+   "shape": {
+    "kind": "ring",
+    "r0": 2.1666666666666665,
+    "r1": 3.3333333333333335
+   },
+   "tele": 4,
+   "layer": "drum"
+  },
+  "beam": {
+   "shape": {
+    "kind": "beam",
+    "w": 0.5833333333333334,
+    "len": 5.0
+   },
+   "tele": 4,
+   "layer": "hat"
+  },
+  "zone": {
+   "shape": {
+    "kind": "zone",
+    "w": 1.25,
+    "h": 1.25
+   },
+   "tele": 8,
+   "hold": 8,
+   "layer": "bass"
+  },
+  "half": {
+   "shape": {
+    "kind": "zone",
+    "w": 3.2,
+    "h": 4.266666666666667
+   },
+   "tele": 8,
+   "hold": 4,
+   "layer": "bass"
+  },
+  "tide": {
+   "shape": {
+    "kind": "zone",
+    "w": 3.4,
+    "h": 1.0
+   },
+   "tele": 4,
+   "layer": "bass"
+  }
+ },
+ "emitters": [
+  {
+   "id": "note-0",
+   "kind": "monster",
+   "x": 6.428,
+   "y": 7.66,
+   "body": 0.22,
+   "range": 6.0,
+   "motion": {
+    "kind": "approach",
+    "every": 4,
+    "by": 0.5,
+    "min": 2.5,
+    "sight": 6.0
+   },
+   "pattern": {
+    "length": 32,
+    "rest": 32,
+    "phase": 0,
+    "events": [
+     {
+      "at": 8,
+      "attack": "circle"
+     },
+     {
+      "at": 16,
+      "attack": "circle"
+     },
+     {
+      "at": 24,
+      "attack": "circle"
+     }
+    ]
+   }
+  },
+  {
+   "id": "note-1",
+   "kind": "monster",
+   "x": -6.428,
+   "y": 7.66,
+   "body": 0.22,
+   "range": 6.0,
+   "motion": {
+    "kind": "approach",
+    "every": 4,
+    "by": 0.5,
+    "min": 2.5,
+    "sight": 6.0
+   },
+   "pattern": {
+    "length": 32,
+    "rest": 32,
+    "phase": 32,
+    "events": [
+     {
+      "at": 8,
+      "attack": "circle"
+     },
+     {
+      "at": 16,
+      "attack": "circle"
+     },
+     {
+      "at": 24,
+      "attack": "circle"
+     }
+    ]
+   }
+  },
+  {
+   "id": "drum-in",
+   "kind": "device",
+   "x": -12.557,
+   "y": 7.25,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "ring-1"
+     },
+     {
+      "at": 8,
+      "attack": "ring-2"
+     },
+     {
+      "at": 12,
+      "attack": "ring-3"
+     }
+    ]
+   }
+  },
+  {
+   "id": "drum-mid-0",
+   "kind": "device",
+   "x": -11.082,
+   "y": 14.184,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "ring-1"
+     },
+     {
+      "at": 8,
+      "attack": "ring-2"
+     },
+     {
+      "at": 12,
+      "attack": "ring-3"
+     }
+    ],
+    "phase": 0
+   }
+  },
+  {
+   "id": "drum-mid-1",
+   "kind": "device",
+   "x": -17.825,
+   "y": 2.505,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "ring-1"
+     },
+     {
+      "at": 8,
+      "attack": "ring-2"
+     },
+     {
+      "at": 12,
+      "attack": "ring-3"
+     }
+    ],
+    "phase": 8
+   }
+  },
+  {
+   "id": "drum-mid-2",
+   "kind": "device",
+   "x": -19.773,
+   "y": 9.644,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "ring-1"
+     },
+     {
+      "at": 8,
+      "attack": "ring-2"
+     },
+     {
+      "at": 12,
+      "attack": "ring-3"
+     }
+    ],
+    "phase": 0
+   }
+  },
+  {
+   "id": "drum-mid-3",
+   "kind": "device",
+   "x": -21.5,
+   "y": 0.0,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "ring-1"
+     },
+     {
+      "at": 8,
+      "attack": "ring-2"
+     },
+     {
+      "at": 12,
+      "attack": "ring-3"
+     }
+    ],
+    "phase": 8
+   }
+  },
+  {
+   "id": "drum-mix",
+   "kind": "device",
+   "x": -22.874,
+   "y": 2.404,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "ring-1"
+     },
+     {
+      "at": 8,
+      "attack": "ring-2"
+     },
+     {
+      "at": 12,
+      "attack": "ring-3"
+     }
+    ],
+    "phase": 8
+   }
+  },
+  {
+   "id": "drum-note",
+   "kind": "monster",
+   "x": -22.083,
+   "y": 8.037,
+   "body": 0.22,
+   "range": 6.0,
+   "motion": {
+    "kind": "approach",
+    "every": 4,
+    "by": 0.5,
+    "min": 2.5,
+    "sight": 6.0
+   },
+   "pattern": {
+    "length": 32,
+    "rest": 32,
+    "events": [
+     {
+      "at": 8,
+      "attack": "circle"
+     },
+     {
+      "at": 16,
+      "attack": "circle"
+     },
+     {
+      "at": 24,
+      "attack": "circle"
+     }
+    ]
+   }
+  },
+  {
+   "id": "drum-guardian",
+   "kind": "guardian",
+   "x": -15.282,
+   "y": 21.034,
+   "hp": 120,
+   "body": 0.33
+  },
+  {
+   "id": "hat-in",
+   "kind": "device",
+   "x": -0.0,
+   "y": -14.5,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 180
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 90
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 270
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 180
+     }
+    ]
+   }
+  },
+  {
+   "id": "hat-mid-0",
+   "kind": "device",
+   "x": -5.408,
+   "y": -16.643,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 180
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 90
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 270
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 180
+     }
+    ],
+    "phase": 0
+   }
+  },
+  {
+   "id": "hat-mid-1",
+   "kind": "device",
+   "x": 4.717,
+   "y": -18.921,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 180
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 90
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 270
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 180
+     }
+    ],
+    "phase": 16
+   }
+  },
+  {
+   "id": "hat-mid-2",
+   "kind": "device",
+   "x": -2.247,
+   "y": -21.382,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 180
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 90
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 270
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 180
+     }
+    ],
+    "phase": 8
+   }
+  },
+  {
+   "id": "hat-mix",
+   "kind": "device",
+   "x": 9.355,
+   "y": -21.012,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 4,
+      "attack": "beam",
+      "rot": 180
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 90
+     },
+     {
+      "at": 8,
+      "attack": "beam",
+      "rot": 270
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 0
+     },
+     {
+      "at": 12,
+      "attack": "beam",
+      "rot": 180
+     }
+    ],
+    "phase": 8
+   }
+  },
+  {
+   "id": "hat-note",
+   "kind": "monster",
+   "x": 4.081,
+   "y": -23.143,
+   "body": 0.22,
+   "range": 6.0,
+   "motion": {
+    "kind": "approach",
+    "every": 4,
+    "by": 0.5,
+    "min": 2.5,
+    "sight": 6.0
+   },
+   "pattern": {
+    "length": 32,
+    "rest": 32,
+    "events": [
+     {
+      "at": 8,
+      "attack": "circle"
+     },
+     {
+      "at": 16,
+      "attack": "circle"
+     },
+     {
+      "at": 24,
+      "attack": "circle"
+     }
+    ]
+   }
+  },
+  {
+   "id": "hat-guardian",
+   "kind": "guardian",
+   "x": -10.575,
+   "y": -23.752,
+   "hp": 120,
+   "body": 0.33
+  },
+  {
+   "id": "bass-in",
+   "kind": "device",
+   "x": 12.557,
+   "y": 7.25,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 8,
+      "attack": "zone"
+     }
+    ]
+   }
+  },
+  {
+   "id": "bass-mid-0",
+   "kind": "device",
+   "x": 16.3,
+   "y": 0.0,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 8,
+      "attack": "zone"
+     }
+    ],
+    "phase": 0
+   }
+  },
+  {
+   "id": "bass-mid-1",
+   "kind": "device",
+   "x": 8.15,
+   "y": 14.116,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 8,
+      "attack": "zone"
+     }
+    ],
+    "phase": 16
+   }
+  },
+  {
+   "id": "bass-mid-2",
+   "kind": "device",
+   "x": 21.638,
+   "y": 5.395,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 8,
+      "attack": "zone"
+     }
+    ],
+    "phase": 8
+   }
+  },
+  {
+   "id": "bass-mid-3",
+   "kind": "device",
+   "x": 15.491,
+   "y": 16.041,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 8,
+      "attack": "zone"
+     }
+    ],
+    "phase": 24
+   }
+  },
+  {
+   "id": "tide-0",
+   "kind": "device",
+   "x": 19.253,
+   "y": -1.346,
+   "body": 0.0,
+   "hidden": true,
+   "rot": -4,
+   "follow": {
+    "layer": "bass",
+    "attack": "tide"
+   }
+  },
+  {
+   "id": "tide-1",
+   "kind": "device",
+   "x": 16.714,
+   "y": 9.65,
+   "body": 0.0,
+   "hidden": true,
+   "rot": 30,
+   "follow": {
+    "layer": "bass",
+    "attack": "tide"
+   }
+  },
+  {
+   "id": "tide-2",
+   "kind": "device",
+   "x": 8.461,
+   "y": 17.347,
+   "body": 0.0,
+   "hidden": true,
+   "rot": 64,
+   "follow": {
+    "layer": "bass",
+    "attack": "tide"
+   }
+  },
+  {
+   "id": "bass-mix",
+   "kind": "device",
+   "x": 13.519,
+   "y": 18.607,
+   "body": 0.2,
+   "pattern": {
+    "length": 16,
+    "rest": 16,
+    "events": [
+     {
+      "at": 8,
+      "attack": "zone"
+     }
+    ],
+    "phase": 8
+   }
+  },
+  {
+   "id": "bass-note",
+   "kind": "monster",
+   "x": 18.002,
+   "y": 15.106,
+   "body": 0.22,
+   "range": 6.0,
+   "motion": {
+    "kind": "approach",
+    "every": 4,
+    "by": 0.5,
+    "min": 2.5,
+    "sight": 6.0
+   },
+   "pattern": {
+    "length": 32,
+    "rest": 32,
+    "events": [
+     {
+      "at": 8,
+      "attack": "circle"
+     },
+     {
+      "at": 16,
+      "attack": "circle"
+     },
+     {
+      "at": 24,
+      "attack": "circle"
+     }
+    ]
+   }
+  },
+  {
+   "id": "bass-guardian",
+   "kind": "guardian",
+   "x": 25.858,
+   "y": 2.718,
+   "hp": 120,
+   "body": 0.33
+  },
+  {
+   "id": "boss",
+   "kind": "boss",
+   "x": 0,
+   "y": 0,
+   "hp": 900,
+   "body": 0.42
+  }
+ ],
+ "parts": [
+  {
+   "layer": "drum",
+   "x": -26.683,
+   "y": 6.653,
+   "guard": "drum-guard"
+  },
+  {
+   "layer": "hat",
+   "x": 7.58,
+   "y": -26.435,
+   "guard": "hat-guard"
+  },
+  {
+   "layer": "bass",
+   "x": 19.103,
+   "y": 19.782,
+   "guard": "bass-guard"
+  }
+ ],
+ "plates": [
+  {
+   "id": "plate-drum",
+   "layer": "drum",
+   "x": -7.794,
+   "y": 4.5,
+   "r": 0.3333333333333333,
+   "flag": "plate-drum"
+  },
+  {
+   "id": "plate-hat",
+   "layer": "hat",
+   "x": -0.0,
+   "y": -9.0,
+   "r": 0.3333333333333333,
+   "flag": "plate-hat"
+  },
+  {
+   "id": "plate-bass",
+   "layer": "bass",
+   "x": 7.794,
+   "y": 4.5,
+   "r": 0.3333333333333333,
+   "flag": "plate-bass"
+  },
+  {
+   "id": "pad-drum",
+   "layer": "drum",
+   "x": -1.9166666666666667,
+   "y": 0.9166666666666666,
+   "r": 0.3333333333333333,
+   "encounter": "boss"
+  },
+  {
+   "id": "pad-hat",
+   "layer": "hat",
+   "x": 0.0,
+   "y": -1.4166666666666667,
+   "r": 0.3333333333333333,
+   "encounter": "boss"
+  },
+  {
+   "id": "pad-bass",
+   "layer": "bass",
+   "x": 1.9166666666666667,
+   "y": 0.9166666666666666,
+   "r": 0.3333333333333333,
+   "encounter": "boss"
+  }
+ ],
+ "gates": [
+  {
+   "id": "boss-bridge",
+   "shape": {
+    "kind": "rect",
+    "x": 0,
+    "y": 5.8,
+    "w": 1.6,
+    "h": 2.8
+   },
+   "requires": {
+    "flags": [
+     "plate-drum",
+     "plate-hat",
+     "plate-bass"
+    ]
+   }
+  },
+  {
+   "id": "drum-shortcut",
+   "shape": {
+    "kind": "rect",
+    "x": -22.95,
+    "y": -13.25,
+    "w": 3.0,
+    "h": 6.5,
+    "rot": 210
+   },
+   "requires": {
+    "layer": "drum"
+   }
+  },
+  {
+   "id": "hat-shortcut",
+   "shape": {
+    "kind": "rect",
+    "x": 22.95,
+    "y": -13.25,
+    "w": 3.0,
+    "h": 6.5,
+    "rot": 330
+   },
+   "requires": {
+    "layer": "hat"
+   }
+  },
+  {
+   "id": "causeway-0",
+   "shape": {
+    "kind": "capsule",
+    "x1": 17.557,
+    "y1": -1.228,
+    "x2": 20.949,
+    "y2": -1.465,
+    "r": 0.5
+   },
+   "requires": {}
+  },
+  {
+   "id": "causeway-1",
+   "shape": {
+    "kind": "capsule",
+    "x1": 15.242,
+    "y1": 8.8,
+    "x2": 18.187,
+    "y2": 10.5,
+    "r": 0.5
+   },
+   "requires": {}
+  },
+  {
+   "id": "causeway-2",
+   "shape": {
+    "kind": "capsule",
+    "x1": 7.715,
+    "y1": 15.819,
+    "x2": 9.206,
+    "y2": 18.875,
+    "r": 0.5
+   },
+   "requires": {}
+  },
+  {
+   "id": "bass-shortcut",
+   "shape": {
+    "kind": "rect",
+    "x": 0.0,
+    "y": 26.5,
+    "w": 3.0,
+    "h": 6.5,
+    "rot": 90
+   },
+   "requires": {
+    "layer": "bass"
+   }
+  }
+ ],
+ "checkpoints": [
+  {
+   "x": 0,
+   "y": 10.5,
+   "r": 1.0
+  },
+  {
+   "x": 0,
+   "y": 7.8,
+   "r": 0.8
+  },
+  {
+   "x": -18.358,
+   "y": 7.417,
+   "r": 0.8
+  },
+  {
+   "x": -13.175,
+   "y": 16.863,
+   "r": 0.8
+  },
+  {
+   "x": -0.0,
+   "y": -19.8,
+   "r": 0.8
+  },
+  {
+   "x": -8.017,
+   "y": -19.842,
+   "r": 0.8
+  },
+  {
+   "x": 18.706,
+   "y": 10.8,
+   "r": 0.8
+  },
+  {
+   "x": 21.192,
+   "y": 2.978,
+   "r": 0.8
+  }
+ ],
+ "encounters": [
+  {
+   "id": "drum-guard",
+   "kind": "guardian",
+   "emitter": "drum-guardian",
+   "x": -15.282,
+   "y": 21.034,
+   "r": 4.0,
+   "flag": "drum-passed",
+   "phrases": [
+    {
+     "id": "seung-drum",
+     "bars": 4,
+     "events": [
+      {
+       "at": 4,
+       "attack": "ring-1"
+      },
+      {
+       "at": 8,
+       "attack": "ring-2"
+      },
+      {
+       "at": 12,
+       "attack": "ring-3"
+      },
+      {
+       "at": 36,
+       "attack": "ring-1"
+      },
+      {
+       "at": 40,
+       "attack": "ring-2"
+      },
+      {
+       "at": 44,
+       "attack": "ring-3"
+      }
+     ],
+     "openBars": [
+      1,
+      3
+     ],
+     "weakTo": "hat",
+     "advance": {
+      "hpBelow": 0,
+      "answered": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "hat-guard",
+   "kind": "guardian",
+   "emitter": "hat-guardian",
+   "x": -10.575,
+   "y": -23.752,
+   "r": 4.0,
+   "flag": "hat-passed",
+   "phrases": [
+    {
+     "id": "seung-hat",
+     "bars": 2,
+     "weakTo": "drum",
+     "events": [
+      {
+       "at": 4,
+       "attack": "beam",
+       "rot": 0
+      },
+      {
+       "at": 4,
+       "attack": "beam",
+       "rot": 180
+      },
+      {
+       "at": 8,
+       "attack": "beam",
+       "rot": 90
+      },
+      {
+       "at": 8,
+       "attack": "beam",
+       "rot": 270
+      },
+      {
+       "at": 12,
+       "attack": "beam",
+       "rot": 0
+      },
+      {
+       "at": 12,
+       "attack": "beam",
+       "rot": 180
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 45
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 135
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 225
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 315
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 0
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 90
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 180
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 270
+      },
+      {
+       "at": 28,
+       "attack": "circle"
+      }
+     ],
+     "advance": {
+      "hpBelow": 0,
+      "answered": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "bass-guard",
+   "kind": "guardian",
+   "emitter": "bass-guardian",
+   "x": 25.858,
+   "y": 2.718,
+   "r": 4.0,
+   "flag": "bass-passed",
+   "phrases": [
+    {
+     "id": "bass-guard",
+     "bars": 4,
+     "events": [
+      {
+       "at": 8,
+       "attack": "zone",
+       "anchor": "target"
+      },
+      {
+       "at": 24,
+       "attack": "circle"
+      },
+      {
+       "at": 40,
+       "attack": "zone",
+       "anchor": "target"
+      },
+      {
+       "at": 56,
+       "attack": "circle"
+      }
+     ],
+     "advance": {
+      "hpBelow": 0,
+      "answered": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "boss",
+   "kind": "boss",
+   "emitter": "boss",
+   "x": 0,
+   "y": 0,
+   "r": 4.6,
+   "flag": "boss-down",
+   "phrases": [
+    {
+     "id": "gi-solo",
+     "bars": 4,
+     "events": [
+      {
+       "at": 8,
+       "attack": "circle"
+      },
+      {
+       "at": 16,
+       "attack": "circle"
+      },
+      {
+       "at": 24,
+       "attack": "circle"
+      }
+     ],
+     "openBars": [
+      2,
+      3
+     ],
+     "advance": {
+      "hpBelow": 0.85
+     }
+    },
+    {
+     "id": "seung-drum",
+     "bars": 4,
+     "events": [
+      {
+       "at": 4,
+       "attack": "ring-1"
+      },
+      {
+       "at": 8,
+       "attack": "ring-2"
+      },
+      {
+       "at": 12,
+       "attack": "ring-3"
+      },
+      {
+       "at": 36,
+       "attack": "ring-1"
+      },
+      {
+       "at": 40,
+       "attack": "ring-2"
+      },
+      {
+       "at": 44,
+       "attack": "ring-3"
+      }
+     ],
+     "openBars": [
+      1,
+      3
+     ],
+     "weakTo": "hat",
+     "advance": {
+      "hpBelow": 0.65
+     }
+    },
+    {
+     "id": "seung-hat",
+     "bars": 2,
+     "weakTo": "drum",
+     "advance": {
+      "hpBelow": 0.45
+     },
+     "events": [
+      {
+       "at": 4,
+       "attack": "beam",
+       "rot": 0
+      },
+      {
+       "at": 4,
+       "attack": "beam",
+       "rot": 180
+      },
+      {
+       "at": 8,
+       "attack": "beam",
+       "rot": 90
+      },
+      {
+       "at": 8,
+       "attack": "beam",
+       "rot": 270
+      },
+      {
+       "at": 12,
+       "attack": "beam",
+       "rot": 0
+      },
+      {
+       "at": 12,
+       "attack": "beam",
+       "rot": 180
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 45
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 135
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 225
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 315
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 0
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 90
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 180
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 270
+      },
+      {
+       "at": 28,
+       "attack": "circle"
+      }
+     ]
+    },
+    {
+     "id": "jeon-resolve",
+     "bars": 4,
+     "shield": true,
+     "advance": {
+      "solved": true
+     },
+     "events": [
+      {
+       "at": 8,
+       "attack": "around"
+      },
+      {
+       "at": 16,
+       "attack": "zone",
+       "anchor": "fixed",
+       "x": -1.9166666666666667,
+       "y": 0.9166666666666666
+      },
+      {
+       "at": 32,
+       "attack": "zone",
+       "anchor": "fixed",
+       "x": 0.0,
+       "y": -1.4166666666666667
+      },
+      {
+       "at": 40,
+       "attack": "around"
+      },
+      {
+       "at": 48,
+       "attack": "zone",
+       "anchor": "fixed",
+       "x": 1.9166666666666667,
+       "y": 0.9166666666666666
+      }
+     ]
+    },
+    {
+     "id": "gyeol-tutti",
+     "bars": 4,
+     "advance": {
+      "hpBelow": 0
+     },
+     "events": [
+      {
+       "at": 4,
+       "attack": "ring-1"
+      },
+      {
+       "at": 8,
+       "attack": "ring-2"
+      },
+      {
+       "at": 12,
+       "attack": "ring-3"
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 0
+      },
+      {
+       "at": 20,
+       "attack": "beam",
+       "rot": 180
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 90
+      },
+      {
+       "at": 24,
+       "attack": "beam",
+       "rot": 270
+      },
+      {
+       "at": 28,
+       "attack": "beam",
+       "rot": 45
+      },
+      {
+       "at": 28,
+       "attack": "beam",
+       "rot": 135
+      },
+      {
+       "at": 28,
+       "attack": "beam",
+       "rot": 225
+      },
+      {
+       "at": 28,
+       "attack": "beam",
+       "rot": 315
+      },
+      {
+       "at": 36,
+       "attack": "circle-1"
+      },
+      {
+       "at": 40,
+       "attack": "circle-1"
+      },
+      {
+       "at": 44,
+       "attack": "circle-1"
+      },
+      {
+       "at": 48,
+       "attack": "half",
+       "anchor": "fixed",
+       "x": -1.6,
+       "y": 0
+      },
+      {
+       "at": 56,
+       "attack": "half",
+       "anchor": "fixed",
+       "x": 1.6,
+       "y": 0
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
