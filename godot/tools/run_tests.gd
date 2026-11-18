@@ -91,5 +91,7 @@ func _init() -> void:
 	check("timbres differ from one another", Synth.render(a.layers["bass"], a.loop_steps, 110.0, 1.0, {"bass": 0}) != Synth.render(a.layers["bass"], a.loop_steps, 110.0, 1.0, {"bass": 1}))
 	check("the band-limited saw has no step at the wrap", absf(Synth._saw(0.9999, 0.01) - Synth._saw(0.0001, 0.01)) < 0.05)
 
+	load("res://tools/test_sim.gd").new().run_all(self)
+
 	print("%d passed, %d failed" % [passed, failed])
 	quit(1 if failed > 0 else 0)

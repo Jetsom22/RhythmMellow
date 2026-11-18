@@ -8,7 +8,7 @@ const K = (() => {
 
   /* ── 색: body 의 CSS 변수에서 읽는다 ── */
   const col = {};
-  const readColors = () => { const cs = getComputedStyle(document.body); for (const k of ['bg', 'ink', 'd', 'e1', 'e2', 'e3', 'p1', 'p2', 'p3']) col[k] = cs.getPropertyValue('--' + k).trim(); };
+  const readColors = () => { const cs = getComputedStyle(document.body); for (const k of ['bg', 'ink', 'd', 'e1', 'e2', 'e3', 'p1', 'p2', 'p3', 'j']) col[k] = cs.getPropertyValue('--' + k).trim(); };
   const alpha = (hex, a) => hex + Math.round(clamp(a) * 255).toString(16).padStart(2, '0');
 
   /* ── 박자표: 마디 안의 스텝 수, 스텝 하나의 길이(박), 회피 자리, 센 박 ── */
@@ -108,13 +108,19 @@ const K = (() => {
 
   /* ── 플레이어 ── */
   function player(g, x, y, ringColor, opt = {}) {
-    const { pulse = 0, hollow = 0, r = 14 } = opt;
-    g.save();
-    g.strokeStyle = ringColor; g.lineWidth = (1.5) * (g.__lw || 1); g.beginPath(); g.arc(x, y, r, 0, TAU); g.stroke();
+    const { pulse = 0, hollow = 0, r = 14, just = null } = opt;
     const rr = 8 * (1 + .1 * pulse);
+    g.save();
+    if (hollow > 0 && just) {                                   // 무적인 동안: 몸이 투명해지고 저스트 색으로 바뀐다
+      g.strokeStyle = just; g.lineWidth = 1.6 * (g.__lw || 1); g.beginPath(); g.arc(x, y, r, 0, TAU); g.stroke();
+      g.fillStyle = just; g.globalAlpha = .22; g.beginPath(); g.arc(x, y, rr, 0, TAU); g.fill();
+      g.globalAlpha = .9; g.lineWidth = 1.2 * (g.__lw || 1); g.beginPath(); g.arc(x, y, rr, 0, TAU); g.stroke();
+      g.restore(); return;
+    }
+    g.strokeStyle = ringColor; g.lineWidth = 1.5 * (g.__lw || 1); g.beginPath(); g.arc(x, y, r, 0, TAU); g.stroke();
     if (hollow > 0) {                                           // 무적인 동안: 몸이 비어 테두리만 남는다
       g.globalAlpha = 1 - hollow; g.fillStyle = col.ink; g.beginPath(); g.arc(x, y, rr, 0, TAU); g.fill();
-      g.globalAlpha = 1; g.strokeStyle = col.ink; g.lineWidth = (1.3) * (g.__lw || 1); g.beginPath(); g.arc(x, y, rr, 0, TAU); g.stroke();
+      g.globalAlpha = 1; g.strokeStyle = col.ink; g.lineWidth = 1.3 * (g.__lw || 1); g.beginPath(); g.arc(x, y, rr, 0, TAU); g.stroke();
     } else { g.fillStyle = col.ink; g.beginPath(); g.arc(x, y, rr, 0, TAU); g.fill(); }
     g.restore();
   }

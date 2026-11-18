@@ -28,6 +28,7 @@ var _heard := 0.0
 var _heard_usec := 0
 
 func set_meter(m: Dictionary) -> void:
+	bpm = float(m.get("bpm", bpm))
 	steps_per_beat = int(m.get("stepsPerBeat", 4))
 	beats_per_bar = int(m.get("beatsPerBar", 4))
 	strike_steps.assign(m.get("strikeSteps", [0, 4, 8, 12]))
