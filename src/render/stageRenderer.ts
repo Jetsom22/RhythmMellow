@@ -414,8 +414,9 @@ export class StageRenderer {
       });
     }
     for (const part of s.parts) {
-      if (part.taken || !this.visible(part.x, part.y)) continue;
-      const k = s.guardCleared(part) ? 1 : .35;
+      // What a guardian guards is not there until the guardian falls.
+      if (part.taken || !s.guardCleared(part) || !this.visible(part.x, part.y)) continue;
+      const k = 1;
       c.fillStyle = c.strokeStyle = pal.player[part.layer];
       c.globalAlpha = k;
       c.beginPath(); c.arc(part.x, part.y, 11 * (1 + .1 * pulse) * this.big, 0, TAU); c.fill();

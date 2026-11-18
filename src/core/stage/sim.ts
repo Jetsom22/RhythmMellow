@@ -86,7 +86,7 @@ export type StageEvent =
   | { type: 'cleared'; id: string; kind: 'guardian' | 'boss' }
   | { type: 'broken'; id: string; pos: V };
 
-export interface StageInput { moveX: number; moveY: number; /** Song time of the dash press, or null. */ dashAt: number | null; switchDir: -1 | 0 | 1; switchTo?: Instrument | null; /** The special-attack key was pressed. */ special?: boolean }
+export interface StageInput { moveX: number; moveY: number; /** Song time of the dash press, or null. */ dashAt: number | null; switchDir: -1 | 0 | 1; switchTo?: Instrument | null; /** Song time of the special-attack press, or null. */ specialAt?: number | null }
 
 export const DASH_TIME = 0.16;
 export const DASH_COOLDOWN = 0.25;
@@ -184,7 +184,7 @@ export class StageSim {
     if (input.switchTo && this.owned.includes(input.switchTo)) this.equipped = input.switchTo;
     if (input.switchDir) this.switchInstrument(input.switchDir);
     if (input.dashAt != null) this.tryDash(mx, my, input.dashAt);
-    if (input.special) this.fireSpecial();
+    if (input.specialAt != null) this.fireSpecial(input.specialAt);
     if (t <= this.time) return this.drain();
     const simFrom = Math.max(this.time, t - MAX_CATCH_UP);
     while (this.time < t - 1e-9) {
@@ -306,7 +306,7 @@ export class StageSim {
   private takeSave(): void {
     this.save = {
       pos: { ...this.checkpoint }, owned: this.owned.slice(), equipped: this.equipped, flags: { ...this.flags },
-      taken: this.parts.map(p => p.taken), gates: this.gates.map(g => g.open),
+      taken: this.parts.map(p => p.taken), partsAt: this.parts.map(p => [p.x, p.y]), gates: this.gates.map(g => g.open),
       emitters: this.emitters.map(e => [e.hp, e.broken, e.x, e.y]),
       encounters: this.encounters.map(e => e.cleared), plates: this.plates.map(p => p.lit),
     };
@@ -348,7 +348,7 @@ export class StageSim {
     this.equipped = s.equipped;
     this.flags = { ...s.flags };
     this.lives = this.maxLives;
-    this.parts.forEach((p, i) => { p.taken = s.taken[i]; });
+    this.parts.forEach((p, i) => { p.taken = s.taken[i]; [p.x, p.y] = s.partsAt[i]; });
     this.gates.forEach((g, i) => { g.open = s.gates[i]; });
     this.field.setWays(this.gates.filter(g => g.open).map(g => g.shape));
     this.emitters.forEach((e, i) => { [e.hp, e.broken, e.x, e.y] = s.emitters[i]; });
@@ -500,6 +500,8 @@ export class StageSim {
     e.emitter.broken = true;
     this.active = this.active.filter(a => a.src !== e.emitter.id);
     if (e.flag) this.flags[e.flag] = true;
+    // What it guarded appears where it fell.
+    for (const part of this.parts) if (part.guard === e.id && !part.taken) { part.x = e.emitter.x; part.y = e.emitter.y; }
     this.openGates();
     this.events.push({ type: 'cleared', id: e.id, kind: e.kind });
   }
@@ -532,10 +534,15 @@ export class StageSim {
 
   // ───────── the special attack ─────────
 
-  /** Fire the charged special attack of the instrument in hand. Without a charge or an instrument nothing happens. */
-  fireSpecial(): void {
+  /**
+   * Fire the charged special attack of the instrument in hand. Like the dash it only goes off on the beat:
+   * pressed outside the judgement time nothing happens and the charge is kept. Without a charge or an instrument nothing happens.
+   */
+  fireSpecial(pressedAt: number): void {
     const eq = this.equipped;
     if (!this.charged || !eq || this.reform) return;
+    const j = this.meter.judge(pressedAt - this.inputOffsetMs / 1000);
+    if (!j.dash) { this.events.push({ type: 'fizzle', offsetMs: j.offsetMs }); return; }
     this.charged = false;
     const u = this.u, from = this.pos;
     let hits = 0;
