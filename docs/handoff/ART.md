@@ -8,6 +8,11 @@
 - 시안의 역사: https://jetsom22.github.io/RhythmMellow/concepts/ — 지금 것이 8번째(`beat.html` 박과 판정, `map.html` 맵의 문법, `organic.html` 곡선 덩어리; 공용 `kit8.js`, `round8.css`). `round1.html` ~ `round7.html` 이 이전 판이다. 기획자가 무엇을 버렸는지 보려면 순서대로 훑는다.
 - 코드: `src/render/renderer.ts`(그리기 전부), `src/render/theme.ts`(팔레트), `public/concepts/index.html`(움직이는 시안)
 
+## 일하는 방식
+
+- **아트 세션의 PR은 아트 세션이 직접 머지한다.** 기획자가 시안을 Pages에서 바로 볼 수 있게, 테스트와 빌드가 통과하면 시스템 브랜치로 머지하고 배포까지 확인한다(기획자의 지시, 2026-11-18).
+- 기획자에게는 한국어로만 보고한다.
+
 ## 결정 (기획자가 정한 것. 바꾸지 않는다)
 
 **방향**
