@@ -126,6 +126,7 @@ export class StageRenderer {
     this.lw = 1;
     this.drawHud(s, pulse);
     this.drawClock(s, stepF);
+    this.drawNav(s, pulse);
   }
 
   private visible(x: number, y: number, pad = 60): boolean {
@@ -784,6 +785,39 @@ export class StageRenderer {
     // The line at twelve o'clock: it does not move.
     c.strokeStyle = pal.ink; c.globalAlpha = .9; c.lineWidth = 1.4;
     c.beginPath(); c.moveTo(0, y - R - 7); c.lineTo(0, y - R + 9); c.stroke();
+    c.restore();
+  }
+
+  /**
+   * Where the instruments are: for each one not yet taken and not on screen, a small mark in its colour
+   * at the edge of the screen, on the side it lies. A guarded instrument is where its guardian is.
+   */
+  private drawNav(s: StageSim, pulse: number): void {
+    if (this.far > .3) return;        // the whole map is in view: the instruments themselves show
+    const c = this.ctx, w = this.width, h = this.height, z = this.cam.z, M = 34;
+    c.save();
+    for (const part of s.parts) {
+      if (part.taken) continue;
+      const g = s.guardCleared(part) ? null : s.encounters.find(e => e.id === part.guard);
+      const wx = g ? g.emitter.x : part.x, wy = g ? g.emitter.y : part.y;
+      const sx = (wx - this.camX) * z, sy = (wy - this.camY) * z;
+      if (sx > M && sx < w - M && sy > M && sy < h - M) continue;
+      // Slide along the line from the centre of the screen to the instrument until it meets the margin.
+      const dx = sx - w / 2, dy = sy - h / 2, k = Math.min((w / 2 - M) / Math.abs(dx || 1e-6), (h / 2 - M) / Math.abs(dy || 1e-6));
+      const x = w / 2 + dx * k, y = h / 2 + dy * k, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+      const col = this.pal.player[part.layer];
+      c.fillStyle = c.strokeStyle = col;
+      c.globalAlpha = .9;
+      c.beginPath(); c.arc(x, y, 5 + pulse, 0, TAU); c.fill();
+      // A small wedge beyond the dot, pointing the way.
+      c.beginPath();
+      c.moveTo(x + ux * 15, y + uy * 15);
+      c.lineTo(x + ux * 9 - uy * 4.5, y + uy * 9 + ux * 4.5);
+      c.lineTo(x + ux * 9 + uy * 4.5, y + uy * 9 - ux * 4.5);
+      c.closePath(); c.fill();
+      // Still guarded: a ring around the dot.
+      if (g) { c.globalAlpha = .6; c.lineWidth = 1; c.beginPath(); c.arc(x, y, 9, 0, TAU); c.stroke(); }
+    }
     c.restore();
   }
 
