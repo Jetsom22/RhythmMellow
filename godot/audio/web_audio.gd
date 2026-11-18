@@ -11,7 +11,7 @@ extends RefCounted
 const LIB := """
 window.__rmA = window.__rmA || (function () {
   const ctx = window.__rmCtx;
-  const loops = {}, shots = {}, gains = {};
+  const loops = {}, shots = {}, gains = {}, sources = {};
   let t0 = null;
   const master = ctx.createGain();
   master.gain.value = 0.9;
@@ -46,7 +46,23 @@ window.__rmA = window.__rmA || (function () {
         s.loop = true;
         s.connect(gains[id]);
         s.start(t0);
+        sources[id] = s;
       }
+    },
+    // Swap one layer's sound while it plays: the new loop comes in at the same point of the bar.
+    replaceLoop(id, b64, rate) {
+      const b = buffer(b64, rate);
+      loops[id] = b;
+      if (t0 === null) return;
+      const when = ctx.currentTime + 0.06;
+      const offset = (((when - t0) % b.duration) + b.duration) % b.duration;
+      const s = ctx.createBufferSource();
+      s.buffer = b;
+      s.loop = true;
+      s.connect(gains[id]);
+      s.start(when, offset);
+      if (sources[id]) sources[id].stop(when);
+      sources[id] = s;
     },
     // Song time the listener is hearing now.
     time() { return t0 === null ? -1000 : ctx.currentTime - t0 - delay(); },
@@ -74,6 +90,9 @@ static func _b64(pcm: PackedFloat32Array) -> String:
 
 func add_loop(id: String, pcm: PackedFloat32Array) -> void:
 	JavaScriptBridge.eval("window.__rmA.addLoop('%s','%s',%d);" % [id, _b64(pcm), Synth.SR], true)
+
+func replace_loop(id: String, pcm: PackedFloat32Array) -> void:
+	JavaScriptBridge.eval("window.__rmA.replaceLoop('%s','%s',%d);" % [id, _b64(pcm), Synth.SR], true)
 
 func add_shot(id: String, pcm: PackedFloat32Array) -> void:
 	JavaScriptBridge.eval("window.__rmA.addShot('%s','%s',%d);" % [id, _b64(pcm), Synth.SR], true)

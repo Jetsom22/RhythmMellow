@@ -35,10 +35,10 @@ func _player(stream: AudioStream) -> AudioStreamPlayer:
 	return p
 
 ## Bake one layer. Returns the time it took, so slow machines can be spotted.
-func bake(song: Song, id: String, bpm: float) -> float:
+func bake(song: Song, id: String, bpm: float, timbre: Dictionary = {}) -> float:
 	var t0 := Time.get_ticks_usec()
 	var notes: Array = song.tick if id == "tick" else song.layers[id]
-	var buf := Synth.render(notes, song.loop_steps, bpm)
+	var buf := Synth.render(notes, song.loop_steps, bpm, 1.0, timbre)
 	loop_seconds = float(buf.size()) / Synth.SR
 	if _web:
 		_web.add_loop(id, buf)
@@ -51,6 +51,16 @@ func bake(song: Song, id: String, bpm: float) -> float:
 	_sent[id] = -1.0
 	bake_ms[id] = (Time.get_ticks_usec() - t0) / 1000.0
 	return bake_ms[id]
+
+## Change one layer's timbre while the music plays, without losing its place in the bar.
+func rebake(song: Song, id: String, bpm: float, timbre: Dictionary) -> void:
+	var buf := Synth.render(song.layers[id], song.loop_steps, bpm, 1.0, timbre)
+	if _web:
+		_web.replace_loop(id, buf)
+	else:
+		var p: AudioStreamPlayer = _players[id]
+		p.stream = Synth.to_stream(buf, true)
+		p.play(_players["tick"].get_playback_position())
 
 func bake_shots() -> void:
 	var shots := {

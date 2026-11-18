@@ -74,5 +74,22 @@ func _init() -> void:
 	var st := Synth.to_stream(buf, true)
 	check("the stream loops over its whole length", st.loop_mode == AudioStreamWAV.LOOP_FORWARD and st.loop_end == want and st.data.size() == want * 2)
 
+	# Every bass and lead timbre must bake to a sound that is audible, finite and not clipping.
+	for layer in ["bass", "lead"]:
+		var names: Array[String] = Synth.BASS_PRESETS if layer == "bass" else Synth.LEAD_PRESETS
+		for k in names.size():
+			var out := Synth.render(a.layers[layer], a.loop_steps, 110.0, 1.0, {layer: k})
+			var top := 0.0
+			var bad := false
+			var energy := 0.0
+			for v in out:
+				if is_nan(v) or is_inf(v): bad = true
+				top = maxf(top, absf(v))
+				energy += v * v
+			var rms := sqrt(energy / out.size())
+			check("%s '%s' bakes cleanly" % [layer, names[k]], not bad and out.size() == want and top > 0.3 and top <= 0.75 and rms > 0.02, "peak %.3f rms %.3f" % [top, rms])
+	check("timbres differ from one another", Synth.render(a.layers["bass"], a.loop_steps, 110.0, 1.0, {"bass": 0}) != Synth.render(a.layers["bass"], a.loop_steps, 110.0, 1.0, {"bass": 1}))
+	check("the band-limited saw has no step at the wrap", absf(Synth._saw(0.9999, 0.01) - Synth._saw(0.0001, 0.01)) < 0.05)
+
 	print("%d passed, %d failed" % [passed, failed])
 	quit(1 if failed > 0 else 0)

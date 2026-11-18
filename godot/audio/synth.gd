@@ -7,19 +7,27 @@ extends RefCounted
 ## is fully determined by its seed, so its loops can be baked once when a stage loads
 ## and then played as ordinary looping samples: low latency everywhere.
 
-const SR := 32000
+const SR := 44100
+
+## Timbres to choose between by ear. The first of each is the default.
+const BASS_PRESETS: Array[String] = ["sub pluck", "round", "acid", "fm thump"]
+const LEAD_PRESETS: Array[String] = ["fm bell", "soft pulse", "glass", "reed"]
 
 static func mtof(m: float) -> float:
 	return 440.0 * pow(2.0, (m - 69.0) / 12.0)
 
 ## Render notes into one loop. Tails that run past the end wrap to the start, so the loop is seamless.
-static func render(notes: Array, loop_steps: int, bpm: float, gain: float = 1.0) -> PackedFloat32Array:
+## `timbre` picks the bass and lead presets: { "bass": index, "lead": index }.
+static func render(notes: Array, loop_steps: int, bpm: float, gain: float = 1.0, timbre: Dictionary = {}) -> PackedFloat32Array:
 	var sps := 60.0 / bpm / 4.0
 	var total := int(round(loop_steps * sps * SR))
 	var buf := PackedFloat32Array()
 	buf.resize(total)
 	var noise := RandomNumberGenerator.new()
 	noise.seed = 1234
+	var bass_kind := int(timbre.get("bass", 0))
+	var lead_kind := int(timbre.get("lead", 0))
+	var pitched := ""
 	for n in notes:
 		var at := int(round(float(n["step"]) * sps * SR))
 		var dur: float = float(n["len"]) * sps
@@ -28,11 +36,69 @@ static func render(notes: Array, loop_steps: int, bpm: float, gain: float = 1.0)
 			"kick": _kick(buf, at, vel)
 			"snare": _snare(buf, at, vel, noise)
 			"hat": _hat(buf, at, vel, noise)
-			"bass": _bass(buf, at, float(n["midi"]), dur, vel)
-			"lead": _lead(buf, at, float(n["midi"]), dur, vel)
+			"bass":
+				_bass(buf, at, float(n["midi"]), dur, vel, bass_kind)
+				pitched = "bass"
+			"lead":
+				_lead(buf, at, float(n["midi"]), dur, vel, lead_kind)
+				pitched = "lead"
 			"pad": _pad(buf, at, float(n["midi"]), dur, vel)
 			"tick": _tone(buf, at, 2000.0, 0.02, vel * 0.5)
+	if pitched == "lead":
+		_echo(buf, int(round(3.0 * sps * SR)), 0.34, 0.28)     # a dotted-eighth echo, baked into the loop
+	if pitched != "":
+		_level(buf, 0.62 if pitched == "bass" else 0.5)
 	return buf
+
+## Band-limiting correction for a naive saw or pulse edge (PolyBLEP). Without it the edges alias into a harsh buzz.
+static func _blep(t: float, dt: float) -> float:
+	if t < dt:
+		var x := t / dt
+		return x + x - x * x - 1.0
+	if t > 1.0 - dt:
+		var y := (t - 1.0) / dt
+		return y * y + y + y + 1.0
+	return 0.0
+
+static func _saw(phase: float, dt: float) -> float:
+	return 2.0 * phase - 1.0 - _blep(phase, dt)
+
+static func _pulse(phase: float, dt: float, width: float) -> float:
+	var v := 1.0 if phase < width else -1.0
+	return v + _blep(phase, dt) - _blep(fposmod(phase + 1.0 - width, 1.0), dt)
+
+## Note envelope: quick attack, held, short release. Never clicks.
+static func _env(t: float, dur: float, attack: float, release: float) -> float:
+	if t < attack:
+		return t / attack
+	if t < dur:
+		return 1.0
+	return maxf(0.0, 1.0 - (t - dur) / release)
+
+## Feedback echo around the loop, so the tail of the last note carries into the first bar.
+static func _echo(buf: PackedFloat32Array, delay: int, feedback: float, mix: float) -> void:
+	var total := buf.size()
+	if delay <= 0 or delay >= total:
+		return
+	var wet := PackedFloat32Array()
+	wet.resize(total)
+	for lap in 3:
+		for i in total:
+			var j := posmod(i - delay, total)
+			wet[i] = (buf[j] + wet[j]) * feedback
+	for i in total:
+		buf[i] += wet[i] * mix / feedback
+
+## Scale so the loudest moment sits at `peak`. Keeps presets comparable in loudness.
+static func _level(buf: PackedFloat32Array, peak: float) -> void:
+	var top := 0.0
+	for v in buf:
+		top = maxf(top, absf(v))
+	if top < 0.0001:
+		return
+	var k := peak / top
+	for i in buf.size():
+		buf[i] *= k
 
 static func _kick(buf: PackedFloat32Array, at: int, vel: float) -> void:
 	var total := buf.size()
@@ -71,37 +137,82 @@ static func _hat(buf: PackedFloat32Array, at: int, vel: float, noise: RandomNumb
 		prev = x
 		buf[(at + i) % total] += hi * exp(-t * 80.0) * 0.22 * vel
 
-static func _bass(buf: PackedFloat32Array, at: int, midi: float, dur: float, vel: float) -> void:
+## Bass. Bass notes sit at 55 to 80 Hz, below what small speakers can play,
+## so every preset also carries energy an octave or two up.
+static func _bass(buf: PackedFloat32Array, at: int, midi: float, dur: float, vel: float, kind: int) -> void:
 	var total := buf.size()
-	var n := int((dur + 0.06) * SR)
-	var inc := mtof(midi) / SR
-	var phase := 0.0
-	var lp := 0.0
-	for i in n:
-		var t := float(i) / SR
-		phase = fposmod(phase + inc, 1.0)
-		var cutoff := 500.0 * pow(160.0 / 500.0, minf(t / maxf(dur, 0.1), 1.0))
-		lp += minf(1.0, TAU * cutoff / SR) * ((2.0 * phase - 1.0) - lp)
-		var env := minf(t / 0.01, 1.0) * (1.0 if t < dur - 0.04 else maxf(0.0, 1.0 - (t - (dur - 0.04)) / 0.07))
-		buf[(at + i) % total] += lp * env * 0.9 * vel
-
-static func _lead(buf: PackedFloat32Array, at: int, midi: float, dur: float, vel: float) -> void:
-	var total := buf.size()
-	var n := int((dur + 0.14) * SR)
 	var f := mtof(midi)
-	var inc_a := f * pow(2.0, -7.0 / 1200.0) / SR
-	var inc_b := f * pow(2.0, 7.0 / 1200.0) / SR
-	var pa := 0.0
-	var pb := 0.0
-	var lp := 0.0
-	var k := minf(1.0, TAU * 1800.0 / SR)
+	var dt := f / SR
+	var n := int((dur + 0.09) * SR)
+	var p := 0.0        # fundamental
+	var p2 := 0.0       # octave up
+	var low := 0.0
+	var band := 0.0
+	var mod := 0.0
 	for i in n:
 		var t := float(i) / SR
-		pa = fposmod(pa + inc_a, 1.0)
-		pb = fposmod(pb + inc_b, 1.0)
-		lp += k * (((1.0 if pa < 0.5 else -1.0) + (1.0 if pb < 0.5 else -1.0)) * 0.5 - lp)
-		var env := minf(t / 0.012, 1.0) * (lerpf(1.0, 0.55, minf(t / dur, 1.0)) if t < dur else 0.55 * maxf(0.0, 1.0 - (t - dur) / 0.12))
-		buf[(at + i) % total] += lp * env * 0.3 * vel
+		p = fposmod(p + dt, 1.0)
+		p2 = fposmod(p2 + dt * 2.0, 1.0)
+		var x := 0.0
+		match kind:
+			1:      # round: sine and a soft triangle an octave up, no edge at all
+				x = sin(TAU * p) * 0.8 + (absf(4.0 * p2 - 2.0) - 1.0) * 0.28 * exp(-t * 3.0) + sin(TAU * p2) * 0.18
+			2:      # acid: a saw through a resonant filter that snaps shut
+				var cut := 180.0 + 2200.0 * exp(-t * 11.0)
+				var fc := 2.0 * sin(PI * minf(cut, SR / 7.0) / SR)
+				low += fc * band
+				band += fc * (_saw(p2, dt * 2.0) - low - 0.22 * band)
+				x = low * 0.75 + sin(TAU * p) * 0.55
+			3:      # fm thump: a sine bent by a fast-decaying modulator, like a plucked low string
+				mod = sin(TAU * p2) * (2.6 * exp(-t * 16.0) + 0.25)
+				x = sin(TAU * p + mod) * 0.85 + sin(TAU * p2 + mod * 0.5) * 0.2 * exp(-t * 5.0)
+			_:      # sub pluck: a sine sub under a saw whose filter closes after the attack
+				var cut0 := 140.0 + 1500.0 * exp(-t * 8.0)
+				var fc0 := 2.0 * sin(PI * cut0 / SR)
+				low += fc0 * band
+				band += fc0 * (_saw(p2, dt * 2.0) - low - 0.9 * band)
+				x = sin(TAU * p) * 0.7 + low * 0.6
+		x = tanh(x * 1.3)       # a little warmth; also keeps peaks in check
+		buf[(at + i) % total] += x * _env(t, dur - 0.02, 0.006, 0.08) * vel
+
+static func _lead(buf: PackedFloat32Array, at: int, midi: float, dur: float, vel: float, kind: int) -> void:
+	var total := buf.size()
+	var f := mtof(midi)
+	var dt := f / SR
+	var n := int((dur + 0.3) * SR)
+	var p := 0.0
+	var pm := 0.0
+	var pv := 0.0
+	var low := 0.0
+	var band := 0.0
+	for i in n:
+		var t := float(i) / SR
+		# Vibrato only once the note has settled.
+		pv = fposmod(pv + 5.2 / SR, 1.0)
+		var bend := 1.0 + sin(TAU * pv) * 0.0035 * clampf((t - 0.14) / 0.2, 0.0, 1.0)
+		p = fposmod(p + dt * bend, 1.0)
+		var x := 0.0
+		var amp := 1.0
+		match kind:
+			1:      # soft pulse: a narrow pulse, filtered, opening a little at the start
+				var cut := 900.0 + 1700.0 * exp(-t * 6.0)
+				var fc := 2.0 * sin(PI * cut / SR)
+				low += fc * band
+				band += fc * (_pulse(p, dt, 0.32) - low - 0.7 * band)
+				x = low
+				amp = _env(t, dur, 0.012, 0.16) * (0.6 + 0.4 * exp(-t * 4.0))
+			2:      # glass: almost a sine, with a soft fifth above that fades
+				x = sin(TAU * p) * 0.8 + sin(TAU * p * 3.0) * 0.14 * exp(-t * 6.0) + sin(TAU * p * 2.0) * 0.1
+				amp = _env(t, dur, 0.008, 0.28) * (0.55 + 0.45 * exp(-t * 3.0))
+			3:      # reed: a triangle bent by a slow modulator, breathier and longer
+				pm = fposmod(pm + dt * 3.0, 1.0)
+				x = sin(TAU * p + sin(TAU * pm) * 0.7 * (0.4 + 0.6 * exp(-t * 3.0))) * 0.6 + (absf(4.0 * p - 2.0) - 1.0) * 0.3
+				amp = _env(t, dur, 0.03, 0.2)
+			_:      # fm bell: a sine struck by a modulator two octaves up that dies away fast
+				pm = fposmod(pm + dt * 2.0, 1.0)
+				x = sin(TAU * p + sin(TAU * pm) * (2.0 * exp(-t * 8.0) + 0.22))
+				amp = _env(t, dur, 0.004, 0.3) * (0.4 + 0.6 * exp(-t * 3.2))
+		buf[(at + i) % total] += x * amp * 0.5 * vel
 
 static func _pad(buf: PackedFloat32Array, at: int, midi: float, dur: float, vel: float) -> void:
 	var total := buf.size()
