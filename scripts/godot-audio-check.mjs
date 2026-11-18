@@ -10,6 +10,12 @@ const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gestur
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [];
 page.on('pageerror', e => errors.push(String(e).slice(0, 160)));
+// FORCE_RATE=48000 makes the browser's audio run at that rate, like a different sound card.
+const FORCE_RATE = Number(process.env.FORCE_RATE ?? 0);
+if (FORCE_RATE) await page.addInitScript(rate => {
+  const Orig = window.AudioContext;
+  window.AudioContext = class extends Orig { constructor(o) { super({ ...(o || {}), sampleRate: rate }); window.__forcedArgs = o || null; } };
+}, FORCE_RATE);
 await page.addInitScript(() => {
   window.__onsets = [];
   const connect = AudioNode.prototype.connect;
@@ -34,7 +40,10 @@ await page.addInitScript(() => {
     return connect.call(this, dest, ...rest);
   };
 });
-await page.goto(BASE + '/godot/index.html');
+// SLOW=4 makes the page's main thread four times slower, like a weak phone or laptop.
+const SLOW = Number(process.env.SLOW ?? 0);
+if (SLOW) { const cdp = await page.context().newCDPSession(page); await cdp.send('Emulation.setCPUThrottlingRate', { rate: SLOW }); }
+await page.goto(BASE + (process.env.PAGE ?? '/godot/index.html'));
 await page.waitForFunction(() => window.__rmg && window.__rmg.state === 'idle', null, { timeout: 90000 });
 await page.mouse.click(640, 360);
 await page.waitForFunction(() => window.__rmg.state === 'playing' && window.__rmg.step > 2, null, { timeout: 90000 });
@@ -43,7 +52,8 @@ for (let i = 0; i < SECONDS; i++) {
   await page.waitForTimeout(1000);
   samples.push(await page.evaluate(() => {
     const c = window.__ctx, ts = c.getOutputTimestamp();
-    return { step: window.__rmg.step, wall: window.__rmg.wall, bpm: 110, ctxAtPerf: ts.contextTime, perf: ts.performanceTime, out: (c.outputLatency || 0), latencyMs: window.__rmg.latencyMs, mode: window.__rmg.audio };
+    window.__sr = c.sampleRate;
+    return { fps: window.__rmg.fps, sr: c.sampleRate, args: window.__forcedArgs, step: window.__rmg.step, wall: window.__rmg.wall, bpm: 110, ctxAtPerf: ts.contextTime, perf: ts.performanceTime, out: (c.outputLatency || 0), latencyMs: window.__rmg.latencyMs, mode: window.__rmg.audio };
   }));
 }
 const onsets = await page.evaluate(() => window.__onsets);
@@ -69,7 +79,7 @@ const last = errs.slice(-6).reduce((a, b) => a + b, 0) / Math.min(6, errs.length
 const gaps = onsets.slice(1).map((t, i) => (t - onsets[i]) * 1000);
 const gapErr = gaps.map(g => g - spb * 1000);
 console.log(JSON.stringify({
-  mode: samples[0]?.mode ?? 'unknown', clicks: onsets.length, seconds: SECONDS,
+  slow: SLOW, fps: samples[Math.floor(samples.length / 2)]?.fps, contextRate: samples[0]?.sr, engineAskedFor: samples[0]?.args, mode: samples[0]?.mode ?? 'unknown', clicks: onsets.length, seconds: SECONDS,
   clockVsSoundMs: { mean: +mean.toFixed(1), first6: +first.toFixed(1), last6: +last.toFixed(1), driftOverRun: +(last - first).toFixed(1) },
   settledMs: { clicks: settled.length, mean: +avg(settled).toFixed(1), first5: +avg(settled.slice(0, 5)).toFixed(1), last5: +avg(settled.slice(-5)).toFixed(1), worst: +Math.max(...settled.map(Math.abs)).toFixed(1) },
   beatSpacingErrorMs: { worst: +Math.max(...gapErr.map(Math.abs)).toFixed(1), mean: +(gapErr.reduce((a, b) => a + b, 0) / (gapErr.length || 1)).toFixed(2) },

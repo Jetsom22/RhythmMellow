@@ -135,11 +135,16 @@ static func ping(freqs: Array, dur: float, vel: float) -> PackedFloat32Array:
 		_tone(buf, 0, float(f), dur, vel)
 	return buf
 
-static func to_stream(buf: PackedFloat32Array, looping: bool) -> AudioStreamWAV:
+## 16-bit little-endian samples.
+static func to_pcm16(buf: PackedFloat32Array) -> PackedByteArray:
 	var bytes := PackedByteArray()
 	bytes.resize(buf.size() * 2)
 	for i in buf.size():
 		bytes.encode_s16(i * 2, int(clampf(buf[i], -1.0, 1.0) * 32767.0))
+	return bytes
+
+static func to_stream(buf: PackedFloat32Array, looping: bool) -> AudioStreamWAV:
+	var bytes := to_pcm16(buf)
 	var s := AudioStreamWAV.new()
 	s.format = AudioStreamWAV.FORMAT_16_BITS
 	s.mix_rate = SR

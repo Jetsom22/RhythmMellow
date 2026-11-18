@@ -19,7 +19,6 @@ var last := {}
 var last_at := -10.0
 var seed_value := 7
 var _push := 0.0
-var _device_checked := 0.0
 
 func _ready() -> void:
 	if OS.has_feature("web"):
@@ -86,18 +85,11 @@ func _process(delta: float) -> void:
 		if bake_queue.is_empty():
 			mixer.bake_shots()
 			mixer.start()
-			Beat.start(mixer.players["tick"], mixer.loop_seconds)
+			Beat.start(mixer.heard_time)
 			state = "playing"
 			_apply()
 		else:
 			mixer.bake(song, bake_queue.pop_front(), Beat.bpm)
-	if state == "playing" and OS.has_feature("web") and _device_checked < 6.0:
-		# The browser only knows its real output delay once sound has been flowing for a moment.
-		var before := _device_checked
-		_device_checked += delta
-		if int(before) != int(_device_checked):
-			var v: Variant = JavaScriptBridge.eval("(window.__rmCtx ? (window.__rmCtx.outputLatency || 0) + (window.__rmCtx.baseLatency || 0) : 0)", true)
-			Beat.set_device_latency(float(v))
 	_push += delta
 	if _push > 0.2 and OS.has_feature("web"):
 		_push = 0.0
@@ -107,9 +99,9 @@ func _process(delta: float) -> void:
 
 func _report() -> Dictionary:
 	return {
-		"state": state, "step": Beat.step_f() if Beat.running else -1.0, "latencyMs": Beat.latency_ms(),
+		"state": state, "step": Beat.step_f() if Beat.running else -1.0, "latencyMs": mixer.delay_ms(),
 		"bakeMs": mixer.bake_ms, "presses": presses, "last": last, "inputOffsetMs": Beat.input_offset_ms,
-		"fps": Engine.get_frames_per_second(), "seed": seed_value, "audio": "stream, clock from playback position",
+		"fps": Engine.get_frames_per_second(), "seed": seed_value, "audio": mixer.backend,
 	}
 
 func _draw() -> void:
@@ -183,7 +175,7 @@ func _draw() -> void:
 	var lines := [
 		"SPACE / CLICK  tap on the beat      1-5  layers      C  calibrate      [ ]  offset",
 		"taps %d   mean %+.0f ms   sd %.0f ms   input offset %+.0f ms" % [presses.size(), mean, sd, Beat.input_offset_ms],
-		"output latency %.0f ms   fps %d   bake %s ms   seed %d   %d bpm" % [Beat.latency_ms(), Engine.get_frames_per_second(), _bake_text(), seed_value, int(Beat.bpm)],
+		"audio: %s   output delay %.0f ms   fps %d   bake %s ms   seed %d   %d bpm" % [mixer.backend, mixer.delay_ms(), Engine.get_frames_per_second(), _bake_text(), seed_value, int(Beat.bpm)],
 	]
 	for i in lines.size():
 		_text(font, Vector2(24, size.y - 62 + i * 18), lines[i], 12, Color(INK, 0.7), false)

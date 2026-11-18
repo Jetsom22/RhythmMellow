@@ -20,14 +20,10 @@ var near_ms := 120.0
 var input_offset_ms := 0.0
 
 var running := false
+## Where time comes from: a function returning the song time being heard, read from the audio.
+## The system clock is only used to glide between readings; on its own it drifts from the sound.
+var _source: Callable = Callable()
 var _begin_usec := 0
-var _latency := 0.0
-## When set, time is read from the audio itself: the playing position of one looping layer.
-## The system clock drifts away from the sound; the sound cannot drift away from itself.
-var _ref: AudioStreamPlayer = null
-var _loop_len := 0.0
-var _wraps := 0
-var _last_raw := 0.0
 var _heard := 0.0
 var _heard_usec := 0
 
@@ -43,37 +39,20 @@ func steps_per_bar() -> int:
 func sec_per_step() -> float:
 	return 60.0 / bpm / steps_per_beat
 
-## Call in the same frame the looping layers start playing.
-## `reference` is one of those layers and `loop_len` its length in seconds.
-func start(reference: AudioStreamPlayer = null, loop_len: float = 0.0) -> void:
+## Call in the same frame the looping layers start. `source` returns heard song time in seconds.
+func start(source: Callable = Callable()) -> void:
+	_source = source
 	_begin_usec = Time.get_ticks_usec()
-	_latency = AudioServer.get_output_latency()
-	_ref = reference
-	_loop_len = loop_len
-	_wraps = 0
-	_last_raw = 0.0
-	_heard = -_latency
+	_heard = source.call() if source.is_valid() else 0.0
 	_heard_usec = _begin_usec
 	running = true
 
-func latency_ms() -> float:
-	return _latency * 1000.0
-
-## Delay the engine cannot see: on the web, the browser's own output path after the engine's mixer.
-func set_device_latency(seconds: float) -> void:
-	_latency = AudioServer.get_output_latency() + maxf(0.0, seconds)
-
 func _process(_delta: float) -> void:
-	if not running or _ref == null:
+	if not running or not _source.is_valid():
 		return
-	# The position jumps back to zero each time the loop comes round: count the laps.
-	var raw := _ref.get_playback_position()
-	if raw < _last_raw - _loop_len * 0.5:
-		_wraps += 1
-	_last_raw = raw
-	var t := _wraps * _loop_len + raw + AudioServer.get_time_since_last_mix() - _latency
-	# The mixer reports in chunks; never let the clock step backwards.
+	var t: float = _source.call()
 	var now := Time.get_ticks_usec()
+	# Audio time arrives in small jumps. Glide toward it; snap only if it is far off.
 	var coast := _heard + float(now - _heard_usec) / 1000000.0
 	_heard = t if absf(t - coast) > 0.05 else lerpf(coast, t, 0.2)
 	_heard_usec = now
@@ -83,8 +62,8 @@ func heard_time() -> float:
 	return heard_time_at(Time.get_ticks_usec())
 
 func heard_time_at(usec: int) -> float:
-	if _ref == null:
-		return float(usec - _begin_usec) / 1000000.0 - _latency
+	if not _source.is_valid():
+		return float(usec - _begin_usec) / 1000000.0
 	return _heard + float(usec - _heard_usec) / 1000000.0
 
 func step_f() -> float:
