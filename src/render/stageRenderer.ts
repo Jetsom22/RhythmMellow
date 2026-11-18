@@ -1,6 +1,6 @@
 import { LayerId } from '../core/music/song';
 import { centreOf, outline } from '../core/stage/shapes';
-import { ATTACK_RANGE_U, Emitter, Inst, Instrument, StageEvent, StageSim, V } from '../core/stage/sim';
+import { ATTACK_RANGE_U, Emitter, Inst, Instrument, SPECIAL, StageEvent, StageSim, V } from '../core/stage/sim';
 import { Palette, paletteOf } from './theme';
 
 const TAU = Math.PI * 2;
@@ -29,6 +29,7 @@ type PlayerFx =
   | { kind: 'drum'; at: number; x: number; y: number }
   | { kind: 'hat'; at: number; x: number; y: number; tx: number; ty: number }
   | { kind: 'ring'; at: number; x: number; y: number; color: string }
+  | { kind: 'special'; at: number; layer: Instrument; x: number; y: number; dx: number; dy: number }
   | { kind: 'dust'; at: number; from: V; to: V; dur: number };
 
 /** Grains the player breaks into. Fixed, so the scatter looks the same every time. */
@@ -74,6 +75,8 @@ export class StageRenderer {
   private cam = { x: 0, y: 0, z: 1, set: false, last: 0 };
   /** Spans of song time (in steps) during which the camera pulls back to show the whole map. */
   private overviews: [number, number][] = [];
+  /** Places the camera goes to look at and then comes back from: [from step, until step, x, y]. A way that opened. */
+  private visits: [number, number, number, number][] = [];
   private bounds = { x: 0, y: 0, r: 1 };
   private chunks = new Map<string, number[][][] | null>();
   private chunkVersion = -1;
@@ -143,15 +146,19 @@ export class StageRenderer {
 
   /**
    * Usually the camera follows the player. In a fight it holds the whole arena.
-   * At a few moments it pulls back to show the whole map and then returns:
-   * after being hit (until re-formed), after taking an instrument, and when a way opens.
+   * When a way opens, the camera goes to where it opened, stays a moment and comes back.
+   * Only after the lives run out (starting again from the save) does it pull back to show the whole map.
    */
   private moveCamera(s: StageSim, stepF: number): void {
     const w = this.width, h = this.height, cam = this.cam, fight = s.fight;
     let tx = s.x, ty = s.y, tz = this.zoom;
     this.overviews = this.overviews.filter(o => stepF < o[1]);
+    this.visits = this.visits.filter(v => stepF < v[1]);
+    const visit = this.visits.find(v => stepF >= v[0]);
     if (this.overviews.some(o => stepF >= o[0])) {
       tx = this.bounds.x; ty = this.bounds.y; tz = Math.min(this.zoom, Math.min(w, h) / (this.bounds.r * 2.1));
+    } else if (visit) {
+      tx = visit[2]; ty = visit[3];
     } else if (fight) {
       tx = fight.x; ty = fight.y; tz = Math.min(this.zoom, Math.min(w, h) / (fight.r * 2.3));
     }
@@ -175,30 +182,40 @@ export class StageRenderer {
       if (e.type === 'dash') {
         this.pfx.push({ kind: 'dash', at: stepF, x: e.from.x, y: e.from.y, x1: e.to.x, y1: e.to.y, strong: true });
         if (e.just) this.justs.push(Math.round(stepF - (e.offsetMs / 1000) / s.meter.secPerStep));
+      } else if (e.type === 'special') {
+        this.pfx.push({ kind: 'special', at: stepF, layer: e.layer, x: e.from.x, y: e.from.y, dx: e.dirX, dy: e.dirY });
+      } else if (e.type === 'trigger') {
+        this.pfx.push({ kind: 'ring', at: stepF, x: e.pos.x, y: e.pos.y, color: this.pal.just });
       } else if (e.type === 'absorb') {
         this.pfx.push({ kind: 'ring', at: stepF, x: s.x, y: s.y, color: eq });
       } else if (e.type === 'attack') {
         // A whiff is still shown, reaching only as far as the instrument can.
         const d = Math.hypot(e.to.x - e.from.x, e.to.y - e.from.y) || 1, k = e.hit ? 1 : Math.min(1, (ATTACK_RANGE_U[e.layer] * s.u) / d);
         const tx = e.from.x + (e.to.x - e.from.x) * k, ty = e.from.y + (e.to.y - e.from.y) * k;
-        if (e.strong) this.pfx.push({ kind: 'ring', at: stepF, x: e.to.x, y: e.to.y, color: this.pal.just });
         if (e.layer === 'drum') this.pfx.push({ kind: 'drum', at: stepF, x: e.from.x, y: e.from.y });
         else if (e.layer === 'hat') this.pfx.push({ kind: 'hat', at: stepF, x: e.from.x, y: e.from.y, tx, ty });
         else this.bassLine = { until: stepF + 1.4, tx, ty };
       } else if (e.type === 'hurt' || e.type === 'gameover') {
+        // The camera pulls back to the whole map only when the lives ran out and the player starts again from the save.
+        // A hit with lives left re-forms at a checkpoint and the camera keeps following.
         const spb = s.meter.stepsPerBeat;
-        this.overviews.push([stepF + .3 * spb, stepF + 8 + .8 * spb]);
+        if (e.type === 'gameover') this.overviews.push([stepF + .3 * spb, stepF + 8 + .8 * spb]);
         this.pfx.push({ kind: 'dust', at: stepF, from: e.from, to: e.to, dur: 8 });
         this.pfx.push({ kind: 'ring', at: stepF, x: e.from.x, y: e.from.y, color: this.pal.danger });
         this.pfx.push({ kind: 'ring', at: stepF + 8, x: e.to.x, y: e.to.y, color: eq });
       } else if (e.type === 'part' || e.type === 'plate') {
-        if (e.type === 'part') this.overviews.push([stepF + .2 * s.meter.stepsPerBeat, stepF + 4.2 * s.meter.stepsPerBeat]);
         this.pfx.push({ kind: 'ring', at: stepF, x: s.x, y: s.y, color: this.pal.player[e.layer] });
       } else if (e.type === 'broken') {
         this.pfx.push({ kind: 'ring', at: stepF, x: e.pos.x, y: e.pos.y, color: this.pal.ink });
       } else if (e.type === 'gate') {
-        // A way that was waiting for plates has opened: show where.
-        if (s.gates.find(g => g.id === e.id)?.requires.flags?.length) this.overviews.push([stepF + .5 * s.meter.stepsPerBeat, stepF + 4 * s.meter.stepsPerBeat]);
+        // A way has opened: the camera goes there, stays a moment and comes back. A ring marks the place as it arrives.
+        const g = s.gates.find(q => q.id === e.id);
+        if (g) {
+          const q = centreOf(g.shape), spb = s.meter.stepsPerBeat, color = g.requires.layer ? this.pal.player[g.requires.layer] : this.pal.ink;
+          this.visits.push([stepF + .25 * spb, stepF + 4.25 * spb, q.x, q.y]);
+          this.pfx.push({ kind: 'ring', at: stepF + 1.1 * spb, x: q.x, y: q.y, color });
+          this.pfx.push({ kind: 'ring', at: stepF + 1.6 * spb, x: q.x, y: q.y, color });
+        }
       } else if (e.type === 'strike') {
         // An attack has just landed: flash it and send out its echo.
         const a = e.inst;
@@ -608,6 +625,21 @@ export class StageRenderer {
           const k = (age - .22) / .38; c.globalAlpha = .8 * (1 - k); c.lineWidth = (1.2) * this.lw;
           for (const a of [-1.1, 0, 1.1]) { const cc = Math.cos(a) * -ux - Math.sin(a) * -uy, ss = Math.sin(a) * -ux + Math.cos(a) * -uy; c.beginPath(); c.moveTo(f.tx + cc * 4, f.ty + ss * 4); c.lineTo(f.tx + cc * (6 + 12 * k), f.ty + ss * (6 + 12 * k)); c.stroke(); }
         }
+      } else if (f.kind === 'special') {
+        // The special attack: the instrument's own shape, large, in the player's colour with a just-coloured edge.
+        if (age > 1.2) continue;
+        const k = age / 1.2, col = pal.player[f.layer];
+        c.fillStyle = col; c.strokeStyle = pal.just;
+        if (f.layer === 'drum') {
+          const R = SPECIAL.drum.r * s.u * easeOut(clamp(age / .2));
+          c.globalAlpha = .4 * (1 - k) ** 2; c.beginPath(); c.arc(f.x, f.y, R, 0, TAU); c.fill();
+          c.globalAlpha = (1 - k) ** 1.3; c.lineWidth = (3 - 2 * k) * this.lw; c.beginPath(); c.arc(f.x, f.y, R + 14 * k, 0, TAU); c.stroke();
+        } else if (f.layer === 'hat') {
+          const L = SPECIAL.hat.len * s.u * easeOut(clamp(age / .15)), hw = (SPECIAL.hat.w / 2) * s.u * (1 - k);
+          c.globalAlpha = .7 * (1 - k) ** 1.5;
+          c.beginPath(); c.moveTo(f.x - f.dy * hw, f.y + f.dx * hw); c.lineTo(f.x + f.dx * L, f.y + f.dy * L); c.lineTo(f.x + f.dy * hw, f.y - f.dx * hw); c.closePath(); c.fill();
+          c.globalAlpha = (1 - k) ** 1.3; c.lineWidth = 2 * this.lw; c.beginPath(); c.moveTo(f.x, f.y); c.lineTo(f.x + f.dx * L, f.y + f.dy * L); c.stroke();
+        }
       } else if (f.kind === 'ring') {
         if (age > .9) continue;
         c.strokeStyle = f.color; c.lineWidth = (2 - 1.4 * (age / .9)) * this.lw; c.globalAlpha = .9 * (1 - age / .9) ** 1.4;
@@ -615,6 +647,14 @@ export class StageRenderer {
       } else {
         this.drawDust(f.from, f.to, age, f.dur / 4, stepF / 4);
       }
+    }
+    // The bass special: a pool that dips and climbs back to each beat, when it strikes again.
+    for (const p of s.pools) {
+      const u = ((stepF / s.meter.stepsPerBeat) % 1 + 1) % 1, left = clamp((p.until - stepF) / s.meter.stepsPerBeat);
+      c.fillStyle = pal.player.bass; c.strokeStyle = pal.just; c.setLineDash([]);
+      c.globalAlpha = (u < .1 ? .5 : .14 + .05 * (Math.floor(u * 4) + 1)) * Math.min(1, left * 2);
+      c.beginPath(); c.arc(p.x, p.y, p.r, 0, TAU); c.fill();
+      c.globalAlpha = .8 * Math.min(1, left * 2); c.lineWidth = 1.4 * this.lw; c.beginPath(); c.arc(p.x, p.y, p.r, 0, TAU); c.stroke();
     }
     // The bass attack is a held string, trembling for as long as the note sounds.
     if (stepF < this.bassLine.until && s.equipped === 'bass' && !s.reform) {
@@ -674,7 +714,7 @@ export class StageRenderer {
       } else { c.fillStyle = pal.ink; c.beginPath(); c.arc(s.x, s.y, r, 0, TAU); c.fill(); }
     }
     if (s.charged) {
-      // A just dodge is being carried: the next attack that lands is stronger.
+      // A special attack is charged and waiting for its key.
       c.strokeStyle = pal.just; c.globalAlpha = .9; c.lineWidth = 1.4 * this.lw;
       c.beginPath(); c.arc(s.x, s.y, R + 4 * m + 1.5 * pulse, 0, TAU); c.stroke();
     }

@@ -40,6 +40,7 @@
 - 플랫폼은 PC 스팀. 웹으로 만든 게임을 PC 앱으로 감싸서 낸다.
 - **구현은 웹으로 한다** (2026-11-18 기획자 결정). 고닷으로 옮겨 봤으나 화면이 웹과 너무 달랐고, 아트와 레벨 디자인 세션이 손대기에도 웹이 편하다. 고닷 프로젝트(`godot/`)는 멈춰 두었다.
 - 게임은 https://jetsom22.github.io/RhythmMellow/ 에서 해 볼 수 있다. 검증 빌드(방 넷과 첫 보스)는 주소 뒤에 `?classic=1`.
+- **게임의 음악은 사운드 세션의 곡 데이터를 새 재생기로 연주한다** (`src/audio/scorePlayer.ts`, `src/core/music/score.ts`. 물리는 곳은 `src/stage.ts`). 든 악기에 따라 겹을 켜고, 보스전의 단계에 따라 장면을 바꾼다. 효과음, 드럼을 얻기 전의 기준 박, 박자 맞추기는 예전 엔진(`src/audio/engine.ts`)에 남아 있다.
 - **스테이지를 고치는 곳**
   - 규칙: `src/core/stage/sim.ts` (그림도 소리도 없다)
   - 그리기: `src/render/stageRenderer.ts`, 색은 `src/render/theme.ts`

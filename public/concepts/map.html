@@ -24,7 +24,7 @@
 </div>
 
 <h2>정해진 방식 · 갑에 병을 섞어</h2>
-<p>화면은 갑(가는 선, 따라가는 카메라)으로 그린다. 지금 맵을 넓게 봐야 하는 순간에만 병(한눈에 보는 지도)으로 물러났다가 돌아온다. 이 한 바퀴에서는 세 번이다. 몬스터에 맞아 흩어졌다가 체크포인트에서 다시 뭉칠 때, 수호자를 넘고 베이스를 얻었을 때(세이브), 베이스로 문을 열어 보스로 가는 길이 열렸을 때다. 지도로 물러나면 구역 사이의 길과 세이브 자리가 드러난다. 목숨이 다해 세이브로 돌아갈 때도 같은 방식을 쓴다.</p>
+<p>화면은 갑(가는 선, 따라가는 카메라)으로 그린다. 병(한눈에 보는 지도)으로 물러나는 것은 목숨이 다해 처음부터(세이브 자리에서) 되살아날 때만이다. 목숨이 남아 체크포인트에서 다시 뭉칠 때와 악기를 얻을 때는 물러나지 않는다. 길이 열리면 카메라가 열린 자리로 갔다가 3박쯤 머물고 돌아온다(이 한 바퀴에서는 두 번, 북쪽 문과 동쪽 문). 악기를 얻을 때의 연출은 따로 정한다. 물러나는 모습은 아래 병의 화면에서 볼 수 있다.</p>
 <canvas class="big" data-style="mix" width="1920" height="1080"></canvas>
 
 <h2>갑 · 가는 선, 따라가는 카메라</h2>
@@ -256,10 +256,11 @@ function avgCam(fn, b, span, n = 8) { let x = 0, y = 0, w = 0; for (let i = 0; i
 const inFight = b => b > 16.5 && b < PICK + 3;
 /* 정해진 방식: 평소엔 갑(따라가는 카메라), 특정 순간엔 병(한눈에 보는 지도)으로 물러난다.
    맞고 다시 뭉칠 때, 악기를 얻었을 때, 보스로 가는 문이 열릴 때 */
-const OVERVIEW = [[HIT + .3, REFORM + .8], [PICK + .2, PICK + 4.2], [45, 48.5]];
+const OVERVIEW = [];   // 2026-11-18: 지도로 물러나는 것은 목숨이 다해 처음부터 되살아날 때만. 이 한 바퀴에는 그런 순간이 없다
+const VISITS = GATES.map(G => [G.open + .25, G.open + 4.25, G.x, G.y]);   // 길이 열리면 카메라가 그 자리로 갔다가 돌아온다
 const overviewAt = t => OVERVIEW.some(([a, z]) => t >= a && t < z);
 const CAM = {
-  mix: b => avgCam(t => overviewAt(t) ? { x: 1230, y: 560, w: 2360 } : CAM.line(t), b, 1.8, 10),
+  mix: b => avgCam(t => { if (overviewAt(t)) return { x: 1230, y: 560, w: 2360 }; const v = VISITS.find(([a, z]) => t >= a && t < z); return v ? { x: v[2], y: v[3], w: 760 } : CAM.line(t); }, b, 1.4, 10),
   line: b => avgCam(t => {
     if (inFight(t)) return { x: ARENA.x, y: ARENA.y + 10, w: 600 };
     if (t > 49) return { x: BOSS.cx - 60, y: BOSS.cy + 10, w: 860 };

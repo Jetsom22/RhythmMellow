@@ -175,35 +175,57 @@ describe('attacks and the just judgement', () => {
     const ev = run(s, 44 * STEP + 0.4, { dashAt: 40 * STEP - 0.02 });
     expect(of(ev, 'hurt')).toHaveLength(1);
   });
-  it('a just dodge makes the next attack that lands stronger, once', () => {
-    const s = make({ emitters: [{ id: 'dev', kind: 'device', x: 0, y: 0, hp: 1000, body: 0.2, pattern: { length: 16, rest: 16, events: [{ at: 8, attack: 'big' }] } }] });
-    s.owned = ['drum']; s.equipped = 'drum'; s.x = 0.5 * U;
-    run(s, 40 * STEP - 0.03);
-    const ev = run(s, 44 * STEP + 0.01, { dashAt: 40 * STEP - 0.02, moveX: 0, moveY: 0 });
-    expect(of(ev, 'dash')[0].just).toBe(true);
-    const hits = of(run(s, 56 * STEP), 'attack').concat(of(ev, 'attack')).filter(a => a.hit);
-    expect(hits.filter(a => a.strong)).toHaveLength(1);
-    expect(s.charged).toBe(false);
-  });
-  it('pressing off the beat does nothing: still inside, still hit', () => {
+  it('a just dodge charges one special attack; without a charge the key does nothing', () => {
     const s = make(device('big'));
-    run(s, 40 * STEP - 0.2);
-    const ev = run(s, 40 * STEP + 0.4, { dashAt: 40 * STEP - 0.19 });
-    expect(of(ev, 'dash')).toHaveLength(0);
-    expect(of(ev, 'hurt')).toHaveLength(1);
-  });
-  it('a dash that is not just is still safe if it carries the player out of the attack', () => {
-    const s = make(device('ring')); s.x = 1.5 * U;
-    run(s, 40 * STEP - 0.11);
-    const ev = run(s, 40 * STEP + 0.4, { dashAt: 40 * STEP - 0.10, moveX: 1 });
-    expect(of(ev, 'hurt')).toHaveLength(0);
-    expect(of(ev, 'absorb')).toHaveLength(0);
-  });
-  it('on time but outside the attack is not a just', () => {
-    const s = make(device('big')); s.x = 4 * U;
+    s.owned = ['drum']; s.equipped = 'drum';
+    expect(of(s.stepTo(s.time, { special: true }), 'special')).toHaveLength(0);
     run(s, 40 * STEP - 0.03);
     const ev = run(s, 40 * STEP + 0.3, { dashAt: 40 * STEP - 0.02 });
-    expect(of(ev, 'dash')[0].just).toBe(false);
+    expect(of(ev, 'charge')).toHaveLength(1);
+    expect(s.charged).toBe(true);
+    expect(of(s.stepTo(s.time, { special: true }), 'special')).toHaveLength(1);
+    expect(s.charged).toBe(false);
+    expect(of(s.stepTo(s.time, { special: true }), 'special')).toHaveLength(0);
+  });
+  const dummy = (x: number, y: number, extra: any = {}): Partial<StageData> => ({ emitters: [{ id: 'd', kind: 'device', x, y, hp: 1000, body: 0.2, pattern: { length: 16, events: [] }, ...extra }] });
+  it('the drum special bursts around the player', () => {
+    const s = make(dummy(1.5, 0)); s.owned = ['drum']; s.equipped = 'drum'; s.charged = true;
+    s.stepTo(s.time, { special: true });
+    expect(s.emitters[0].hp).toBe(940);
+    const far = make(dummy(3, 0)); far.owned = ['drum']; far.equipped = 'drum'; far.charged = true;
+    far.stepTo(far.time, { special: true });
+    expect(far.emitters[0].hp).toBe(1000);
+  });
+  it('the hat special is a line the way the player faces', () => {
+    const s = make(dummy(5, 0)); s.owned = ['hat']; s.equipped = 'hat'; s.charged = true;
+    s.stepTo(s.time, { special: true });
+    expect(s.emitters[0].hp).toBe(960);
+    const side = make(dummy(0, 5)); side.owned = ['hat']; side.equipped = 'hat'; side.charged = true;
+    side.stepTo(side.time, { special: true });
+    expect(side.emitters[0].hp).toBe(1000);
+  });
+  it('the bass special leaves a pool that strikes on every beat for four beats', () => {
+    const s = make(dummy(2, 0)); s.owned = ['hat', 'bass']; s.equipped = 'bass'; s.charged = true; s.god = true;
+    s.stepTo(s.time, { special: true });
+    s.equipped = 'hat';                       // so that the ordinary bass attack does not add to it
+    s.x = -9 * U;
+    run(s, 60 * STEP);
+    expect(s.emitters[0].hp).toBe(1000 - 15 * 5);       // once when fired, then on four beats
+    expect(s.pools).toHaveLength(0);
+  });
+  it('a device can react to a special attack: that is how a special solves things', () => {
+    const s = make({ ...dummy(1, 0, { hp: 0, onSpecial: { flag: 'sw', layer: 'drum' } }), ...gate({ flag: 'sw' }) });
+    s.owned = ['drum', 'hat']; s.equipped = 'hat'; s.charged = true;
+    s.stepTo(s.time, { special: true });
+    expect(s.isGround(12 * U, 0)).toBe(false);          // the wrong instrument
+    s.equipped = 'drum'; s.charged = true;
+    expect(of(s.stepTo(s.time, { special: true }), 'trigger')).toHaveLength(1);
+    expect(s.isGround(12 * U, 0)).toBe(true);
+  });
+  it('being hit loses the charge', () => {
+    const s = make(device('big')); s.charged = true;
+    run(s, 40 * STEP + 0.3);
+    expect(s.charged).toBe(false);
   });
   it('a held attack strikes on every beat while it lasts', () => {
     const s = make(device('zone')); s.god = true;
