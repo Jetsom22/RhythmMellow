@@ -3,199 +3,182 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RhythmMellow 비주얼 시안</title>
+<title>RhythmMellow 비주얼 시안 2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&display=swap">
 <style>
-:root{--paper:#fff;--ink:#111;--mute:#77777a;--line:#e3e3e0;--c:#00aeef;--m:#ec008c;--y:#ffe600}
+:root{--paper:#f6f5f1;--ink:#3b3936;--mute:#8d8a84;--hair:#d9d6cf}
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 "Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-main{max-width:1320px;margin:0 auto;padding:40px 24px 80px}
-h1{font-size:28px;letter-spacing:-.02em;margin:0 0 6px}
-.lede{color:var(--mute);margin:0 0 8px;max-width:62ch}
-section{border-top:2px solid var(--ink);margin-top:48px;padding-top:18px}
-.head{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline}
-.head b{font-size:13px;letter-spacing:.08em}
-h2{font-size:22px;margin:0;letter-spacing:-.01em}
-.why{margin:6px 0 16px;max-width:70ch}
-.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 "Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+main{max-width:1280px;margin:0 auto;padding:48px 24px 96px}
+h1{font:500 30px/1.1 "Barlow Condensed","Apple SD Gothic Neo",sans-serif;letter-spacing:.02em;margin:0 0 10px}
+h2{font:500 24px/1.1 "Barlow Condensed","Apple SD Gothic Neo",sans-serif;letter-spacing:.02em;margin:0}
+.lede{color:var(--mute);margin:0;max-width:64ch}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px 36px;margin:22px 0 0;padding:0;list-style:none;font-size:13.5px}
+.read b{font-weight:600}
+section{border-top:1px solid var(--ink);margin-top:56px;padding-top:16px}
+.head{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+.head span{font:500 13px "Barlow Condensed",sans-serif;letter-spacing:.14em;color:var(--mute)}
+.why{margin:8px 0 18px;max-width:72ch}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
 figure{margin:0}
-svg{display:block;width:100%;height:auto;border:1px solid var(--line)}
-figcaption{font-size:12px;color:var(--mute);margin-top:6px}
-.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 32px;margin:14px 0 0;padding:0;list-style:none;font-size:13.5px}
-.notes b{font-weight:600}
-.legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px;margin:14px 0 0}
-.legend i{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px}
-@keyframes beat{0%{transform:scale(1.12)}35%,100%{transform:scale(1)}}
-@keyframes blink{0%{opacity:1}35%,100%{opacity:.55}}
-.beat{animation:beat .545s linear infinite;transform-box:fill-box;transform-origin:center}
-.blink{animation:blink .545s linear infinite}
-@media (prefers-reduced-motion:reduce){.beat,.blink{animation:none}}
+svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--mute);margin-top:8px}
+.sw{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font:500 12px "Barlow Condensed",sans-serif;letter-spacing:.1em;color:var(--mute)}
+.sw i{display:inline-block;width:28px;height:10px;margin-right:6px;vertical-align:0}
+.notes{margin:12px 0 0;padding:0;list-style:none;font-size:13.5px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px 36px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+@media(max-width:700px){.strip{grid-template-columns:repeat(2,1fr)}}
+a{color:inherit}
+@keyframes beat{0%{transform:scale(1.14)}40%,100%{transform:scale(1)}}
+@keyframes fade{0%{opacity:1}45%,100%{opacity:.72}}
+.beat{animation:beat .545s cubic-bezier(.2,.7,.2,1) infinite;transform-box:fill-box;transform-origin:center}
+.fade{animation:fade .545s linear infinite}
+@media (prefers-reduced-motion:reduce){.beat,.fade{animation:none}}
 </style>
 </head>
 <body>
 <main>
-<h1>RhythmMellow 비주얼 시안</h1>
-<p class="lede">흰 바탕에 CMY. 같은 두 장면(드럼의 방, 보스전)을 네 가지 방향으로 그렸다. 게임 빌드에는 아직 아무것도 반영하지 않았다. 박에 맞춰 움직이는 요소는 110 BPM으로 깜빡인다.</p>
-<div class="legend">
-  <span><i style="background:var(--m)"></i>마젠타 = 드럼</span>
-  <span><i style="background:var(--y)"></i>옐로 = 하이햇</span>
-  <span><i style="background:var(--c)"></i>시안 = 베이스</span>
-  <span><i style="background:var(--ink)"></i>검정 = 플레이어·보스(주선율)</span>
-</div>
+<h1>비주얼 시안 2 — 판과 면</h1>
+<p class="lede">B(오버프린트)와 D(색면) 계열로 좁히고, 색을 가라앉히고 선과 두께를 다시 잡았다. 게임 빌드에는 반영하지 않았다. <a href="round1.html">이전 시안</a></p>
+<ul class="read">
+  <li><b>글리피카에서 읽은 것</b> · 순백이 아닌 따뜻한 종이색, 가장자리로 아주 옅게 어두워지는 바탕</li>
+  <li><b>선</b> · 굵은 테두리가 없다. 1px 실선과 점선, 그리고 작은 채운 도형 둘뿐</li>
+  <li><b>색</b> · 검정 대신 따뜻한 짙은 회색. 강조색은 채도를 낮춘 한두 가지</li>
+  <li><b>크기</b> · 요소가 작고 여백이 넓다. 글자는 좁은 대문자체로 작게</li>
+</ul>
 <div id="out"></div>
 </main>
 <script>
-const C = '#00aeef', M = '#ec008c', Y = '#ffe600', K = '#111';
-const svg = (inner, bg = '#fff') => `<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" role="img"><rect width="640" height="360" fill="${bg}"/>${inner}</svg>`;
-const poly = (cx, cy, r, n, rot = -90) => Array.from({ length: n }, (_, i) => {
-  const a = (rot + (360 / n) * i) * Math.PI / 180;
-  return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`;
-}).join(' ');
-const arc = (cx, cy, r, frac) => {
-  const a = -Math.PI / 2 + Math.PI * 2 * frac;
-  return `M ${cx} ${cy - r} A ${r} ${r} 0 ${frac > .5 ? 1 : 0} 1 ${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`;
-};
-
-/* ───────── A. 노선도 ───────── */
-const A_room = svg(`
-  <rect x="40" y="96" width="560" height="168" rx="28" fill="#f1f0ec"/>
-  <path d="M 600 180 H 232" stroke="${M}" stroke-width="14" stroke-linecap="round" fill="none"/>
-  <path d="M 176 180 H 92" stroke="${M}" stroke-width="14" stroke-linecap="round" fill="none"/>
-  <path d="M 226 180 H 182" stroke="${M}" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round"/>
-  ${[500, 428, 356, 284].map((x, i) => i % 2 === 0
-    ? `<rect class="blink" x="${x - 9}" y="112" width="18" height="136" rx="9" fill="${M}"/>`
-    : `<rect x="${x - 9}" y="112" width="18" height="136" rx="9" fill="#fff" stroke="${M}" stroke-width="4"/>`).join('')}
-  <circle class="beat" cx="92" cy="180" r="15" fill="#fff" stroke="${K}" stroke-width="6"/>
-  <circle cx="392" cy="180" r="9" fill="${K}" stroke="#fff" stroke-width="4"/>
-  <g transform="translate(28,28)">
-    <circle cx="8" cy="8" r="6" fill="${K}"/><circle cx="28" cy="8" r="6" fill="${K}"/><circle cx="48" cy="8" r="6" fill="${K}"/>
-    <circle cx="8" cy="34" r="7" fill="#fff" stroke="#c9c8c4" stroke-width="3"/>
-    <path d="M 22 41 L 29 27 L 36 41 Z" fill="#fff" stroke="#c9c8c4" stroke-width="3" stroke-linejoin="round"/>
-    <rect x="43" y="27" width="14" height="14" fill="#fff" stroke="#c9c8c4" stroke-width="3"/>
-  </g>`, '#fbfbf9');
-const A_boss = svg(`
-  <rect x="60" y="30" width="520" height="300" rx="36" fill="#f1f0ec"/>
-  <circle cx="320" cy="180" r="118" fill="none" stroke="${M}" stroke-width="16" opacity=".9" class="blink"/>
-  <path d="M 320 180 L 600 60" stroke="${Y}" stroke-width="22" stroke-linecap="round"/>
-  <path d="M 320 180 L 600 60" stroke="${K}" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/>
-  <path d="M 320 180 L 40 300" stroke="${Y}" stroke-width="22" stroke-linecap="round"/>
-  <path d="M 320 180 L 40 300" stroke="${K}" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/>
-  <rect x="424" y="212" width="124" height="92" rx="20" fill="none" stroke="${C}" stroke-width="10" stroke-dasharray="18 10"/>
-  <path d="${arc(320, 180, 62, .62)}" stroke="${K}" stroke-width="5" fill="none" stroke-linecap="round"/>
-  <polygon class="beat" points="${poly(320, 180, 40, 5)}" fill="#fff" stroke="${K}" stroke-width="8" stroke-linejoin="round"/>
-  <circle cx="232" cy="240" r="9" fill="${K}" stroke="#fff" stroke-width="4"/>
-  <g transform="translate(28,28)">
-    <circle cx="8" cy="8" r="6" fill="${K}"/><circle cx="28" cy="8" r="6" fill="${K}"/><circle cx="48" cy="8" r="6" fill="none" stroke="#c9c8c4" stroke-width="3"/>
-    <circle cx="8" cy="34" r="7" fill="${M}"/>
-    <path d="M 22 41 L 29 27 L 36 41 Z" fill="${Y}" stroke="${K}" stroke-width="2" stroke-linejoin="round"/>
-    <rect x="43" y="27" width="14" height="14" fill="${C}"/>
-  </g>`, '#fbfbf9');
-
-/* ───────── B. 오버프린트 ───────── */
+const INK = '#3b3936';
+let uid = 0;
+const paper = id => `<defs>
+  <radialGradient id="${id}p" cx="50%" cy="46%" r="75%"><stop offset="0" stop-color="#fbfaf7"/><stop offset="1" stop-color="#ebe9e2"/></radialGradient>
+</defs><rect width="960" height="540" fill="url(#${id}p)"/>`;
+const frame = inner => { const id = 'g' + (uid++); return `<svg viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img">${paper(id)}${inner(id)}</svg>`; };
 const mul = 'style="mix-blend-mode:multiply"';
-const B_room = svg(`
-  <rect x="40" y="110" width="560" height="140" fill="#f3f3f3"/>
-  <rect x="176" y="110" width="56" height="140" fill="#fff"/>
-  <path d="M 176 110 V 250 M 232 110 V 250" stroke="${K}" stroke-width="1"/>
-  ${[500, 428, 356, 284].map((x, i) => i % 2 === 0
-    ? `<rect class="blink" x="${x - 14}" y="110" width="28" height="140" fill="${M}" ${mul}/>`
-    : `<rect x="${x - 14}" y="110" width="5" height="140" fill="${M}" ${mul}/><rect x="${x + 9}" y="110" width="5" height="140" fill="${M}" ${mul}/>`).join('')}
-  <circle class="beat" cx="96" cy="180" r="20" fill="${M}" ${mul}/>
-  <circle cx="102" cy="184" r="20" fill="${Y}" ${mul}/>
-  <rect x="376" y="170" width="20" height="20" fill="${C}" ${mul} opacity=".9"/>
-  <rect x="381" y="173" width="20" height="20" fill="${M}" ${mul} opacity=".9"/>
-  <rect x="386" y="170" width="20" height="20" fill="${K}"/>
-  <g transform="translate(28,26)">
-    <rect width="12" height="12" fill="${K}"/><rect x="18" width="12" height="12" fill="${K}"/><rect x="36" width="12" height="12" fill="${K}"/>
-    <rect y="22" width="14" height="14" fill="#ddd"/><rect x="20" y="22" width="14" height="14" fill="#ddd"/><rect x="40" y="22" width="14" height="14" fill="#ddd"/>
-  </g>`);
-const B_boss = svg(`
-  <rect x="60" y="30" width="520" height="300" fill="#f3f3f3"/>
-  <rect x="320" y="30" width="260" height="300" fill="${C}" ${mul} opacity=".85"/>
-  <path d="M 320 180 m -150 0 a 150 150 0 1 0 300 0 a 150 150 0 1 0 -300 0 M 320 180 m -96 0 a 96 96 0 1 1 192 0 a 96 96 0 1 1 -192 0" fill="${M}" fill-rule="evenodd" ${mul} class="blink"/>
-  <polygon points="320,160 600,40 600,96 320,200" fill="${Y}" ${mul}/>
-  <polygon points="320,160 40,280 40,336 320,200" fill="${Y}" ${mul}/>
-  <polygon class="beat" points="${poly(320, 180, 44, 5)}" fill="${K}"/>
-  <path d="${arc(320, 180, 66, .62)}" stroke="${K}" stroke-width="3" fill="none"/>
-  <rect x="204" y="236" width="18" height="18" fill="${K}"/>
-  <g transform="translate(28,26)">
-    <rect width="12" height="12" fill="${K}"/><rect x="18" width="12" height="12" fill="${K}"/><rect x="36" width="12" height="12" fill="#ddd"/>
-    <rect y="22" width="14" height="14" fill="${M}"/><rect x="20" y="22" width="14" height="14" fill="${Y}"/><rect x="40" y="22" width="14" height="14" fill="${C}"/>
-  </g>`);
+const hair = (d, o = .55, dash = '') => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="1" opacity="${o}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
+const circ = (x, y, r, o = .4, dash = '') => `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${INK}" stroke-width="1" opacity="${o}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>`;
+const label = (x, y, t, anchor = 'start', o = .7, size = 13) => `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Barlow Condensed, sans-serif" font-size="${size}" font-weight="500" letter-spacing="1.6" fill="${INK}" opacity="${o}">${t}</text>`;
+const poly = (cx, cy, r, n, rot = -90) => Array.from({ length: n }, (_, i) => { const a = (rot + 360 / n * i) * Math.PI / 180; return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`; }).join(' ');
+const arcPath = (cx, cy, r, f) => { const a = -Math.PI / 2 + Math.PI * 2 * f; return `M ${cx} ${cy - r} A ${r} ${r} 0 ${f > .5 ? 1 : 0} 1 ${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`; };
+const annulus = (cx, cy, r1, r2) => `M ${cx - r2} ${cy} a ${r2} ${r2} 0 1 0 ${2 * r2} 0 a ${r2} ${r2} 0 1 0 ${-2 * r2} 0 M ${cx - r1} ${cy} a ${r1} ${r1} 0 1 1 ${2 * r1} 0 a ${r1} ${r1} 0 1 1 ${-2 * r1} 0`;
+const band = (cx, cy, ang, w, len) => { const a = ang * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), h = w / 2; return `${cx + s * h},${cy - c * h} ${cx + c * len + s * h},${cy + s * len - c * h} ${cx + c * len - s * h},${cy + s * len + c * h} ${cx - s * h},${cy + c * h}`; };
 
-/* ───────── C. 악보 ───────── */
-const staff = (x1, x2, y, gap = 22) => [0, 1, 2, 3, 4].map(i => `<path d="M ${x1} ${y + i * gap} H ${x2}" stroke="${K}" stroke-width="1"/>`).join('');
-const C_room = svg(`
-  ${staff(56, 196, 136)}${staff(232, 600, 136)}
-  <path d="M 56 136 V 224 M 600 136 V 224" stroke="${K}" stroke-width="1"/>
-  <path d="M 196 136 V 224 M 232 136 V 224" stroke="${K}" stroke-width="1" stroke-dasharray="2 4"/>
-  ${[500, 428, 356, 284].map((x, i) => i % 2 === 0
-    ? `<path class="blink" d="M ${x - 4} 136 V 224" stroke="${M}" stroke-width="2"/><path class="blink" d="M ${x + 4} 136 V 224" stroke="${M}" stroke-width="7"/>`
-    : `<path d="M ${x} 136 V 224" stroke="${M}" stroke-width="1.5" stroke-dasharray="3 5"/>`).join('')}
-  <ellipse class="beat" cx="96" cy="180" rx="13" ry="10" fill="none" stroke="${M}" stroke-width="2.5" transform="rotate(-18 96 180)"/>
-  <ellipse cx="392" cy="180" rx="10" ry="7.5" fill="${K}" transform="rotate(-18 392 180)"/>
-  <path d="M 401 178 V 138" stroke="${K}" stroke-width="1.5"/>
-  <ellipse cx="61" cy="110" rx="4.5" ry="3.4" fill="${K}" transform="rotate(-18 61 110)"/><path d="M 65 109 V 94" stroke="${K}" stroke-width="1.2"/><text x="74" y="113" font-size="12" font-family="Georgia,serif" font-style="italic" fill="${K}">= 110</text>
-  <text x="56" y="252" font-size="10" fill="#999">1</text><text x="284" y="252" font-size="10" fill="#999">2</text><text x="428" y="252" font-size="10" fill="#999">3</text>
-  <g transform="translate(540,100)" fill="${K}"><circle cx="0" cy="0" r="3"/><circle cx="12" cy="0" r="3"/><circle cx="24" cy="0" r="3"/></g>`);
-const C_boss = svg(`
-  ${[150, 118, 86].map(r => `<circle cx="320" cy="180" r="${r}" fill="none" stroke="#d8d8d8" stroke-width="1"/>`).join('')}
-  <circle class="blink" cx="320" cy="180" r="118" fill="none" stroke="${M}" stroke-width="2.5"/>
-  <circle cx="320" cy="180" r="100" fill="none" stroke="${M}" stroke-width="1" stroke-dasharray="1 6"/>
-  <path d="M 320 180 L 600 60 M 320 180 L 40 300" stroke="${Y}" stroke-width="9"/>
-  <path d="M 320 180 L 600 60 M 320 180 L 40 300" stroke="${K}" stroke-width=".8"/>
-  <clipPath id="zc"><rect x="424" y="212" width="124" height="92"/></clipPath>
-  <g clip-path="url(#zc)">${Array.from({ length: 12 }, (_, i) => `<path d="M ${404 + i * 14} 304 l 24 -92" stroke="${C}" stroke-width="1"/>`).join('')}</g>
-  <rect x="424" y="212" width="124" height="92" fill="none" stroke="${C}" stroke-width="2.5"/>
-  <path d="${arc(320, 180, 60, .62)}" stroke="${K}" stroke-width="1.5" fill="none"/>
-  <polygon class="beat" points="${poly(320, 180, 38, 5)}" fill="#fff" stroke="${K}" stroke-width="2.5"/>
-  <circle cx="320" cy="180" r="5" fill="${K}"/>
-  <ellipse cx="232" cy="240" rx="10" ry="7.5" fill="${K}" transform="rotate(-18 232 240)"/>
-  <text x="40" y="44" font-size="12" font-family="Georgia,serif" font-style="italic" fill="${K}">III. 승 — tutti</text>
-  <g transform="translate(560,40)" fill="${K}"><circle cx="0" cy="0" r="3"/><circle cx="12" cy="0" r="3"/><circle cx="24" cy="0" r="3" fill="none" stroke="${K}"/></g>`);
+const player = (x, y) => `<circle cx="${x}" cy="${y}" r="8" fill="#fbfaf7" stroke="${INK}" stroke-width="1.5"/><circle class="beat" cx="${x}" cy="${y}" r="3.2" fill="${INK}"/>`;
+const hud = (P, owned, hp = 3) => `<g transform="translate(480,502)">
+  ${[0, 1, 2].map(i => `<rect x="${-58 + i * 14}" y="-4" width="9" height="9" fill="${i < hp ? INK : 'none'}" stroke="${INK}" stroke-width="1" opacity="${i < hp ? .9 : .4}"/>`).join('')}
+  ${hair('M -8 -8 V 9', .3)}
+  ${[P.m, P.y, P.c].map((c, i) => `<rect x="${6 + i * 18}" y="-6" width="13" height="13" fill="${i < owned ? c : 'none'}" stroke="${INK}" stroke-width="1" opacity="${i < owned ? 1 : .35}"/>`).join('')}
+  ${owned ? `<path d="M 6 12 h 13" stroke="${INK}" stroke-width="1.5"/>` : ''}
+</g>`;
+const beats = (x, y, on) => [0, 1, 2, 3].map(i => `<rect x="${x + i * 16}" y="${y}" width="10" height="${i === on ? 4 : 1}" fill="${INK}" opacity="${i === on ? .9 : .45}"/>`).join('');
 
-/* ───────── D. 색면 ───────── */
-const D_room = svg(`
-  <rect x="0" y="84" width="640" height="192" fill="${M}"/>
-  <rect x="176" y="84" width="56" height="192" fill="#fff"/>
-  ${[500, 428, 356, 284].map((x, i) => i % 2 === 0
-    ? `<rect class="blink" x="${x - 16}" y="84" width="32" height="192" fill="${K}"/>`
-    : `<rect x="${x - 16}" y="84" width="32" height="10" fill="${K}"/><rect x="${x - 16}" y="266" width="32" height="10" fill="${K}"/>`).join('')}
-  <circle class="beat" cx="96" cy="180" r="24" fill="#fff"/>
-  <rect x="380" y="168" width="24" height="24" fill="${K}"/>
-  <rect x="24" y="24" width="16" height="16" fill="${K}"/><rect x="46" y="24" width="16" height="16" fill="${K}"/><rect x="68" y="24" width="16" height="16" fill="${K}"/>`);
-const D_boss = svg(`
-  <rect x="320" y="0" width="320" height="360" fill="${C}"/>
-  <path d="M 320 180 m -150 0 a 150 150 0 1 0 300 0 a 150 150 0 1 0 -300 0 M 320 180 m -100 0 a 100 100 0 1 1 200 0 a 100 100 0 1 1 -200 0" fill="${M}" fill-rule="evenodd" class="blink"/>
-  <polygon points="320,156 640,20 640,84 320,204" fill="${Y}"/>
-  <polygon points="320,156 0,292 0,356 320,204" fill="${Y}"/>
-  <polygon class="beat" points="${poly(320, 180, 52, 5)}" fill="${K}"/>
-  <rect x="196" y="240" width="24" height="24" fill="${K}"/>
-  <rect x="24" y="24" width="16" height="16" fill="${K}"/><rect x="46" y="24" width="16" height="16" fill="${K}"/><rect x="68" y="24" width="16" height="16" fill="none" stroke="${K}" stroke-width="3"/>
-  <rect x="24" y="320" width="${592 * .62}" height="10" fill="${K}"/><rect x="24" y="320" width="592" height="10" fill="none" stroke="${K}" stroke-width="2"/>`);
+/* ── 방: 드럼 ── mode: wash | field | line */
+function room(P, mode) {
+  return frame(() => {
+    const X0 = 150, X1 = 810, Y0 = 210, H = 120, Y1 = Y0 + H;
+    const floor = mode === 'wash' ? P.mt : mode === 'field' ? P.m : 'none';
+    const gateFill = mode === 'field' ? INK : P.m;
+    const gates = [690, 610, 530, 450];
+    let s = '';
+    // 가운데 방(오른쪽으로 잘림)과 다른 방의 기척
+    s += `<rect x="810" y="130" width="200" height="280" fill="${mode === 'line' ? 'none' : '#e6e3dc'}" ${mul} opacity=".8"/>`;
+    if (mode === 'line') s += hair('M 960 130 H 810 V 210 M 810 330 V 410 H 960', .5);
+    // 방 바닥: 틈(낭떠러지)에서 끊긴 두 판
+    if (mode !== 'line') s += `<rect x="${X0}" y="${Y0}" width="150" height="${H}" fill="${floor}" ${mul}/><rect x="350" y="${Y0}" width="${X1 - 350}" height="${H}" fill="${floor}" ${mul}/>`;
+    else s += hair(`M 300 ${Y0} H ${X0} V ${Y1} H 300 M 350 ${Y0} H ${X1} M 350 ${Y1} H ${X1}`, .55);
+    s += hair(`M 300 ${Y0} V ${Y1} M 350 ${Y0} V ${Y1}`, .45, '2 4');
+    // 문짝: 닫힘은 면, 열림은 실선 한 쌍
+    gates.forEach((x, i) => {
+      if (i % 2 === 0) s += `<rect class="fade" x="${x - 11}" y="${Y0}" width="22" height="${H}" fill="${gateFill}" ${mode === 'field' ? '' : mul}/>`;
+      else s += hair(`M ${x - 11} ${Y0} V ${Y1} M ${x + 11} ${Y0} V ${Y1}`, mode === 'field' ? .8 : .5) + `<rect x="${x - 11}" y="${Y0}" width="22" height="7" fill="${gateFill}" ${mode === 'field' ? '' : mul}/><rect x="${x - 11}" y="${Y1 - 7}" width="22" height="7" fill="${gateFill}" ${mode === 'field' ? '' : mul}/>`;
+    });
+    // 악기
+    s += circ(215, 270, 26, .35, '2 5');
+    s += `<circle class="beat" cx="215" cy="270" r="9" fill="${mode === 'field' ? '#fbfaf7' : P.m}"/>`;
+    s += player(570, 270);
+    // 회피 거리 암시
+    s += hair('M 356 270 H 296', .35, '1 5');
+    s += label(X0, Y0 - 14, 'KICK · SNARE', 'start', .6);
+    s += beats(X0, Y1 + 16, 1);
+    s += label(480, 40, 'ROOM 1', 'middle', .75, 15) + `<rect x="450" y="50" width="60" height="1" fill="${INK}" opacity=".3"/><rect x="450" y="49" width="22" height="3" fill="${INK}" opacity=".8"/>`;
+    s += hud(P, 0);
+    return s;
+  });
+}
 
-const concepts = [
-  { tag: 'A', name: '노선도', why: '미니 메트로의 문법을 그대로 가져온 방향. 공간은 옅은 회색 덩어리로만 암시하고, 길과 위험은 굵고 둥근 선으로 그린다. 악기는 역 기호(원·삼각·사각)가 된다.',
-    a: A_room, b: A_boss,
-    notes: [['색', '바탕은 종이빛 흰색. CMY는 선에만 쓴다'], ['형태', '굵은 선, 둥근 끝, 흰 속에 검은 테두리'], ['강점', '읽기 쉽고 차분하다. 참고작과 가장 가깝다'], ['걱정', '참고작과 너무 닮아 보일 수 있다. 격한 보스전에서 힘이 약할 수 있다']] },
-  { tag: 'B', name: '오버프린트', why: '인쇄의 겹침을 규칙으로 삼는 방향. 겹마다 CMY 한 판이고, 판이 겹치면 색이 섞인다. 드럼과 하이햇이 겹치면 빨강, 셋이 다 겹치면 검정에 가까워진다. 곡이 쌓이는 것이 색으로 보인다.',
-    a: B_room, b: B_boss,
-    notes: [['색', '순백 바탕, 반투명 없이 곱하기 겹침'], ['형태', '면. 테두리 없음. 살짝 어긋난 판 맞춤'], ['강점', '"겹이 쌓인다"는 게임의 핵심이 화면의 규칙이 된다'], ['걱정', '겹친 색(빨강·초록·파랑)이 어느 악기인지 헷갈릴 수 있다']] },
-  { tag: 'C', name: '악보', why: '가장 절제된 방향. 화면 대부분이 흰 여백이고, 가는 검은 선이 오선과 마디처럼 공간을 만든다. CMY는 가는 선과 점으로 아껴 쓴다. 플레이어는 음표 머리다.',
-    a: C_room, b: C_boss,
-    notes: [['색', '흰 바탕과 검은 실선이 주인. CMY는 강조에만'], ['형태', '실선, 점선, 작은 기호. 약간의 글자(빠르기, 마디 번호)'], ['강점', '담백하고 음악과 직접 닿는다. 아주 다른 인상'], ['걱정', '가는 선은 빠른 액션에서 놓치기 쉽다. 노랑이 흰 바탕에서 약하다']] },
-  { tag: 'D', name: '색면', why: '가장 강한 방향. 방 하나가 통째로 한 색이고, 보스의 공격은 화면을 가르는 큰 색판이다. 포스터처럼 굵고 단순하다.',
-    a: D_room, b: D_boss,
-    notes: [['색', '흰 바탕 위에 CMY를 꽉 채운 면. 검정은 플레이어·보스·위험'], ['형태', '큰 면, 굵은 덩어리, 선 없음'], ['강점', '멀리서도 읽힌다. 박의 타격감이 크다. 스크린샷이 강하다'], ['걱정', '오래 보면 눈이 피로할 수 있다. "담백함"과는 거리가 있다']] },
+/* ── 보스전 ── */
+function boss(P, mode, stage = 2) {
+  return frame(() => {
+    const cx = 480, cy = 262;
+    let s = '';
+    const big = mode === 'field';
+    // 경기장
+    s += mode === 'line' ? '' : `<rect x="150" y="70" width="660" height="390" fill="#e9e6df" ${mul} opacity="${big ? .0 : .55}"/>`;
+    s += hair('M 150 70 H 810 V 460 H 150 Z', mode === 'line' ? .5 : .22);
+    // 화성 고리
+    s += circ(cx, cy, 64, .3, '2 5') + circ(cx, cy, 96, .22, '2 5');
+    // 베이스 장판 (C)
+    const zone = big ? [480, 70, 330, 390] : [560, 300, 220, 150];
+    s += `<rect x="${zone[0]}" y="${zone[1]}" width="${zone[2]}" height="${zone[3]}" fill="${P.c}" ${mul} opacity="${mode === 'line' ? .0 : .9}"/>`;
+    if (mode === 'line') s += hair(`M ${zone[0]} ${zone[1]} h ${zone[2]} v ${zone[3]} h ${-zone[2]} Z`, .6, '4 4') + `<rect x="${zone[0]}" y="${zone[1]}" width="${zone[2]}" height="${zone[3] * .4}" fill="${P.c}" ${mul} opacity=".9"/>`;
+    // 드럼 고리 (M): 바깥은 실선, 안은 차오르는 면
+    const r1 = big ? 110 : 122, r2 = big ? 196 : 180;
+    s += `<path class="fade" d="${annulus(cx, cy, r1, mode === 'line' ? r1 + (r2 - r1) * .45 : r2)}" fill="${P.m}" fill-rule="evenodd" ${mul}/>`;
+    s += circ(cx, cy, r1, .45) + circ(cx, cy, r2, .45);
+    [0, 90, 180, 270].forEach(a => { const t = a * Math.PI / 180; s += hair(`M ${cx + Math.cos(t) * (r2 + 4)} ${cy + Math.sin(t) * (r2 + 4)} L ${cx + Math.cos(t) * (r2 + 12)} ${cy + Math.sin(t) * (r2 + 12)}`, .6); });
+    // 하이햇 빔 (Y)
+    const bw = big ? 54 : 30;
+    s += `<polygon points="${band(cx, cy, -24, bw, 420)}" fill="${P.y}" ${mul}/><polygon points="${band(cx, cy, 156, bw, 420)}" fill="${P.y}" ${mul}/>`;
+    s += hair(`M ${cx} ${cy} L ${cx + Math.cos(-24 * Math.PI / 180) * 420} ${cy + Math.sin(-24 * Math.PI / 180) * 420} M ${cx} ${cy} L ${cx + Math.cos(156 * Math.PI / 180) * 420} ${cy + Math.sin(156 * Math.PI / 180) * 420}`, .35, '1 6');
+    // 보스
+    s += `<path d="${arcPath(cx, cy, 40, .62)}" fill="none" stroke="${INK}" stroke-width="1.5"/>` + circ(cx, cy, 40, .18);
+    s += `<polygon class="beat" points="${poly(cx, cy, 24, 5)}" fill="${INK}"/>`;
+    s += player(338, 356);
+    s += label(480, 34, 'III · 승', 'middle', .8, 15) + label(480, 52, 'TUTTI', 'middle', .5, 11) + `<rect x="440" y="60" width="80" height="1" fill="${INK}" opacity=".3"/><rect x="440" y="59" width="46" height="3" fill="${INK}" opacity=".8"/>`;
+    s += hud(P, 3, 2);
+    void stage;
+    return s;
+  });
+}
+
+/* ── 예고가 타격이 되기까지 (작은 네 컷) ── */
+function strip(P) {
+  const cell = (k, cap) => `<figure><svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg"><rect width="240" height="180" fill="#f6f5f1"/>
+    ${k < 3 ? `<path d="${annulus(120, 90, 34, 34 + 36 * (k === 0 ? 0.001 : k === 1 ? .5 : 1))}" fill="${P.m}" fill-rule="evenodd" ${mul} opacity="${k === 2 ? 1 : .8}"/>` : `<path d="${annulus(120, 90, 34, 70)}" fill="${P.m}" fill-rule="evenodd" ${mul} opacity=".22"/>`}
+    <circle cx="120" cy="90" r="34" fill="none" stroke="${INK}" stroke-width="1" opacity="${k === 3 ? .2 : .45}"/><circle cx="120" cy="90" r="70" fill="none" stroke="${INK}" stroke-width="1" opacity="${k === 3 ? .2 : .45}" ${k === 0 ? 'stroke-dasharray="2 5"' : ''}/>
+    ${k === 2 ? `<circle cx="120" cy="90" r="76" fill="none" stroke="${INK}" stroke-width="1.5"/>` : ''}
+    <polygon points="${poly(120, 90, 11, 5)}" fill="${INK}"/></svg><figcaption>${cap}</figcaption></figure>`;
+  return `<div class="strip">${cell(0, '예고 — 점선만')}${cell(1, '차오름 — 면이 안에서 밖으로')}${cell(2, '타격 — 면이 꽉 차고 실선이 굵어짐')}${cell(3, '잔상 — 옅게 남았다 사라짐')}</div>`;
+}
+
+const P1 = { c: '#86b6c2', m: '#d08a9e', y: '#e0c26a', mt: '#f1dde2' };
+const P2 = { c: '#6ea6b5', m: '#c06a86', y: '#d6ae48', mt: '#ecd3da' };
+const P3 = { c: '#a5cdd7', m: '#e3acbb', y: '#ead68f', mt: '#f5e6ea' };
+const sw = P => `<div class="sw"><span><i style="background:${P.m}"></i>DRUM</span><span><i style="background:${P.y}"></i>HAT</span><span><i style="background:${P.c}"></i>BASS</span><span><i style="background:${INK}"></i>INK</span></div>`;
+
+const items = [
+  { tag: 'B′', name: '얇은 판', P: P1, mode: 'wash',
+    why: '오버프린트를 차분하게. 방의 바닥은 그 악기 색의 아주 옅은 판이고, 위험은 같은 색의 짙은 판이다. 판끼리는 곱하기로 겹친다. 선은 전부 1px이고, 굵기 대신 "면이냐 선이냐"로 위험을 가른다.',
+    notes: [['읽는 법', '면 = 지금 위험, 실선 = 곧 위험, 점선 = 범위'], ['강점', '겹이 쌓이는 것이 색으로 보이면서도 조용하다'], ['걱정', '옅은 판은 밝은 모니터에서 날아갈 수 있다']] },
+  { tag: 'D′', name: '가라앉은 색면', P: P2, mode: 'field',
+    why: '색면을 유지하되 채도를 내렸다. 방 하나가 통째로 한 색의 판이고, 그 위의 위험은 잉크색이다. 보스전에서는 공격이 큰 판으로 화면을 가르고, 판이 겹친 자리는 더 짙어진다.',
+    notes: [['읽는 법', '색 = 어느 악기의 공간·공격인지, 잉크 = 닿으면 안 되는 것'], ['강점', '멀리서도 읽히고 스크린샷이 강하다'], ['걱정', '방 안에서는 그 색 하나만 보여 단조로울 수 있다']] },
+  { tag: 'B′+D′', name: '선에서 면으로', P: P3, mode: 'line',
+    why: '평소에는 종이와 실선뿐이다. 색은 박이 올 때만 나타난다. 예고는 점선으로 시작해 안에서부터 면이 차오르고, 타격의 순간에 꽉 찬다. 색이 곧 박자다.',
+    notes: [['읽는 법', '화면에 색이 보이면 그건 지금 울리는 소리다'], ['강점', '가장 담백하고, 음악이 쌓일수록 화면에 색이 늘어난다'], ['걱정', '초반(악기가 없을 때)은 화면이 거의 비어 보인다']], strip: true },
 ];
 
-document.getElementById('out').innerHTML = concepts.map(c => `
-<section id="${c.tag.toLowerCase()}">
-  <div class="head"><b>${c.tag}</b><h2>${c.name}</h2></div>
+document.getElementById('out').innerHTML = items.map(c => `
+<section>
+  <div class="head"><span>${c.tag}</span><h2>${c.name}</h2></div>
   <p class="why">${c.why}</p>
   <div class="pair">
-    <figure>${c.a}<figcaption>드럼의 방 — 박마다 여닫히는 문짝 넷, 회피로 건너는 틈, 왼쪽 끝의 악기</figcaption></figure>
-    <figure>${c.b}<figcaption>보스전 — 드럼의 고리, 하이햇의 빔, 베이스의 장판이 한꺼번에</figcaption></figure>
+    <figure>${room(c.P, c.mode)}<figcaption>드럼의 방 — 닫힌 문짝 둘, 열린 문짝 둘, 틈, 악기</figcaption></figure>
+    <figure>${boss(c.P, c.mode)}<figcaption>보스전 — 드럼의 고리, 하이햇의 빔, 베이스의 장판</figcaption></figure>
   </div>
+  ${c.strip ? strip(c.P) : ''}
+  ${sw(c.P)}
   <ul class="notes">${c.notes.map(([k, v]) => `<li><b>${k}</b> · ${v}</li>`).join('')}</ul>
 </section>`).join('');
 </script>
