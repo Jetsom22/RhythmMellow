@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RhythmMellow 시안 8 · 곡선 덩어리</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="round8.css">
+</head>
+<body data-p="rust">
+<main>
+<h1>시안 8 · 곡선 덩어리</h1>
+<p class="lede">추가 레퍼런스의 물렁한 덩어리(<code>b1</code>)를 두 자리에 써 봤다. 하나는 땅의 모양, 하나는 보스와 수호자의 몸이다. 땅의 끝은 결정대로 보통 색의 가는 선 하나이고, 적은 붉은 계열, 플레이어는 푸른 계열이다. 레퍼런스 <code>a2</code> 가운데의 "등고선으로만 그린 덩어리"도 함께 참고했다. <a href="index.html">시안 8 목록</a></p>
+<div class="bar">
+  <div class="grp" role="group" aria-label="팔레트" id="pal">
+    <button data-p="rust" aria-pressed="true">RUST</button><button data-p="mid" aria-pressed="false">MID</button><button data-p="navy" aria-pressed="false">NAVY</button><button data-p="ochre" aria-pressed="false">OCHRE</button>
+  </div>
+  <div class="grp" role="group" aria-label="속도" id="speed">
+    <button data-speed="1" aria-pressed="true">1×</button><button data-speed="0.5" aria-pressed="false">½×</button><button data-speed="0.25" aria-pressed="false">¼×</button>
+  </div>
+</div>
+
+<h2>1 · 땅 — 각진 것에서 물렁한 것까지</h2>
+<p>같은 도형들(통로 캡슐, 둥근 마당, 북쪽 길, 기운 비탈, 가운데 구덩이)을 이어 붙이는 방식만 바꿨다. 왼쪽은 그냥 겹친 것, 가운데와 오른쪽은 이음매가 녹아 붙은 것이다. 플레이어가 벽에 다가가면 안쪽의 옅은 두 줄과 바깥의 점이 드러나고, 드럼 공격의 여운은 벽을 따라 튕긴다. 오른쪽은 아래 막대로 물렁함을 바꿔 볼 수 있다.</p>
+<div class="row">
+  <figure><canvas class="gtile" data-k="0" width="1280" height="720"></canvas><figcaption><b>기하</b> · 도형이 만나는 자리가 각진다. 지금의 맵 시안과 같다</figcaption></figure>
+  <figure><canvas class="gtile" data-k="34" width="1280" height="720"></canvas><figcaption><b>녹은 이음매</b> · 이음매만 둥글게 녹고 도형의 생김새는 남는다. 어디가 마당이고 어디가 길인지 아직 읽힌다</figcaption></figure>
+  <figure><canvas class="gtile" data-k="90" data-slider="1" width="1280" height="720"></canvas><figcaption><b>덩어리</b> · 땅 전체가 하나의 물렁한 덩어리가 된다. 레퍼런스에 가장 가깝지만, 대시 거리를 재기 어려워진다</figcaption></figure>
+</div>
+<div class="lg" style="margin-top:12px;gap:12px"><label for="kk">오른쪽 화면의 물렁함</label><input id="kk" type="range" min="0" max="160" step="2" value="90" style="width:220px;accent-color:var(--chrome)"><output id="kkOut"></output></div>
+
+<h2>2 · 몸 — 보스와 수호자</h2>
+<p>플레이어와 장치가 기하 도형이니, 살아 있는 상대만 곡선 덩어리로 그리면 "무엇이 적인가"가 생김새로 갈린다. 셋 다 박마다 아주 조금 부풀고, 공격 직전에 살짝 움츠렸다가, 떨어지는 순간에 가장자리가 한 번 출렁인다. 크게 움직이지 않는다.</p>
+<div class="row">
+  <figure><canvas class="btile" data-v="layers" width="1280" height="720"></canvas><figcaption><b>가 · 겹친 면</b> · 레퍼런스 그대로. 적의 색 계열 셋과 잉크색 덩어리가 겹쳐 흐르고, 작은 원들이 둘레를 떠돈다. 가장 화려하고, 가장 무겁다</figcaption></figure>
+  <figure><canvas class="btile" data-v="core" width="1280" height="720"></canvas><figcaption><b>나 · 덩어리와 심장</b> · 잉크색 덩어리 하나 안에 지금 보스의 사분원이 심장처럼 돈다. 기하 문법과 곡선 덩어리 사이의 다리</figcaption></figure>
+  <figure><canvas class="btile" data-v="contour" width="1280" height="720"></canvas><figcaption><b>다 · 등고선 덩어리</b> · 면 없이 겹친 가는 선으로만 그린 덩어리(<code>a2</code>). 평소엔 잉크색 선뿐이고, 공격을 품는 동안에만 안쪽부터 적의 색이 차오른다. 선과 면의 문법을 그대로 지킨다</figcaption></figure>
+</div>
+
+<h2>3 · 합쳐 보면</h2>
+<p>녹은 이음매의 대결장에 덩어리 보스를 놓은 열여섯 박짜리 악구다. 드럼 고리, 하이햇 띠, 머무는 베이스가 차례로 온다. 아래에서 몸의 갈래를 바꿀 수 있다.</p>
+<div class="grp" role="group" aria-label="몸" id="bodyv" style="margin-bottom:12px">
+  <button data-b="layers" aria-pressed="false">가 · 겹친 면</button><button data-b="core" aria-pressed="false">나 · 덩어리와 심장</button><button data-b="contour" aria-pressed="true">다 · 등고선 덩어리</button>
+</div>
+<canvas id="big" width="1920" height="1080"></canvas>
+
+<h2>까미의 생각</h2>
+<ul class="notes">
+  <li><b>땅</b> · "녹은 이음매"를 권한다. 레퍼런스의 물렁함은 살리면서 마당과 길이 구분되고, 명세의 도형 맵(원, 캡슐, 다각형)을 그대로 쓴다. 이음매를 얼마나 녹일지는 도형마다 값 하나로 줄 수 있다</li>
+  <li><b>몸</b> · "다 · 등고선 덩어리"를 권한다. 굵은 면이 늘 화면에 있으면 적의 예고(면)와 몸(면)이 다투는데, 선으로 된 몸은 예고를 가리지 않는다. 그리고 "공격을 품는 동안 색이 찬다"가 그 자체로 예고가 된다. 수호자는 같은 문법에 등고선 수만 줄인다</li>
+  <li><b>가</b>는 타이틀이나 챕터 표지 같은 정지 화면에 어울린다. 싸움 화면에는 너무 무겁다</li>
+  <li><b>확인한 것과 못 한 것</b> · 헤드리스 브라우저로 찍어 모양과 색을 확인했다. 덩어리의 출렁임이 1×에서 너무 크거나 작게 느껴지는지는 직접 봐 주셔야 한다</li>
+</ul>
+</main>
+<script src="kit8.js"></script>
+<script>
+const { TAU, clamp, easeOut, easeInOut, lerp, col, clock } = K;
+
+/* ════ 녹아 붙는 땅: 거리장의 부드러운 합 ════ */
+const smin = (a, b, k) => { if (k <= 0) return Math.min(a, b); const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k / 4; };
+const smax = (a, b, k) => -smin(-a, -b, k);
+const sdC = (x, y, c) => Math.hypot(x - c.x, y - c.y) - c.r;
+const sdCap = (x, y, c) => { const dx = c.x2 - c.x1, dy = c.y2 - c.y1, t = clamp(((x - c.x1) * dx + (y - c.y1) * dy) / (dx * dx + dy * dy)); return Math.hypot(x - c.x1 - dx * t, y - c.y1 - dy * t) - c.r; };
+const sdBox = (x, y, c) => { const co = Math.cos(-c.rot), si = Math.sin(-c.rot), lx = (x - c.x) * co - (y - c.y) * si, ly = (x - c.x) * si + (y - c.y) * co; const qx = Math.abs(lx) - c.w / 2, qy = Math.abs(ly) - c.h / 2; return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0); };
+const SD = { circle: sdC, capsule: sdCap, rect: sdBox };
+
+function makeGround(ground, holes, k, W, H) {
+  const g = { k };
+  g.sdf = (x, y) => { let d = 1e9; for (const p of ground) d = smin(d, SD[p.k](x, y, p), k); for (const h of holes) d = smax(d, -SD[h.k](x, y, h), k * .5); return d; };
+  g.grad = (x, y) => { const e = 1.2, gx = g.sdf(x + e, y) - g.sdf(x - e, y), gy = g.sdf(x, y + e) - g.sdf(x, y - e), L = Math.hypot(gx, gy) || 1; return [gx / L, gy / L]; };
+  const S = 4, nx = Math.ceil((W + 80) / S), ny = Math.ceil((H + 80) / S), X0 = -40, Y0 = -40, v = new Float32Array((nx + 1) * (ny + 1));
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) v[j * (nx + 1) + i] = g.sdf(X0 + i * S, Y0 + j * S);
+  g.contours = [0, -6, -12].map(lv => {
+    const seg = [], P = (i, j) => [X0 + i * S, Y0 + j * S], L = (a, b, va, vb) => { const t = va / (va - vb); return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; };
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const a = v[j * (nx + 1) + i] - lv, b = v[j * (nx + 1) + i + 1] - lv, c = v[(j + 1) * (nx + 1) + i + 1] - lv, d = v[(j + 1) * (nx + 1) + i] - lv, pts = [];
+      if ((a < 0) !== (b < 0)) pts.push(L(P(i, j), P(i + 1, j), a, b));
+      if ((b < 0) !== (c < 0)) pts.push(L(P(i + 1, j), P(i + 1, j + 1), b, c));
+      if ((c < 0) !== (d < 0)) pts.push(L(P(i + 1, j + 1), P(i, j + 1), c, d));
+      if ((d < 0) !== (a < 0)) pts.push(L(P(i, j + 1), P(i, j), d, a));
+      if (pts.length >= 2) seg.push([...pts[0], ...pts[1]]);
+      if (pts.length === 4) seg.push([...pts[2], ...pts[3]]);
+    }
+    return seg;
+  });
+  g.travel = (x, y, vx, vy, d) => {
+    for (let n = 0; n < 80 && d > 0; n++) {
+      const s = Math.min(4, d), nx2 = x + vx * s, ny2 = y + vy * s;
+      if (g.sdf(nx2, ny2) > 0) { let lo = 0, hi = s; for (let i = 0; i < 6; i++) { const m = (lo + hi) / 2; g.sdf(x + vx * m, y + vy * m) > 0 ? hi = m : lo = m; } x += vx * lo; y += vy * lo; d -= lo; const [gx, gy] = g.grad(x, y), dot = vx * gx + vy * gy; if (dot > 0) { vx -= 2 * dot * gx; vy -= 2 * dot * gy; } x -= gx * .3; y -= gy * .3; continue; }
+      x = nx2; y = ny2; d -= s;
+    }
+    return [x, y];
+  };
+  return g;
+}
+function drawGround(g, G, p) {
+  g.save(); g.strokeStyle = col.ink; g.lineCap = 'round';
+  g.globalAlpha = .7; g.lineWidth = 1; g.beginPath(); for (const s of G.contours[0]) { g.moveTo(s[0], s[1]); g.lineTo(s[2], s[3]); } g.stroke();
+  for (let k = 1; k <= 2; k++) for (const s of G.contours[k]) { const d = Math.hypot((s[0] + s[2]) / 2 - p.x, (s[1] + s[3]) / 2 - p.y); if (d > 110) continue; g.globalAlpha = .5 * (1 - d / 110) ** 1.6 / k; g.beginPath(); g.moveTo(s[0], s[1]); g.lineTo(s[2], s[3]); g.stroke(); }
+  g.fillStyle = col.d; const R = 130;
+  for (let y = Math.floor((p.y - R) / 12) * 12; y < p.y + R; y += 12) for (let x = Math.floor((p.x - R) / 14) * 14; x < p.x + R; x += 14) {
+    const xx = x + ((y / 12) % 2 ? 7 : 0); if (G.sdf(xx, y) < 4) continue;
+    const k = clamp(1 - Math.hypot(xx - p.x, y - p.y) / R) ** 1.5; if (k < .03) continue;
+    g.globalAlpha = .8 * k; g.beginPath(); g.arc(xx, y, .5 + 2.8 * k, 0, TAU); g.fill();
+  }
+  g.restore();
+}
+function drumEcho(g, G, s, e, color, dist = 80) {
+  g.save(); g.strokeStyle = color; g.lineJoin = 'round';
+  const rings = s.kind === 'ring' ? [[s.r2, 1], [s.r1, -1]] : [[s.r, 1]];
+  for (let k = 0; k < 2; k++) {
+    const te = (e - k * .2) / 1.3; if (te <= 0 || te >= 1) continue;
+    const d = 2 + easeOut(te) * dist * (1 + k * .12);
+    g.globalAlpha = .7 * (1 - te) ** 1.4; g.lineWidth = 1.3 * (1 - te * .35); g.beginPath();
+    for (const [r, sg] of rings) { let pen = false, lx = 0, ly = 0; for (let i = 0; i <= 80; i++) { const th = i / 80 * TAU, [qx, qy] = G.travel(s.x + r * Math.cos(th), s.y + r * Math.sin(th), sg * Math.cos(th), sg * Math.sin(th), d); if (pen && Math.hypot(qx - lx, qy - ly) < 24) g.lineTo(qx, qy); else g.moveTo(qx, qy); lx = qx; ly = qy; pen = true; } }
+    g.stroke();
+  }
+  g.restore();
+}
+/* 매끈한 닫힌 길: 점을 지나는 캣멀롬 */
+function catmull(pts, u) {
+  const n = pts.length, f = ((u % 1) + 1) % 1 * n, i = Math.floor(f), t = f - i;
+  const P = k => pts[((i + k) % n + n) % n];
+  const p0 = P(-1), p1 = P(0), p2 = P(1), p3 = P(2), t2 = t * t, t3 = t2 * t;
+  const c = (a, b, c2, d) => .5 * (2 * b + (-a + c2) * t + (2 * a - 5 * b + 4 * c2 - d) * t2 + (-a + 3 * b - 3 * c2 + d) * t3);
+  return { x: c(p0[0], p1[0], p2[0], p3[0]), y: c(p0[1], p1[1], p2[1], p3[1]) };
+}
+
+/* ════ 1. 땅 ════ */
+const W = 640, H = 360;
+const GPRIMS = [
+  { k: 'capsule', x1: -60, y1: 205, x2: 205, y2: 205, r: 44 },
+  { k: 'circle', x: 330, y: 195, r: 128 },
+  { k: 'capsule', x1: 330, y1: 70, x2: 330, y2: -60, r: 38 },
+  { k: 'rect', x: 520, y: 150, w: 230, h: 66, rot: -.32 },
+];
+const GHOLES = [{ k: 'circle', x: 330, y: 215, r: 38 }];
+const GPATH = [[30, 205], [190, 205], [252, 140], [330, 100], [420, 130], [560, 118], [450, 175], [410, 270], [330, 285], [250, 262], [190, 212]];
+const GHITS = [{ T: 2, x: 250, y: 132 }, { T: 6, x: 545, y: 128 }, { T: 10, x: 330, y: 288 }, { T: 14, x: 90, y: 205 }];
+const gtiles = [...document.querySelectorAll('canvas.gtile')].map(cv => { K.watch(cv); return { cv, surf: K.surface(cv, W, H), G: makeGround(GPRIMS, GHOLES, +cv.dataset.k, W, H) }; });
+const slider = document.getElementById('kk'), kOut = document.getElementById('kkOut');
+const showK = () => { kOut.textContent = slider.value === '0' ? '기하' : `이음매 ${slider.value}`; };
+slider.addEventListener('input', () => { const t = gtiles.find(t => t.cv.dataset.slider); t.G = makeGround(GPRIMS, GHOLES, +slider.value, W, H); showK(); }); showK();
+function drawGTile(t, b) {
+  const { g } = t.surf; t.surf.begin();
+  const u = b / 16, p = catmull(GPATH, u);
+  drawGround(g, t.G, p);
+  for (const h of GHITS) for (const T of [h.T, h.T + 16, h.T - 16]) {
+    const pr = (b - (T - 1)), e = b - T; if (pr < 0 || e > 2.4) continue;
+    const s = { kind: 'disc', x: h.x, y: h.y, r: 34 };
+    if (e < .7) K.attack(g, s, col.e1, pr, e, 4);
+    if (e >= 0) drumEcho(g, t.G, s, e, col.e1, 90);
+  }
+  K.player(g, p.x, p.y, col.p1, { pulse: (b % 1) < .2 ? 1 - (b % 1) / .2 : 0 });
+}
+
+/* ════ 2. 덩어리 몸 ════ */
+const rnd = (a, b) => { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+/* 반지름이 각도마다 조금씩 다른 닫힌 덩어리. amp 가 출렁임, t 가 흐름 */
+function blobPath(g, x, y, R, seed, t, amp, sx = 1, sy = 1) {
+  const N = 72, pts = [];
+  for (let i = 0; i < N; i++) {
+    const th = i / N * TAU; let r = 1;
+    for (let k = 2; k <= 5; k++) r += amp * (rnd(seed, k) - .3) * .55 / (k - 1) * Math.sin(k * th + rnd(seed, k + 9) * TAU + t * (.25 + .12 * k) * (rnd(seed, k + 3) < .5 ? 1 : -1));
+    pts.push([x + Math.cos(th) * R * r * sx, y + Math.sin(th) * R * r * sy]);
+  }
+  g.beginPath(); const m = (a, b2) => [(a[0] + b2[0]) / 2, (a[1] + b2[1]) / 2];
+  let s = m(pts[N - 1], pts[0]); g.moveTo(s[0], s[1]);
+  for (let i = 0; i < N; i++) { const q = m(pts[i], pts[(i + 1) % N]); g.quadraticCurveTo(pts[i][0], pts[i][1], q[0], q[1]); }
+  g.closePath();
+}
+/* 몸의 반응: 박의 숨, 공격 직전의 움츠림, 떨어진 뒤의 출렁임, 예고의 진행 */
+function react(b, hits) {
+  let gather = 0, wob = 0, tele = 0;
+  for (const h of hits) {
+    const d = h.T - b; if (d > 0 && d < .25) gather = Math.max(gather, 1 - d / .25);
+    const e = b - h.T; if (e >= 0 && e < 1.2) wob = Math.max(wob, Math.exp(-e * 3.5));
+    const p = (b - (h.T - h.tele)) / h.tele; if (p >= 0 && p < 1) tele = Math.max(tele, Math.floor(p * 4 * h.tele + 1) / (4 * h.tele));
+  }
+  const ph = b % 1, breath = ph < .2 ? 1 - ph / .2 : 0;
+  return { gather, wob, tele, breath, scale: 1 + .02 * breath - .035 * gather + .025 * wob, amp: .55 - .3 * gather + .5 * wob };
+}
+function drawBody(g, v, x, y, R, b, rx) {
+  const t = b * .35;
+  g.save();
+  if (v === 'layers') {
+    const layers = [['e3', -.22, -.16, 1, 11], ['e1', .12, .05, .86, 12], ['e2', .3, .3, .5, 13], ['ink', -.1, .38, .62, 14]];
+    for (const [c, ox, oy, rr, sd] of layers) { g.fillStyle = col[c]; g.globalAlpha = 1; blobPath(g, x + ox * R, y + oy * R, R * rr * rx.scale, sd, t, rx.amp); g.fill(); }
+    for (let i = 0; i < 4; i++) { const a = t * .4 + i * 1.7, d = R * (1.35 + .15 * Math.sin(t + i)); g.fillStyle = col[['ink', 'e3', 'e2', 'ink'][i]]; g.beginPath(); g.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, R * [.13, .07, .05, .09][i], 0, TAU); g.fill(); }
+  } else if (v === 'core') {
+    g.fillStyle = col.ink; blobPath(g, x, y, R * rx.scale, 21, t, rx.amp); g.fill();
+    const rot = b * .5; g.fillStyle = col.e1; g.beginPath(); g.moveTo(x, y); g.arc(x, y, R * .42 * (1 + .25 * rx.tele), rot, rot + Math.PI / 2); g.closePath(); g.fill();
+    g.strokeStyle = col.bg; g.globalAlpha = .5; g.lineWidth = 1; g.beginPath(); g.arc(x, y, R * .42, 0, TAU); g.stroke();
+    for (let i = 0; i < 2; i++) { const a = -t * .5 + i * 3.1; g.fillStyle = col.ink; g.globalAlpha = 1; g.beginPath(); g.arc(x + Math.cos(a) * R * 1.4, y + Math.sin(a) * R * 1.4, R * (.08 + .04 * i), 0, TAU); g.fill(); }
+  } else {
+    const n = 9;
+    if (rx.tele > 0 || rx.wob > .05) {                                        // 공격을 품는 동안: 안쪽부터 적의 색이 찬다
+      const fill = Math.max(rx.tele, rx.wob * .9);
+      g.fillStyle = col.e1; g.globalAlpha = .18 + .55 * fill; blobPath(g, x, y, R * (.25 + .7 * fill) * rx.scale, 31, t, rx.amp); g.fill();
+    }
+    g.strokeStyle = col.ink;
+    for (let i = 0; i < n; i++) { const k = 1 - i / n; g.globalAlpha = .85 - .5 * (i / n); g.lineWidth = i === 0 ? 1.4 : 1; blobPath(g, x, y, R * (.18 + .82 * k) * rx.scale * (1 + .03 * rx.wob * (n - i) / n), 31, t + i * .05, rx.amp * (.5 + .5 * k)); g.stroke(); }
+    for (let i = 0; i < 3; i++) { const a = t * .5 + i * 2.2, d = R * 1.38; g.strokeStyle = col.ink; g.globalAlpha = .7; g.lineWidth = 1; g.beginPath(); g.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, R * [.08, .05, .11][i], 0, TAU); g.stroke(); }
+  }
+  g.restore();
+}
+
+/* 2의 작은 화면: 둥근 방 하나, 보스, 플레이어 */
+const BHITS = [];
+for (let bar = -1; bar < 2; bar++) { BHITS.push({ T: bar * 8 + 2, tele: 1, kind: 'ring' }, { T: bar * 8 + 5, tele: 1, kind: 'band' }, { T: bar * 8 + 6.5, tele: .5, kind: 'band2' }); }
+const bG = makeGround([{ k: 'circle', x: 320, y: 180, r: 165 }], [], 0, W, H);
+const btiles = [...document.querySelectorAll('canvas.btile')].map(cv => { K.watch(cv); return { cv, v: cv.dataset.v, surf: K.surface(cv, W, H) }; });
+function drawBTile(t, b) {
+  const { g } = t.surf; t.surf.begin(); const bb = b % 8;
+  const pa = .5 + bb * TAU / 8 * .6, p = { x: 320 + 140 * Math.cos(pa), y: 180 + 140 * Math.sin(pa) };
+  drawGround(g, bG, p);
+  const hits = BHITS.map(h => ({ ...h }));
+  for (const h of hits) {
+    const pr = (bb - (h.T - h.tele)) / h.tele, e = bb - h.T; if (pr < 0 || e > 2.2) continue;
+    let s;
+    if (h.kind === 'ring') s = { kind: 'ring', x: 320, y: 180, r1: 70, r2: 108 };
+    else { const a = h.kind === 'band' ? pa + .9 : pa - 1.2; s = { kind: 'band', x: 320, y: 180, ang: a, w: 16, len: 165 }; }
+    if (e < .7) K.attack(g, s, h.kind === 'ring' ? col.e1 : col.e2, pr, e, Math.max(2, 4 * h.tele));
+    if (e >= 0 && h.kind === 'ring') drumEcho(g, bG, s, e, col.e1, 70);
+  }
+  drawBody(g, t.v, 320, 180, 52, b, react(bb, hits));
+  K.player(g, p.x, p.y, col.p1, { pulse: (b % 1) < .2 ? 1 - (b % 1) / .2 : 0 });
+}
+
+/* ════ 3. 합친 장면 ════ */
+const VW = 960, VH = 540, BOSS = { x: 490, y: 245 };
+const aG = makeGround([
+  { k: 'circle', x: 480, y: 265, r: 190 }, { k: 'circle', x: 295, y: 330, r: 118 }, { k: 'circle', x: 680, y: 190, r: 125 },
+  { k: 'capsule', x1: 470, y1: 440, x2: 470, y2: 600, r: 46 }, { k: 'circle', x: 760, y: 360, r: 60 },
+], [], 46, VW, VH);
+const bigCv = document.getElementById('big'); K.watch(bigCv); const bigS = K.surface(bigCv, VW, VH);
+let bodyV = 'contour';
+const PHR = 16;
+const AHITS = [
+  { T: 2, tele: 1, kind: 'ring' }, { T: 4, tele: 1, kind: 'band', a: 0 }, { T: 4.5, tele: .5, kind: 'band', a: 1 },
+  { T: 7, tele: 2, kind: 'bass' }, { T: 8, tele: 1, kind: 'bass2' },
+  { T: 10, tele: 1, kind: 'ring' }, { T: 12, tele: 1, kind: 'band', a: 2 }, { T: 12.5, tele: .5, kind: 'band', a: 3 }, { T: 14.5, tele: 1, kind: 'ring2' },
+];
+const pPath = b => { const th = .2 + b * TAU / PHR; return { x: BOSS.x + 185 * Math.cos(th), y: BOSS.y + 112 * Math.sin(th) + 20 }; };
+const DASHES = [4, 12].map(T => ({ T, a: pPath(T - .02), z: (() => { const p = pPath(T), q = pPath(T + .4); const dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx, dy) || 1; return { x: p.x + dx / L * 70, y: p.y + dy / L * 70 }; })() }));
+function playerAt(b) {
+  let p = pPath(b);
+  for (const d of DASHES) { const e = b - d.T; if (e > 0 && e < 1.4) { const k = easeOut(clamp(e / .3)) * (1 - easeInOut(clamp((e - .3) / 1.1))); p = { x: p.x + (d.z.x - d.a.x) * k * .6, y: p.y + (d.z.y - d.a.y) * k * .6 }; } }
+  return p;
+}
+function shapeOf(h, b) {
+  if (h.kind === 'ring') return { kind: 'ring', x: BOSS.x, y: BOSS.y, r1: 78, r2: 120 };
+  if (h.kind === 'ring2') return { kind: 'ring', x: BOSS.x, y: BOSS.y, r1: 120, r2: 160 };
+  if (h.kind === 'bass' || h.kind === 'bass2') return { kind: 'disc', x: 680, y: 190, r: 120 };
+  const p = pPath(h.T - h.tele), a = Math.atan2(p.y - BOSS.y, p.x - BOSS.x) + [0, .5, 0, -.5][h.a];
+  return { kind: 'band', x: BOSS.x, y: BOSS.y, ang: a, w: 18, len: 320 };
+}
+/* 땅 모양의 가리개: 공격의 면은 땅 안에만 그린다 */
+const layer = document.createElement('canvas'); layer.width = bigCv.width; layer.height = bigCv.height;
+let mask = null;
+function groundMask() {
+  if (mask) return mask;
+  mask = document.createElement('canvas'); mask.width = VW; mask.height = VH;
+  const m = mask.getContext('2d'), img = m.createImageData(VW, VH);
+  for (let y = 0; y < VH; y++) for (let x = 0; x < VW; x++) { const d = aG.sdf(x + .5, y + .5), a = clamp(.5 - d); img.data[(y * VW + x) * 4 + 3] = a * 255; }
+  m.putImageData(img, 0, 0); return mask;
+}
+function drawBig(b) {
+  const main = bigS.g; bigS.begin(); const bb = ((b % PHR) + PHR) % PHR;
+  const p = playerAt(bb);
+  drawGround(main, aG, p);
+  let g = layer.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, layer.width, layer.height); g.setTransform(2, 0, 0, 2, 0, 0);
+  for (const h of AHITS) for (const T of [h.T, h.T + PHR, h.T - PHR]) {
+    const pr = (bb - (T - h.tele)) / h.tele, e = bb - T; if (pr < 0 || e > 2.4) continue;
+    const s = shapeOf(h, bb), color = h.kind.startsWith('bass') ? col.e3 : h.kind === 'band' ? col.e2 : col.e1;
+    if (h.kind === 'bass2' && pr < 1) {                                   // 머무는 베이스: 가라앉았다 계단으로 다시 짙어진다
+      g.save(); g.fillStyle = color; g.globalAlpha = .34 + .12 * (Math.floor(pr * 4) + 1); K.path(g, s); g.fill(); g.globalAlpha = .9; g.strokeStyle = color; g.lineWidth = 1.5; K.path(g, s); g.stroke(); g.restore();
+    } else if (!(h.kind === 'bass' && e > 0)) { if (e < .7) K.attack(g, s, color, pr, e, Math.max(2, 4 * h.tele)); }
+    if (e >= 0 && (h.kind === 'ring' || h.kind === 'ring2')) drumEcho(g, aG, s, e, col.e1, 95);
+    if (h.kind === 'bass2' && e >= 0 && e < 3.4) {                       // 베이스의 여운: 자리 전체가 옅게 남아 풀린다
+      const te = e / 3.4; g.save(); g.fillStyle = color; g.globalAlpha = .16 * Math.min(1, te / .1) * (1 - te) ** 1.4;
+      g.beginPath(); g.arc(s.x, s.y, s.r * (1 + .5 * easeOut(te)), 0, TAU); g.fill(); g.restore();
+    }
+  }
+  g.globalCompositeOperation = 'destination-in'; g.globalAlpha = 1; g.drawImage(groundMask(), 0, 0, VW, VH); g.globalCompositeOperation = 'source-over';
+  main.save(); main.setTransform(1, 0, 0, 1, 0, 0); main.drawImage(layer, 0, 0); main.restore();
+  g = main;
+  const hits = []; for (const h of AHITS) for (const T of [h.T, h.T + PHR, h.T - PHR]) hits.push({ T, tele: h.tele });
+  drawBody(g, bodyV, BOSS.x, BOSS.y, 64, b, react(bb, hits));
+  for (const d of DASHES) K.dash(g, d.a.x, d.a.y, d.a.x + (d.z.x - d.a.x) * .6, d.a.y + (d.z.y - d.a.y) * .6, bb - d.T, col.p1, 1);
+  const age = bb % 1; if (age < .9) { const k = age / .9; g.save(); g.strokeStyle = col.p1; g.globalAlpha = .85 * (1 - k) ** 1.3; g.lineWidth = 2 - 1.3 * k; g.beginPath(); g.arc(p.x, p.y, 60 * easeOut(clamp(age / .25)) + 8 * k, 0, TAU); g.stroke(); g.restore(); }
+  K.player(g, p.x, p.y, col.p1, { pulse: age < .2 ? 1 - age / .2 : 0 });
+}
+
+K.bindPalette(document.getElementById('pal'));
+K.bindSpeed(document.getElementById('speed'));
+K.choice(document.getElementById('bodyv'), 'b', v => { bodyV = v; });
+const params = new URLSearchParams(location.search);
+window.__orgAt = b => { for (const t of gtiles) drawGTile(t, b); for (const t of btiles) drawBTile(t, b); drawBig(b); };
+function frame(now) {
+  K.tick(now); const b = clock.beat;
+  if (!params.has('freeze')) {
+    for (const t of gtiles) if (K.isVisible(t.cv)) drawGTile(t, b);
+    for (const t of btiles) if (K.isVisible(t.cv)) drawBTile(t, b);
+    if (K.isVisible(bigCv)) drawBig(b);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

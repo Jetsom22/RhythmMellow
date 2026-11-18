@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RhythmMellow 시안 8 · 맵의 문법</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="round8.css">
+</head>
+<body data-p="rust">
+<main>
+<h1>시안 8 · 맵의 문법</h1>
+<p class="lede">시스템 세션의 새 스테이지 명세(승인 대기)를 그림으로 옮겨 봤다. 원, 캡슐, 기운 네모를 겹친 하나로 이어진 땅이고, 가운데에 파인 구덩이가 있다. 같은 맵, 같은 한 바퀴를 세 가지 방식으로 그렸다. 플레이어는 함정 통로를 대시로 지나고, 몬스터에 한 번 맞아 되살아나고, 문을 열고, 수호자를 넘어 베이스를 얻고, 보스의 문 앞에 선다. 56박, 30초쯤이다. <a href="index.html">시안 8 목록</a></p>
+<div class="bar">
+  <div class="grp" role="group" aria-label="팔레트" id="pal">
+    <button data-p="rust" aria-pressed="true">RUST</button><button data-p="mid" aria-pressed="false">MID</button><button data-p="navy" aria-pressed="false">NAVY</button><button data-p="ochre" aria-pressed="false">OCHRE</button>
+  </div>
+  <div class="grp" role="group" aria-label="장면으로 건너뛰기" id="jump">
+    <button data-j="0">처음</button><button data-j="2">함정 통로</button><button data-j="7">몬스터</button><button data-j="13">문</button><button data-j="16">대결</button><button data-j="30">파츠</button><button data-j="43">둘째 문</button><button data-j="48">보스의 문</button>
+  </div>
+  <div class="grp" role="group" aria-label="속도" id="speed">
+    <button data-speed="1" aria-pressed="true">1×</button><button data-speed="0.5" aria-pressed="false">½×</button><button data-speed="0.25" aria-pressed="false">¼×</button>
+  </div>
+</div>
+
+<h2>갑 · 가는 선, 따라가는 카메라</h2>
+<p>글리피카처럼 아주 가는 선과 작은 기호로만 그린다. 카메라는 플레이어를 부드럽게 따라가고, 대결장에 들어서면 대결장을 액자처럼 잡는다. 장치·몬스터·수호자는 작은 기호이고, 그것이 닿는 범위를 머리카락 굵기의 점선 원으로 보여 준다. 연출도 선으로만 한다.</p>
+<canvas class="big" data-style="line" width="1920" height="1080"></canvas>
+<ul class="notes">
+  <li><b>대결의 시작</b> · 대결장 둘레에 점선 원이 생기고, 다음 마디까지 16분음마다 한 칸씩 채워진다. 다 차면 실선이 되고 싸움이 시작된다</li>
+  <li><b>파츠</b> · 고리 셋이 몸으로 좁혀 들고, 목숨 점이 하나씩 차례로 차오른다(세이브와 회복)</li>
+  <li><b>문</b> · 통로를 가로지른 두 줄 사이에 여는 악기의 점. 그 악기를 든 채 닿으면 두 줄이 벽 속으로 물러난다</li>
+  <li><b>기호</b> · 장치는 벽에 붙은 작은 네모, 몬스터는 가는 방향을 가리키는 세모, 수호자는 과녁, 보스는 원반에 사분원</li>
+</ul>
+
+<h2>을 · 포스터 — 구역마다 한 장</h2>
+<p>미드센추리 포스터처럼 구역마다 한 장의 구도를 잡아 두고, 플레이어가 구역을 넘으면 카메라가 다음 장으로 미끄러진다. 방출원은 크고 꽉 찬 면(반원, 사분원, 원반)이다. 구역마다 고정된 구도선(대결장 둘레의 동심선, 화면을 가르는 선)이 깔린다. 시안 3의 키 비주얼만큼 대담하게 가 보려는 길이다.</p>
+<canvas class="big" data-style="poster" width="1920" height="1080"></canvas>
+<ul class="notes">
+  <li><b>대결의 시작</b> · 대결장 둘레의 동심선들이 한 박에 한 겹씩 안으로 좁혀 들어와 대결장의 끝선에 포개진다</li>
+  <li><b>파츠</b> · 얻은 자리에서 큰 원 하나가 화면 밖까지 퍼지고, 땅의 끝선이 잠시 그 악기의 색으로 물든다</li>
+  <li><b>문</b> · 통로를 막은 반원 둘이 부채처럼 돌아 열린다</li>
+  <li><b>구도</b> · 구도선은 땅과 상관없이 화면의 비례를 잡는 장식이다. 판정에는 아무 뜻이 없어서 아주 옅게 둔다</li>
+</ul>
+
+<h2>병 · 지도 — 한눈에 보는 맵</h2>
+<p>미니 메트로처럼 스테이지 전체를 한 화면에 두고, 대결과 보스 앞에서만 그 자리로 다가간다. 탐험의 길이 한눈에 보이고, 구역 사이의 길(명세의 routes)이 점선으로 깔린다. 몸과 공격이 작아지는 대신, 정보는 화면 가장자리에 모은다.</p>
+<canvas class="big" data-style="map" width="1920" height="1080"></canvas>
+<ul class="notes">
+  <li><b>대결의 시작</b> · 지도가 대결장으로 다가가며 한 마디를 쓴다. 다가가는 동안 대결장의 테두리가 박마다 한 번 숨 쉰다</li>
+  <li><b>파츠</b> · 지도가 다시 물러나고, 얻은 자리에 세이브 표시(작은 네모)가 남는다. 새로 열 수 있는 문으로 가는 길이 그 악기의 색으로 깜빡인다</li>
+  <li><b>문</b> · 점선 하나. 열리면 점들이 흩어진다</li>
+  <li><b>가장자리</b> · 목숨과 든 악기는 오른쪽 위, 얻은 악기는 아래 가운데</li>
+</ul>
+
+<h2>셋을 함께 보면</h2>
+<ul class="notes">
+  <li><b>같은 것</b> · 땅의 끝은 보통 색의 가는 선 하나, 가까이 가면 안쪽에 옅은 선 두 줄과 바깥의 위험색 점. 적의 것은 붉은 계열, 플레이어의 것은 푸른 계열. 둥근 벽, 기운 벽, 구덩이 둘레에서 여운이 튕긴다</li>
+  <li><b>까미의 생각</b> · 싸움은 갑의 방식으로, 탐험의 쉼(파츠를 얻은 뒤, 체크포인트에서)은 병의 지도로 잠깐 물러나는 섞음을 권한다. 을의 큰 면은 보스와 수호자에게만 주면 "큰 것은 강한 것"이 읽힌다</li>
+  <li><b>명세와 맞춘 것</b> · 거리는 한 박에 걷는 거리(1U=120)로 잡았다. 함정 띠의 두께는 0.4U, 띠 사이는 2U, 정확한 대시는 1.4U다. 대시-걸음-대시가 박에 맞는다</li>
+  <li><b>확인한 것과 못 한 것</b> · 헤드리스 브라우저로 장면마다 찍어 모양과 구도를 확인했다. 카메라가 움직일 때 어지러운지, 30초 동안 지루한지는 직접 봐 주셔야 한다</li>
+</ul>
+</main>
+<script src="kit8.js"></script>
+<script>
+const { TAU, clamp, easeOut, easeInOut, lerp, col, clock, SPB } = K;
+const VW = 960, VH = 540, LOOP = 56, U = 120;
+
+/* ════ 맵: 땅은 도형들의 합, 구덩이는 뺀다 (명세 6.5) ════ */
+const sdC = (x, y, c) => Math.hypot(x - c.x, y - c.y) - c.r;
+const sdCap = (x, y, c) => { const dx = c.x2 - c.x1, dy = c.y2 - c.y1, t = clamp(((x - c.x1) * dx + (y - c.y1) * dy) / (dx * dx + dy * dy)); return Math.hypot(x - c.x1 - dx * t, y - c.y1 - dy * t) - c.r; };
+const sdBox = (x, y, c) => { const co = Math.cos(-c.rot), si = Math.sin(-c.rot), lx = (x - c.x) * co - (y - c.y) * si, ly = (x - c.x) * si + (y - c.y) * co; const qx = Math.abs(lx) - c.w / 2, qy = Math.abs(ly) - c.h / 2; return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0); };
+const SD = { circle: sdC, capsule: sdCap, rect: sdBox };
+const MAP = {
+  ground: [
+    { k: 'circle', x: 300, y: 900, r: 150 },                                  // 시작
+    { k: 'capsule', x1: 420, y1: 900, x2: 1030, y2: 900, r: 64 },              // 함정 통로
+    { k: 'circle', x: 1250, y: 860, r: 230 },                                  // 가운데 마당
+    { k: 'capsule', x1: 1250, y1: 650, x2: 1250, y2: 420, r: 58 },             // 북쪽 길
+    { k: 'circle', x: 1250, y: 215, r: 185 },                                  // 대결장
+    { k: 'rect', x: 1665, y: 780, w: 430, h: 116, rot: -.314 },                // 동쪽 비탈길
+    { k: 'circle', x: 2090, y: 640, r: 240 },                                  // 보스 방
+  ],
+  holes: [{ k: 'circle', x: 1250, y: 900, r: 70 }],                            // 구덩이
+};
+function sdf(x, y) {
+  let d = 1e9; for (const p of MAP.ground) d = Math.min(d, SD[p.k](x, y, p));
+  for (const h of MAP.holes) d = Math.max(d, -SD[h.k](x, y, h));
+  return d;
+}
+const grad = (x, y) => { const e = 1.5, gx = sdf(x + e, y) - sdf(x - e, y), gy = sdf(x, y + e) - sdf(x, y - e), L = Math.hypot(gx, gy) || 1; return [gx / L, gy / L]; };
+/* 끝선과 안쪽 선들: 거리장의 등고선 (마칭 스퀘어) */
+const LEVELS = [0, -7, -14], STEP = 6, BX = 100, BY = -20, BW = 2400, BH = 1160;
+const CONTOUR = LEVELS.map(lv => {
+  const nx = Math.ceil(BW / STEP), ny = Math.ceil(BH / STEP), v = new Float32Array((nx + 1) * (ny + 1)), seg = [];
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) v[j * (nx + 1) + i] = sdf(BX + i * STEP, BY + j * STEP) - lv;
+  const P = (i, j) => [BX + i * STEP, BY + j * STEP];
+  const lerpP = (a, b, va, vb) => { const t = va / (va - vb); return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; };
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const a = v[j * (nx + 1) + i], b = v[j * (nx + 1) + i + 1], c = v[(j + 1) * (nx + 1) + i + 1], d = v[(j + 1) * (nx + 1) + i];
+    const pa = P(i, j), pb = P(i + 1, j), pc = P(i + 1, j + 1), pd = P(i, j + 1), pts = [];
+    if ((a < 0) !== (b < 0)) pts.push(lerpP(pa, pb, a, b));
+    if ((b < 0) !== (c < 0)) pts.push(lerpP(pb, pc, b, c));
+    if ((c < 0) !== (d < 0)) pts.push(lerpP(pc, pd, c, d));
+    if ((d < 0) !== (a < 0)) pts.push(lerpP(pd, pa, d, a));
+    if (pts.length >= 2) seg.push([pts[0][0], pts[0][1], pts[1][0], pts[1][1]]);
+    if (pts.length === 4) seg.push([pts[2][0], pts[2][1], pts[3][0], pts[3][1]]);
+  }
+  return seg;
+});
+/* 여운의 한 점을 d만큼 보낸다. 어떤 모양의 벽이든 거리장의 기울기로 튕긴다 */
+function travel(x, y, vx, vy, d) {
+  for (let n = 0; n < 80 && d > 0; n++) {
+    const s = Math.min(5, d), nx = x + vx * s, ny = y + vy * s;
+    if (sdf(nx, ny) > 0) {                       // 벽을 넘는 지점을 반으로 나눠 찾고, 거기서 튕긴다
+      let lo = 0, hi = s; for (let i = 0; i < 6; i++) { const m = (lo + hi) / 2; sdf(x + vx * m, y + vy * m) > 0 ? hi = m : lo = m; }
+      x += vx * lo; y += vy * lo; d -= lo;
+      const [gx, gy] = grad(x, y), dot = vx * gx + vy * gy; if (dot > 0) { vx -= 2 * dot * gx; vy -= 2 * dot * gy; }
+      x -= gx * .3; y -= gy * .3; continue;
+    }
+    x = nx; y = ny; d -= s;
+  }
+  return [x, y];
+}
+
+/* ════ 놓인 것들 (명세 6.6~6.8) ════ */
+const DEV = [{ x: 560, y: 836, hits: 3 }, { x: 800, y: 836, hits: 5 }];       // 벽에 붙은 장치: 4박마다 띠를 내린다
+const PIT = { x: 1250, y: 900 }, MON = { r: 150, th8: -2.31, w: .35 };         // 구덩이를 도는 몬스터
+const monPos = b => { const th = MON.th8 + MON.w * (b - 8); return { x: PIT.x + MON.r * Math.cos(th), y: PIT.y + MON.r * Math.sin(th), th }; };
+const GATES = [
+  { x: 1250, y: 560, rot: 0, w: 120, inst: 'drum', open: 14 },
+  { x: 1608, y: 799, rot: -.314 + Math.PI / 2, w: 124, inst: 'bass', open: 45 },
+];
+const CHECK = { x: 1062, y: 884 }, ARENA = { x: 1250, y: 215, r: 185 }, GUARD = { x: 1250, y: 195 }, BOSS = { x: 2110, y: 620, r: 240, cx: 2090, cy: 640 };
+const PCOL = { drum: 'p1', hat: 'p2', bass: 'p3' };
+const ROUTES = [[300, 900, 1250, 860], [1250, 860, 1250, 215], [1250, 860, 2090, 640]];
+
+/* ════ 한 바퀴: 박마다의 자리 ════ */
+const KEYS = [   // [박, x, y, 'dash'이면 대시로 도착]
+  [0, 300, 900], [2.6, 500, 900], [3, 500, 900], [3.29, 668, 900, 'dash'], [5, 740, 900], [5.29, 908, 900, 'dash'],
+  [6.5, 1040, 882], [8, 1150, 790],
+  [10, 1062, 884], [12.5, 1250, 650], [13.6, 1250, 585], [15, 1250, 585], [16.5, 1250, 420], [18, 1250, 300], [20, 1250, 290],
+];
+const FIGHT = { from: 20, to: 31, dashes: [22, 25, 28], R: 95 };
+const fightAngle = b => { let a = Math.PI / 2 + .22 * (b - FIGHT.from); for (const T of FIGHT.dashes) a += 1.25 * easeOut(clamp((b - T) / .29)); return a; };
+const KEYS2 = [[31, null], [33.5, GUARD.x, GUARD.y + 2], [37.5, GUARD.x, GUARD.y + 2], [41, 1250, 640], [43.5, 1470, 832], [44.6, 1556, 816], [46, 1556, 816], [48.5, 1880, 712], [52, 1950, 690], [56, 1950, 690]];
+function keyPos(keys, b) {
+  for (let i = 1; i < keys.length; i++) {
+    const [t1, x1, y1, m] = keys[i], [t0, x0, y0] = keys[i - 1];
+    if (b <= t1) { const u = clamp((b - t0) / (t1 - t0 || 1)), e = m === 'dash' ? easeOut(u) : easeInOut(u); return { x: lerp(x0, x1, e), y: lerp(y0, y1, e) }; }
+  }
+  const l = keys[keys.length - 1]; return { x: l[1], y: l[2] };
+}
+function playerPos(b) {
+  if (b < FIGHT.from) return keyPos(KEYS, b);
+  if (b < FIGHT.to) { const a = fightAngle(b); return { x: GUARD.x + FIGHT.R * Math.cos(a), y: GUARD.y + FIGHT.R * Math.sin(a) }; }
+  const k = KEYS2.slice(); const a = fightAngle(FIGHT.to); k[0] = [31, GUARD.x + FIGHT.R * Math.cos(a), GUARD.y + FIGHT.R * Math.sin(a)];
+  return keyPos(k, b);
+}
+const HIT = 8, REFORM = 10;                         // 몬스터에 맞고 체크포인트에서 다시 뭉친다
+const PICK = 33.5;
+const lives = b => b < HIT ? 4 : b < PICK + .5 ? 3 : 4;
+const held = b => b < 44 ? 'drum' : 'bass';
+const owned = b => b < PICK ? ['drum'] : ['drum', 'bass'];
+const DASHES = [{ t: 3, a: [500, 900], z: [668, 900] }, { t: 5, a: [740, 900], z: [908, 900] }, ...FIGHT.dashes.map(T => { const p0 = playerPos(T), p1 = playerPos(T + .29); return { t: T, a: [p0.x, p0.y], z: [p1.x, p1.y] }; })];
+
+/* ════ 적의 공격들: 시간 → 모양 ════ */
+function attacks(b) {
+  const out = [];
+  for (const d of DEV) for (let T = d.hits; T < LOOP + 4; T += 4) out.push({ T, tele: 1, inst: 'hat', shape: { kind: 'band', x: d.x, y: d.y, ang: Math.PI / 2, w: 48, len: 128 }, src: d });
+  for (let T = 2; T < LOOP; T += 2) if (T < 16 || T > 36) { const m = monPos(T); out.push({ T, tele: 1, inst: 'drum', shape: { kind: 'disc', x: m.x, y: m.y, r: 55 } }); }
+  if (b > 18 && b < 34) {
+    for (const T of FIGHT.dashes) { const p = playerPos(T - 1); out.push({ T, tele: 1, inst: 'drum', shape: { kind: 'disc', x: p.x, y: p.y, r: 42 } }); }
+    for (const [T, ang] of [[23.5, -2.2], [26.5, .4]]) out.push({ T, tele: 1, inst: 'hat', shape: { kind: 'band', x: GUARD.x, y: GUARD.y, ang, w: 18, len: 190 } });
+    out.push({ T: 29.5, tele: 2, inst: 'drum', ring: true, shape: { kind: 'ring', x: GUARD.x, y: GUARD.y, r1: 118, r2: 150 } });
+  }
+  return out.filter(a => b > a.T - a.tele && b < a.T + 2.4);
+}
+
+/* ════ 그리기 공용 ════ */
+let g, Z = 1;                                       // Z: 화면 / 세계
+const LW = w => w / Z;
+function camApply(cam) { Z = VW / cam.w; g.setTransform(2 * Z, 0, 0, 2 * Z, 2 * (VW / 2 - cam.x * Z), 2 * (VH / 2 - cam.y * Z)); g.__lw = 1 / Z; }
+function screen() { g.setTransform(2, 0, 0, 2, 0, 0); g.__lw = 1; }
+function groundLines(p, edgeCol, edgeA) {
+  g.save(); g.strokeStyle = edgeCol; g.lineCap = 'round';
+  g.globalAlpha = edgeA; g.lineWidth = LW(1); g.beginPath(); for (const s of CONTOUR[0]) { g.moveTo(s[0], s[1]); g.lineTo(s[2], s[3]); } g.stroke();
+  for (let k = 1; k <= 2; k++) for (const s of CONTOUR[k]) {                 // 가까이 가면 안쪽에 옅은 선 두 줄
+    const d = Math.hypot((s[0] + s[2]) / 2 - p.x, (s[1] + s[3]) / 2 - p.y); if (d > 130) continue;
+    g.globalAlpha = .5 * (1 - d / 130) ** 1.6 / k; g.beginPath(); g.moveTo(s[0], s[1]); g.lineTo(s[2], s[3]); g.stroke();
+  }
+  g.fillStyle = col.d;                                                       // 죽는 땅의 점: 가까울 때만
+  const R = 150; for (let y = Math.floor((p.y - R) / 14) * 14; y < p.y + R; y += 14) for (let x = Math.floor((p.x - R) / 16) * 16; x < p.x + R; x += 16) {
+    const xx = x + ((y / 14) % 2 ? 8 : 0); if (sdf(xx, y) < 5) continue;
+    const k = clamp(1 - Math.hypot(xx - p.x, y - p.y) / R) ** 1.5; if (k < .03) continue;
+    g.globalAlpha = .8 * k; g.beginPath(); g.arc(xx, y, .5 + 3 * k, 0, TAU); g.fill();
+  }
+  g.restore();
+}
+function echo(a, e) {                                // 여운: 하이햇은 좁게, 드럼은 두 겹이 벽에 튕기며
+  const s = a.shape, color = col[a.inst === 'hat' ? 'e2' : 'e1'];
+  g.save(); g.strokeStyle = color; g.lineJoin = 'round';
+  if (s.kind === 'band') {
+    const te = e / .6; if (te > 0 && te < 1) { const c = Math.cos(s.ang), n = Math.sin(s.ang), d = s.w / 2 + 2 + 12 * easeOut(te); g.globalAlpha = .8 * (1 - te) ** 1.4; g.lineWidth = LW(1.1); for (const sg of [1, -1]) { g.beginPath(); g.moveTo(s.x + n * d * sg * -1, s.y + c * d * sg); g.lineTo(s.x + c * s.len - n * d * sg, s.y + n * s.len + c * d * sg); g.stroke(); } }
+  } else {
+    const rings = s.kind === 'ring' ? [[s.r2, 1], [s.r1, -1]] : [[s.r, 1]], dist = s.kind === "ring" ? 95 : 70;
+    for (let k = 0; k < 2; k++) {
+      const te = (e - k * .2) / 1.3; if (te <= 0 || te >= 1) continue;
+      const d = 2 + easeOut(te) * dist * (1 + k * .12);
+      g.globalAlpha = .7 * (1 - te) ** 1.4; g.lineWidth = LW(1.3 * (1 - te * .35)); g.beginPath();
+      for (const [r, sg] of rings) { let pen = false, lx = 0, ly = 0; for (let i = 0; i <= 72; i++) { const th = i / 72 * TAU, [qx, qy] = travel(s.x + r * Math.cos(th), s.y + r * Math.sin(th), sg * Math.cos(th), sg * Math.sin(th), d); if (pen && Math.hypot(qx - lx, qy - ly) < 30) g.lineTo(qx, qy); else g.moveTo(qx, qy); lx = qx; ly = qy; pen = true; } }
+      g.stroke();
+    }
+  }
+  g.restore();
+}
+function enemyAttacks(b, opt = {}) {
+  for (const a of attacks(b)) {
+    const p = (b - (a.T - a.tele)) / a.tele, e = b - a.T, color = col[a.inst === 'hat' ? 'e2' : 'e1'];
+    if (e < .7) K.attack(g, a.shape, color, p, e, 4 * a.tele);
+    if (e >= 0) echo(a, e);
+    if (opt.reach && p > 0 && p < 1 && a.shape.kind === 'disc') { g.save(); g.setLineDash([LW(2), LW(4)]); g.strokeStyle = color; g.globalAlpha = .35; g.lineWidth = LW(.8); g.beginPath(); g.arc(a.shape.x, a.shape.y, a.shape.r + 10, 0, TAU); g.stroke(); g.restore(); }
+  }
+}
+function playerFx(b, color) {
+  for (const d of DASHES) K.dash(g, d.a[0], d.a[1], d.z[0], d.z[1], b - d.t, color, 1);
+  if (b >= FIGHT.from && b < FIGHT.to) {                                      // 드럼 공격: 정박마다 몸 둘레 고리
+    const p = playerPos(b), age = b % 1; if (age < .9) { const k = age / .9; g.save(); g.strokeStyle = g.fillStyle = col.p1; g.globalAlpha = .2 * (1 - k) ** 2; g.beginPath(); g.arc(p.x, p.y, 70 * easeOut(clamp(age / .25)), 0, TAU); g.fill(); g.globalAlpha = .9 * (1 - k) ** 1.3; g.lineWidth = LW(2 - 1.3 * k); g.beginPath(); g.arc(p.x, p.y, 70 * easeOut(clamp(age / .25)) + 10 * k, 0, TAU); g.stroke(); g.restore(); }
+  }
+}
+const H = (a, b) => { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+function body(b, ringColor, scale = 1) {
+  const p = playerPos(b);
+  if (b >= HIT && b < REFORM) {                                               // 가루: 2박 뒤 체크포인트에서 다시 뭉친다
+    const u = (b - HIT) / (REFORM - HIT), at = { x: 1150, y: 790 };
+    g.save(); g.fillStyle = col.ink;
+    for (let i = 0; i < 24; i++) { const a = H(i, 1) * TAU, d = (30 + 55 * H(i, 2)) * Math.sin(Math.PI * u) ** .85, th = a + 1.4 * u * (H(i, 4) - .5), cx = lerp(at.x, CHECK.x, easeInOut(u)), cy = lerp(at.y, CHECK.y, easeInOut(u)); g.globalAlpha = .5 + .4 * H(i, 5); g.beginPath(); g.arc(cx + Math.cos(th) * d, cy + Math.sin(th) * d, (1.3 + H(i, 6)) * scale, 0, TAU); g.fill(); }
+    g.restore(); return;
+  }
+  const pulse = (b % 1) < .2 ? 1 - (b % 1) / .2 : 0;
+  g.save(); g.lineWidth = LW(1.5); g.strokeStyle = ringColor; g.beginPath(); g.arc(p.x, p.y, 14 * scale, 0, TAU); g.stroke();
+  g.fillStyle = col.ink; g.beginPath(); g.arc(p.x, p.y, 8 * scale * (1 + .08 * pulse), 0, TAU); g.fill(); g.restore();
+}
+const guardHP = b => b < FIGHT.from ? 1 : 1 - clamp((Math.floor(b) - FIGHT.from + 1) / 11);
+const guardAlive = b => b < FIGHT.to;
+
+/* ════ 카메라 ════ */
+function avgCam(fn, b, span, n = 8) { let x = 0, y = 0, w = 0; for (let i = 0; i < n; i++) { const c = fn(b - span * i / (n - 1)); x += c.x; y += c.y; w += c.w; } return { x: x / n, y: y / n, w: w / n }; }
+const inFight = b => b > 16.5 && b < PICK + 3;
+const CAM = {
+  line: b => avgCam(t => {
+    if (inFight(t)) return { x: ARENA.x, y: ARENA.y + 10, w: 600 };
+    if (t > 49) return { x: BOSS.cx - 60, y: BOSS.cy + 10, w: 860 };
+    const p = playerPos(Math.max(0, t)), q = playerPos(Math.max(0, t) + .8); return { x: lerp(p.x, q.x, .5), y: lerp(p.y, q.y, .5), w: 760 };
+  }, b, 1.2),
+  poster: b => avgCam(t => {
+    const p = playerPos(Math.max(0, t));
+    if (inFight(t) || (p.y < 470 && p.x < 1400)) return { x: 1250, y: 300, w: 860 };
+    if (p.x < 1010) return { x: 640, y: 880, w: 900 };
+    if (p.x < 1480 || t < 43) return { x: 1230, y: 790, w: 840 };
+    return { x: 1820, y: 690, w: 1000 };
+  }, b, 1.6, 10),
+  map: b => avgCam(t => {
+    if (t > 17 && t < PICK) return { x: ARENA.x, y: ARENA.y + 20, w: 720 };
+    if (t > 50) return { x: BOSS.cx - 40, y: BOSS.cy + 20, w: 980 };
+    if (t > PICK && t < PICK + 4) return { x: 1240, y: 560, w: 2600 };
+    return { x: 1230, y: 560, w: 2360 };
+  }, b, 1.8, 10),
+};
+
+/* ════ 방출원과 장치: 문체마다 다르게 ════ */
+function devices(style, b) {
+  g.save(); g.fillStyle = g.strokeStyle = col.ink;
+  for (const d of DEV) {
+    const ph = ((b - d.hits) % 4 + 4) % 4, lit = ph > 3 || ph < .15;
+    if (style === 'poster') { g.globalAlpha = 1; g.beginPath(); g.arc(d.x, d.y - 2, 22, 0, Math.PI); g.fill(); g.fillStyle = col.e2; g.globalAlpha = lit ? .9 : 0; g.beginPath(); g.arc(d.x, d.y - 2, 8, 0, Math.PI); g.fill(); }
+    else { const s = style === 'map' ? 9 : 7; g.globalAlpha = .9; g.lineWidth = LW(1.2); g.strokeRect(d.x - s, d.y - s * 2 + 1, s * 2, s * 2); if (lit) { g.fillStyle = col.e2; g.fillRect(d.x - s + 3, d.y - s * 2 + 4, s * 2 - 6, s * 2 - 6); g.fillStyle = col.ink; } }
+  }
+  // 몬스터
+  if (!(b > 16 && b < 37)) {
+    const m = monPos(b), dir = m.th + Math.PI / 2;
+    g.save(); g.translate(m.x, m.y); g.rotate(dir); g.fillStyle = col.ink; g.globalAlpha = 1;
+    if (style === 'poster') { g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, 26, -Math.PI / 2, 0); g.closePath(); g.fill(); g.beginPath(); g.arc(0, 0, 4, 0, TAU); g.fill(); }
+    else { const s = style === 'map' ? 11 : 9; g.beginPath(); g.moveTo(s, 0); g.lineTo(-s * .7, s * .75); g.lineTo(-s * .7, -s * .75); g.closePath(); g.fill(); }
+    g.restore();
+    if (style === 'line') { g.save(); g.setLineDash([LW(2), LW(5)]); g.globalAlpha = .28; g.lineWidth = LW(.7); g.beginPath(); g.arc(m.x, m.y, 55, 0, TAU); g.stroke(); g.restore(); }
+  }
+  // 체크포인트
+  const lit = b >= 6.5; g.globalAlpha = .8; g.lineWidth = LW(1); g.beginPath(); g.arc(CHECK.x, CHECK.y, 6, 0, TAU); g.stroke(); if (lit) { g.globalAlpha = .55; g.beginPath(); g.arc(CHECK.x, CHECK.y, 3, 0, TAU); g.fill(); }
+  if (b > REFORM - 1 && b < REFORM + .6) { const u = clamp((b - REFORM + 1) / 1.6); g.globalAlpha = .6 * (1 - u); g.beginPath(); g.arc(CHECK.x, CHECK.y, 6 + 40 * (1 - u), 0, TAU); g.stroke(); }
+  g.restore();
+}
+function gates(style, b) {
+  for (const G of GATES) {
+    const u = clamp((b - G.open) / 1), c = Math.cos(G.rot), s = Math.sin(G.rot), half = G.w / 2, color = col[PCOL[G.inst]];
+    g.save(); g.translate(G.x, G.y); g.rotate(G.rot);
+    if (u >= 1 && style !== 'poster') { g.restore(); continue; }
+    if (style === 'line') {
+      g.strokeStyle = col.ink; g.lineWidth = LW(1.2); g.globalAlpha = .9;
+      for (const sg of [-1, 1]) { const o = half * easeInOut(u); g.beginPath(); g.moveTo(-half + (sg < 0 ? 0 : 0) - o * 0, sg * 6); g.lineTo(sg < 0 ? -o : o, sg * 6); g.lineTo(half, sg * 6); g.stroke(); }
+      g.fillStyle = color; g.globalAlpha = 1 - u; g.beginPath(); g.arc(0, 0, 4.5, 0, TAU); g.fill();
+      g.strokeStyle = col.ink; g.globalAlpha = .9 * (1 - u); g.beginPath(); g.moveTo(-half, -6); g.lineTo(half, -6); g.moveTo(-half, 6); g.lineTo(half, 6); g.stroke();
+    } else if (style === 'poster') {
+      g.fillStyle = col.ink;
+      for (const sg of [-1, 1]) { g.save(); g.translate(sg * half, 0); g.rotate(sg * -easeInOut(u) * Math.PI / 2); g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, half, sg < 0 ? -Math.PI / 2 : Math.PI / 2, sg < 0 ? Math.PI / 2 : Math.PI * 1.5); g.closePath(); g.globalAlpha = .9; g.fill(); g.restore(); }
+      g.fillStyle = color; g.globalAlpha = 1 - u; g.beginPath(); g.arc(0, 0, 7, 0, TAU); g.fill();
+    } else {
+      g.fillStyle = col.ink;
+      for (let i = -5; i <= 5; i++) { const x = i * half / 5.5, k = H(i, 9), dx = (k - .5) * 50 * easeOut(u), dy = (H(i, 3) - .5) * 50 * easeOut(u); g.globalAlpha = .9 * (1 - u); g.beginPath(); g.arc(x + dx, dy, 3.2, 0, TAU); g.fill(); }
+      g.fillStyle = color; g.globalAlpha = 1 - u; g.beginPath(); g.arc(0, -16, 6, 0, TAU); g.fill();
+    }
+    g.restore();
+    if (b > G.open - 1.2 && b < G.open && held(b) === G.inst) {               // 맞는 악기를 든 채 닿음
+      const k = (b - G.open + 1.2) / 1.2; g.save(); g.strokeStyle = color; g.globalAlpha = .7 * k; g.lineWidth = LW(1.2); g.beginPath(); g.arc(G.x, G.y, 14 + 20 * (1 - k), 0, TAU); g.stroke(); g.restore();
+    }
+  }
+}
+function guardian(style, b) {
+  if (b < 16 || b > 33) return;
+  const awake = clamp((b - 18) / 2), dead = clamp((b - FIGHT.to) / 1.5), hp = guardHP(b), x = GUARD.x, y = GUARD.y;
+  const hitFlash = b >= FIGHT.from && b < FIGHT.to && (b % 1) < .12;
+  g.save(); g.fillStyle = g.strokeStyle = col.ink;
+  if (dead < 1) {
+    g.globalAlpha = 1 - dead;
+    if (style === 'poster') { g.beginPath(); g.arc(x, y, 34, 0, TAU); g.fill(); g.fillStyle = col.bg; g.beginPath(); g.moveTo(x, y); g.arc(x, y, 34, -Math.PI / 2 + b * .4, b * .4); g.closePath(); g.fill(); for (let k = 1; k <= 3; k++) { g.globalAlpha = (1 - dead) * .25 / k; g.lineWidth = LW(1); g.beginPath(); g.arc(x, y, 34 + 10 * k, 0, TAU); g.stroke(); } }
+    else { const r = style === 'map' ? 14 : 12; g.lineWidth = LW(1.2); g.beginPath(); g.arc(x, y, r, 0, TAU); g.stroke(); g.beginPath(); g.arc(x, y, r * .45, 0, TAU); g.fill(); g.save(); g.translate(x, y); g.rotate(b * .5 * awake); g.beginPath(); g.moveTo(r + 3, 0); g.lineTo(r + 9, 0); g.stroke(); g.restore(); }
+    if (hitFlash) { g.strokeStyle = col.p1; g.globalAlpha = .9; g.lineWidth = LW(1.5); g.beginPath(); g.arc(x, y, style === 'poster' ? 40 : 18, 0, TAU); g.stroke(); }
+    if (b >= FIGHT.from) { g.strokeStyle = col.ink; g.globalAlpha = .7 * (1 - dead); g.lineWidth = LW(1.4); const R = style === 'poster' ? 52 : 26; g.beginPath(); g.arc(x, y, R, -Math.PI / 2, -Math.PI / 2 + TAU * hp); g.stroke(); }
+  }
+  if (dead > 0 && dead < 1) {                                                  // 부서짐: 외곽선이 퍼지며 벽에 튕긴다
+    echo({ inst: 'drum', shape: { kind: 'disc', x, y, r: style === 'poster' ? 34 : 14 } }, (b - FIGHT.to) * 1.1);
+  }
+  g.restore();
+}
+function part(style, b) {
+  if (b < 31.5 || b > PICK + .1) return;
+  const k = clamp((b - 31.5) / 1), x = GUARD.x, y = GUARD.y;
+  g.save(); g.strokeStyle = g.fillStyle = col.p3; g.globalAlpha = k;
+  g.lineWidth = LW(1.3); g.beginPath(); g.arc(x, y, 12, 0, TAU); g.stroke();
+  const a = b * 2.2; g.beginPath(); g.arc(x + Math.cos(a) * 12, y + Math.sin(a) * 12, 3, 0, TAU); g.fill();
+  g.globalAlpha = k * .3; g.beginPath(); g.arc(x, y, 18 + 4 * Math.sin(b * Math.PI), 0, TAU); g.stroke();
+  g.restore();
+}
+function boss(style, b) {
+  if (b < 46) return;
+  const k = clamp((b - 49) / 3), x = BOSS.x, y = BOSS.y, rot = b * .25;
+  g.save(); g.fillStyle = g.strokeStyle = col.ink;
+  const R = style === 'poster' ? 90 : 60;
+  if (style === 'line') {                                                      // 외곽선이 그려진 뒤 차오른다
+    g.lineWidth = LW(1.2); g.globalAlpha = .9; g.beginPath(); g.arc(x, y, R, -Math.PI / 2, -Math.PI / 2 + TAU * clamp((b - 48.5) / 2)); g.stroke();
+    g.globalAlpha = k; g.beginPath(); g.arc(x, y, R * .82, 0, TAU); g.fill();
+  } else if (style === 'poster') {
+    g.globalAlpha = clamp((b - 48) / 1.5); g.beginPath(); g.arc(x, y, R, 0, TAU); g.fill();
+    for (let i = 1; i <= 6; i++) { const on = clamp(b - 48.5 - i * .5); g.globalAlpha = on * .3 / Math.sqrt(i); g.lineWidth = LW(1); g.beginPath(); g.arc(x, y, R + 22 * i, 0, TAU); g.stroke(); }
+  } else { g.globalAlpha = clamp((b - 47) / 2); g.beginPath(); g.arc(x, y, R * .7, 0, TAU); g.fill(); }
+  g.fillStyle = col.e1; g.globalAlpha = k; g.beginPath(); g.moveTo(x, y); g.arc(x, y, (style === 'poster' ? R : R * .82) * .98, rot, rot + Math.PI / 2); g.closePath(); g.fill();
+  g.restore();
+}
+
+/* ════ 연출 ════ */
+function stageFight(style, b) {
+  if (b < 16.5 || b > FIGHT.to + 1) return;
+  const pre = clamp((b - 16.5) / (FIGHT.from - 16.5)), steps = Math.round((FIGHT.from - 16.5) * 4), k = Math.floor(pre * steps);
+  g.save(); g.strokeStyle = col.ink;
+  if (style === 'line') {
+    const R = ARENA.r - 14, n = 28;
+    for (let i = 0; i < n; i++) { const a0 = -Math.PI / 2 + i / n * TAU, on = b >= FIGHT.from || i / n < k / steps; g.globalAlpha = on ? (b >= FIGHT.from ? .3 : .7) : .14; g.lineWidth = LW(b >= FIGHT.from ? .8 : 1); g.beginPath(); g.arc(ARENA.x, ARENA.y, R, a0, a0 + (b >= FIGHT.from ? TAU / n : TAU / n * .55)); g.stroke(); }
+  } else if (style === 'poster') {
+    for (let i = 1; i <= 4; i++) { const u = clamp((b - 16.5 - (i - 1) * .9) / 3.5), r = ARENA.r + 34 * i * (1 - easeInOut(u)); g.globalAlpha = (b >= FIGHT.from ? .18 : .35) / Math.sqrt(i); g.lineWidth = LW(1); g.beginPath(); g.arc(ARENA.x, ARENA.y, r, 0, TAU); g.stroke(); }
+  } else {
+    if (b < FIGHT.from) { const ph = (b % 1); g.globalAlpha = .6 * (1 - ph); g.lineWidth = LW(1.2 + 1.5 * (1 - ph)); g.beginPath(); g.arc(ARENA.x, ARENA.y, ARENA.r + 6 * (1 - ph), 0, TAU); g.stroke(); }
+  }
+  g.restore();
+}
+function stagePick(style, b, cam) {
+  const u = (b - PICK) / 4; if (u < 0 || u > 1.6) return;
+  const x = GUARD.x, y = GUARD.y;
+  g.save(); g.strokeStyle = col.p3;
+  if (style === 'line') { for (let i = 0; i < 3; i++) { const v = clamp(u * 3 - i * .35); if (v <= 0 || v >= 1) continue; g.globalAlpha = .8 * (1 - v); g.lineWidth = LW(1.2); g.beginPath(); g.arc(x, y + 2, 16 + 70 * (1 - easeOut(v)), 0, TAU); g.stroke(); } }
+  if (style === 'poster') { const v = clamp(u / .9); g.globalAlpha = .7 * (1 - v); g.lineWidth = LW(2 * (1 - v) + .8); g.beginPath(); g.arc(x, y, 20 + 900 * easeOut(v), 0, TAU); g.stroke(); }
+  if (style === 'map') { const v = clamp(u); g.setLineDash([LW(3), LW(5)]); g.globalAlpha = .9 * Math.abs(Math.sin(v * Math.PI * 4)) * (1 - v * .4); g.lineWidth = LW(2); g.beginPath(); g.moveTo(1250, 860); g.lineTo(1608, 799); g.stroke(); }
+  g.restore();
+}
+function saveMark(style, b) {
+  if (style !== 'map' || b < PICK + .5) return;
+  g.save(); g.fillStyle = col.ink; g.globalAlpha = .85; const s = 7; g.fillRect(GUARD.x + 26, GUARD.y - 30, s, s); g.restore();
+}
+
+/* ════ HUD (화면 좌표) ════ */
+function hud(style, b) {
+  screen();
+  const L = lives(b), refill = b >= PICK && b < PICK + 4, lost = b >= HIT && b < HIT + 1;
+  g.save(); g.fillStyle = g.strokeStyle = col.ink;
+  const lifeDot = (x, y, i, r) => {
+    const full = i < L; let pop = 0;
+    if (refill) { const t = (b - PICK - i * .25); pop = t > 0 && t < .4 ? 1 - t / .4 : 0; }
+    g.globalAlpha = .85; g.lineWidth = 1; g.beginPath(); g.arc(x, y, r + 2 * pop, 0, TAU); full ? g.fill() : g.stroke();
+    if (lost && i === 3) { const t = b - HIT; g.globalAlpha = .6 * (1 - t); g.beginPath(); g.arc(x, y, r + 10 * t, 0, TAU); g.stroke(); }
+  };
+  const inst = (x, y, r, gap) => ['drum', 'hat', 'bass'].forEach((k, i) => {
+    const have = owned(b).includes(k), h = held(b) === k, cx = x + i * gap;
+    g.fillStyle = col[PCOL[k]]; g.strokeStyle = col[PCOL[k]]; g.globalAlpha = have ? .95 : .25; g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, y, r, 0, TAU); have ? g.fill() : g.stroke();
+    if (h) { g.strokeStyle = col.ink; g.globalAlpha = .8; g.beginPath(); g.arc(cx, y, r + 4, 0, TAU); g.stroke(); }
+  });
+  if (style === 'line') { for (let i = 0; i < 4; i++) lifeDot(26 + i * 13, 26, i, 3.4); inst(102, 26, 3.4, 14); }
+  if (style === 'poster') { for (let i = 0; i < 4; i++) { g.globalAlpha = i < L ? .9 : .2; g.fillStyle = col.ink; g.fillRect(28 + i * 12, VH - 52, 5, 26); } inst(100, VH - 39, 8, 24); }
+  if (style === 'map') { for (let i = 0; i < 4; i++) lifeDot(VW - 120 + i * 13, 28, i, 3.6); inst(VW / 2 - 22, VH - 24, 4.5, 22); g.globalAlpha = .4; g.strokeStyle = col.ink; g.beginPath(); g.arc(VW - 30, 28, 9, 0, TAU); g.stroke(); g.globalAlpha = .8; g.beginPath(); g.moveTo(VW - 30, 28); const a = -Math.PI / 2 + (b % 4) / 4 * TAU; g.lineTo(VW - 30 + Math.cos(a) * 7, 28 + Math.sin(a) * 7); g.stroke(); }
+  if (refill && style === 'line') { const v = clamp((b - PICK) / 1.2); g.strokeStyle = col.p3; g.globalAlpha = .5 * (1 - v); g.lineWidth = 1; const cam = CAM.line(b); const p = playerPos(b), sx = VW / 2 + (p.x - cam.x) * VW / cam.w, sy = VH / 2 + (p.y - cam.y) * VW / cam.w; g.beginPath(); g.moveTo(sx, sy); g.lineTo(lerp(sx, 60, v), lerp(sy, 26, v)); g.stroke(); }
+  g.restore();
+}
+
+/* ════ 한 장면 ════ */
+function compose(style) {
+  if (style !== 'poster') return;
+  g.save(); g.strokeStyle = col.ink; g.lineWidth = LW(1);
+  for (let i = 1; i <= 5; i++) { g.globalAlpha = .07; g.beginPath(); g.arc(ARENA.x, ARENA.y, ARENA.r + 40 * i, 0, TAU); g.stroke(); }
+  for (let i = 1; i <= 4; i++) { g.globalAlpha = .07; g.beginPath(); g.arc(BOSS.cx, BOSS.cy, BOSS.r + 46 * i, 0, TAU); g.stroke(); }
+  g.globalAlpha = .1; for (const x of [440, 1030, 1480]) { g.beginPath(); g.moveTo(x, -200); g.lineTo(x, 1400); g.stroke(); }
+  g.beginPath(); g.moveTo(-200, 984); g.lineTo(1100, 984); g.stroke();
+  g.restore();
+}
+function routes(style, b) {
+  if (style !== 'map') return;
+  g.save(); g.strokeStyle = col.ink; g.globalAlpha = .22; g.lineWidth = LW(1); g.setLineDash([LW(2), LW(6)]);
+  for (const r of ROUTES) { g.beginPath(); g.moveTo(r[0], r[1]); g.lineTo(r[2], r[3]); g.stroke(); }
+  g.restore();
+}
+function drawStyle(cv, style, b) {
+  g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.fillStyle = col.bg; g.fillRect(0, 0, cv.width, cv.height);
+  const cam = CAM[style](b); camApply(cam);
+  const p = playerPos(b), pickTint = style === 'poster' ? clamp(1 - Math.abs((b - PICK - .8) / 1.2)) : 0;
+  compose(style); routes(style, b);
+  groundLines(p, pickTint > 0 ? col.p3 : col.ink, .7 + .3 * pickTint);
+  stageFight(style, b);
+  devices(style, b); gates(style, b);
+  enemyAttacks(b, { reach: style === 'line' });
+  guardian(style, b); part(style, b); boss(style, b); saveMark(style, b);
+  playerFx(b, col[PCOL[held(b)]]);
+  body(b, col[PCOL[held(b)]], style === 'map' && cam.w > 1500 ? 1.3 : 1);
+  stagePick(style, b, cam);
+  hud(style, b);
+  if (b > LOOP - 1.2) { g.globalAlpha = clamp((b - LOOP + 1.2) / 1.2); g.fillStyle = col.bg; g.fillRect(0, 0, VW, VH); g.globalAlpha = 1; }
+}
+
+const bigs = [...document.querySelectorAll('canvas.big')]; bigs.forEach(K.watch);
+K.bindPalette(document.getElementById('pal'));
+K.bindSpeed(document.getElementById('speed'));
+let offset = 0;
+document.querySelectorAll('#jump button').forEach(btn => btn.addEventListener('click', () => { offset = +btn.dataset.j - (clock.beat % LOOP) + offset; offset = ((offset % LOOP) + LOOP) % LOOP; }));
+const params = new URLSearchParams(location.search); if (params.has('t')) offset = +params.get('t');
+window.__mapAt = b => { for (const cv of bigs) drawStyle(cv, cv.dataset.style, b); };
+function frame(now) {
+  K.tick(now);
+  const b = ((clock.beat + offset) % LOOP + LOOP) % LOOP;
+  if (!params.has('freeze')) for (const cv of bigs) if (K.isVisible(cv)) drawStyle(cv, cv.dataset.style, b);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
