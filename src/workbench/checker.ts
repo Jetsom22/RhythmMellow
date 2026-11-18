@@ -145,8 +145,8 @@ const near = (m: Model, g: Grid, x: number, y: number, rU: number): number[] => 
 
 /* ---------------- density ---------------- */
 
-/** The planner's density targets (2026-11-18). One screen is 10.7U x 6U. */
-export const DENSITY = { screenW: 10.7, screenH: 6, perScreen: 2, quietBeats: 4, areaScreens: 3 };
+/** The planner's density targets (2026-11-18). One screen is the 1920x1080 reference at zoom 1: 16U x 9U (1U = 120px). */
+export const DENSITY = { screenW: 16, screenH: 9, perScreen: 2, quietBeats: 4, areaScreens: 3 };
 
 export interface Density {
   paths: { layer: Instrument; lengthU: number; quietU: number; longestQuietU: number; perScreen: number; quietAt: { x: number; y: number } }[];

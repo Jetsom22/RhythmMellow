@@ -323,9 +323,11 @@ dd{margin:0;font-size:14px}
     if (step >= hit + 1 && step < hit + 1 + linger) return { kind: 'after', f: (step - hit - 1) / linger };
     return null;
   }
+  /** As in the game: from the first moment of a telegraph the whole area shows as a faint plane with an outline; the fill spreads inside it. */
+  function teleArea(ctx, col, drawFn) { ctx.fillStyle = alpha(col, 0.1); drawFn(1, 'fill'); ctx.strokeStyle = alpha(col, 0.5); ctx.lineWidth = 1.25; drawFn(1, 'stroke'); }
   function shape(ctx, ph, col, drawFn) {
     if (!ph) return;
-    if (ph.kind === 'tele') { ctx.fillStyle = alpha(col, ph.a); drawFn(ph.grow, 'fill'); }
+    if (ph.kind === 'tele') { teleArea(ctx, col, drawFn); ctx.fillStyle = alpha(col, ph.a); drawFn(ph.grow, 'fill'); }
     else if (ph.kind === 'hit') { ctx.fillStyle = col; drawFn(1, 'fill'); }
     else { ctx.strokeStyle = alpha(col, 0.7 * (1 - ph.f)); ctx.lineWidth = 1.2; drawFn(1 + 0.2 * ph.f, 'stroke'); }
   }
@@ -416,7 +418,7 @@ dd{margin:0;font-size:14px}
       const sh = h - 40, S = scene(ctx, w, sh, 300), s = T % 32, col = css('--e-bass');
       const sq = (g, mode) => { const hs = 75 * S.k * g; mode === 'fill' ? ctx.fillRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs) : ctx.strokeRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs); };
       ctx.fillStyle = col; ctx.beginPath(); ctx.arc(S.cx, S.cy, 3.5, 0, 7); ctx.fill();
-      if (s < 8) { const ph = phaseOf(s, 0, 8); ctx.fillStyle = alpha(col, ph.a); sq(ph.grow, 'fill'); }
+      if (s < 8) { const ph = phaseOf(s, 0, 8); teleArea(ctx, col, sq); ctx.fillStyle = alpha(col, ph.a); sq(ph.grow, 'fill'); }
       else if (s < 17) { const ib = (s - 8) % 4; ctx.fillStyle = alpha(col, ib < 1 ? 1 : 0.18 + 0.5 * Math.floor(ib) / 3); sq(1, 'fill'); }
       else if (s < 21) { const f = (s - 17) / 4; ctx.fillStyle = alpha(col, 0.22 * (1 - f)); sq(1 + 0.3 * f, 'fill'); }
       const dir = Math.floor(T / 32) % 2 ? -1 : 1;
@@ -432,7 +434,7 @@ dd{margin:0;font-size:14px}
       if (s < 16) { ctx.fillStyle = alpha(pc, 0.55); ctx.beginPath(); ctx.moveTo(S.cx, S.cy); ctx.arc(S.cx, S.cy, 40 * S.k - 3, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * prog / 16); ctx.closePath(); ctx.fill(); }
       else if (s < 28) { ctx.fillStyle = alpha(pc, 0.55); ctx.beginPath(); ctx.arc(S.cx, S.cy, 40 * S.k - 3, 0, 7); ctx.fill(); }
       const sq = (g, mode) => { const hs = 75 * S.k * g; mode === 'fill' ? ctx.fillRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs) : ctx.strokeRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs); };
-      if (s >= 8 && s < 16) { const ph = phaseOf(s, 8, 16); ctx.fillStyle = alpha(col, ph.a); sq(ph.grow, 'fill'); }
+      if (s >= 8 && s < 16) { const ph = phaseOf(s, 8, 16); teleArea(ctx, col, sq); ctx.fillStyle = alpha(col, ph.a); sq(ph.grow, 'fill'); }
       else if (s >= 16 && s < 25) { const ib = (s - 16) % 4; ctx.fillStyle = alpha(col, ib < 1 ? 1 : 0.18 + 0.5 * Math.floor(ib) / 3); sq(1, 'fill'); }
       let px = 0; if (!on) px = s < 17 ? 130 * (s - 15.6) / 1.4 : s < 28 ? 130 : 130 * (1 - (s - 28) / 4);
       player(ctx, S.X(px), S.cy);

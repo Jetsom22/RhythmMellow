@@ -37,8 +37,9 @@ export interface StageData {
   map: { ground: Shape[]; holes?: Shape[]; blend?: number };
   attacks?: Record<string, AttackDef>;
   emitters?: (V & { id: string; kind: 'device' | 'monster' | 'guardian' | 'boss'; hp?: number; body?: number; pattern?: Pattern;
-    follow?: { layer: LayerId; attack: string }; motion?: { kind: 'approach'; every?: number; by?: number; min?: number; sight?: number };
-    range?: number; hidden?: boolean; rot?: number; weakTo?: Instrument; onBreak?: string; onSpecial?: { flag: string; layer?: Instrument } })[];
+    follow?: { layer: LayerId; attack: string }; motion?: Motion;
+    range?: number; hidden?: boolean; rot?: number; weakTo?: Instrument; onBreak?: string; onSpecial?: { flag: string; layer?: Instrument };
+    touch?: boolean; respawn?: number })[];
   parts?: (V & { layer: Instrument; guard?: string })[];
   plates?: (V & { id: string; layer: Instrument; r?: number; flag?: string; encounter?: string })[];
   gates?: { id: string; shape: Shape; requires?: Requires }[];
@@ -55,11 +56,26 @@ export interface Inst {
 export interface Emitter {
   id: string; kind: 'device' | 'monster' | 'guardian' | 'boss'; x: number; y: number;
   maxHp: number; hp: number; broken: boolean; body: number; pattern: Pattern;
-  follow?: { layer: LayerId; attack: string }; motion?: { kind: 'approach'; every?: number; by?: number; min?: number; sight?: number };
+  follow?: { layer: LayerId; attack: string }; motion?: Motion;
   range?: number; hidden: boolean; rot: number; weakTo?: Instrument; onBreak?: string;
   /** Hit by a special attack (of this instrument, if one is named), it sets a flag: a switch for gates. */
   onSpecial?: { flag: string; layer?: Instrument };
+  /** Walking into its body is a hit (a dash passes through, as through any attack). */
+  touch?: boolean;
+  /** Bars after it is broken before it comes back at home, once the player is out of its sight. */
+  respawn?: number;
+  /** Where it was placed: a chasing monster goes back here when it loses the player, and comes back here. */
+  hx: number; hy: number; brokenAt: number;
 }
+/**
+ * How a monster moves.
+ *  - approach: one step of `by` U toward the player every `every` steps, while within `sight`, never closer than `min`.
+ *  - chase: walks after the player at `by` U per beat while within `sight`, keeps `min` U away, stands still while its own
+ *    attack is on the way (the wind-up), goes back home when it loses the player. Never steps off the ground.
+ */
+export interface Motion { kind: 'approach' | 'chase'; every?: number; by?: number; min?: number; sight?: number }
+/** The player's body, for touching a monster (U). */
+export const PLAYER_BODY_U = 0.1;
 export interface Part { layer: Instrument; x: number; y: number; guard: string; taken: boolean }
 export interface Plate { id: string; layer: Instrument; x: number; y: number; r: number; flag: string; encounter: string; lit: boolean; count: number }
 export interface Gate { id: string; shape: Shape; requires: Requires; open: boolean }
@@ -84,7 +100,7 @@ export type StageEvent =
   | { type: 'encounter'; id: string; phrase: string }
   | { type: 'phrase'; id: string; repeat: number; advanced: boolean }
   | { type: 'cleared'; id: string; kind: 'guardian' | 'boss' }
-  | { type: 'broken'; id: string; pos: V };
+  | { type: 'broken' | 'respawn'; id: string; pos: V };
 
 export interface StageInput { moveX: number; moveY: number; /** Song time of the dash press, or null. */ dashAt: number | null; switchDir: -1 | 0 | 1; switchTo?: Instrument | null; /** The special-attack key was pressed. */ special?: boolean }
 
@@ -268,6 +284,8 @@ export class StageSim {
         if (!part.taken && dist(this.x, this.y, part.x, part.y) <= 0.35 * this.u && this.guardCleared(part)) this.take(part);
       }
     }
+    this.chase(dt);
+    if (this.touched()) { this.hurt('hit'); return; }
     if (this.pending.some(p => p.due <= this.time)) this.hurt('hit');
   }
 
@@ -409,6 +427,11 @@ export class StageSim {
     const spb = this.meter.stepsPerBeat;
     this.stepEncounters(s);
     for (const em of this.emitters) {
+      if (em.broken && em.respawn !== undefined && s >= em.brokenAt + em.respawn * this.meter.stepsPerBar
+        && dist(this.x, this.y, em.hx, em.hy) > (em.motion?.sight ?? em.range ?? 6) * this.u) {
+        em.broken = false; em.hp = em.maxHp; em.x = em.hx; em.y = em.hy;
+        this.events.push({ type: 'respawn', id: em.id, pos: { x: em.x, y: em.y } });
+      }
       if (em.broken || em.kind === 'guardian' || em.kind === 'boss') continue;
       // A device may follow a layer of the song instead of a pattern: it strikes on each beat that layer sounds.
       if (em.follow) {
@@ -441,6 +464,32 @@ export class StageSim {
     this.autoAttack(s);
     if (mod(s, spb) === 0) for (const p of this.pools) if (s <= p.until) this.poolStrike(p);
     this.pools = this.pools.filter(p => s < p.until);
+  }
+
+  // ───────── chasing monsters ─────────
+
+  /** Monsters that chase walk every frame, not on the beat: they keep close to the player. */
+  private chase(dt: number): void {
+    const beat = this.meter.secPerStep * this.meter.stepsPerBeat;
+    for (const em of this.emitters) {
+      const m = em.motion;
+      if (em.broken || m?.kind !== 'chase') continue;
+      // It stands still while its own attack is on the way: the wind-up is part of the telegraph.
+      if (this.active.some(a => a.src === em.id && a.hitStep > this.step)) continue;
+      const seen = !this.reform && dist(this.x, this.y, em.x, em.y) <= (m.sight ?? 6) * this.u;
+      const tx = seen ? this.x : em.hx, ty = seen ? this.y : em.hy;
+      const dx = tx - em.x, dy = ty - em.y, d = Math.hypot(dx, dy);
+      const room = d - (seen ? (m.min ?? 0.7) * this.u : 0);
+      if (room <= 0.001) continue;
+      const k = Math.min(((m.by ?? 0.8) * this.u * dt) / beat, room) / d, nx = em.x + dx * k, ny = em.y + dy * k;
+      if (this.isGround(nx, ny)) { em.x = nx; em.y = ny; }
+    }
+  }
+
+  /** Walking into a monster's body is a hit. A dash passes through, as it passes through any attack. */
+  private touched(): boolean {
+    if (this.god || this.reform || this.dash || this.iframe > 0 || this.step < this.graceUntil) return false;
+    return this.emitters.some(em => em.touch && !em.broken && dist(this.x, this.y, em.x, em.y) <= em.body + PLAYER_BODY_U * this.u);
   }
 
   // ───────── plates ─────────
@@ -590,6 +639,7 @@ export class StageSim {
     em.hp = Math.max(floor, em.hp - amount * mult);
     if (em.hp <= 0 && !enc) {
       em.broken = true;
+      em.brokenAt = s;
       this.active = this.active.filter(a => a.src !== em.id);
       if (em.onBreak) { this.flags[em.onBreak] = true; this.openGates(); }
       this.events.push({ type: 'broken', id: em.id, pos: { x: em.x, y: em.y } });
@@ -618,6 +668,7 @@ export class StageSim {
         id: e.id, kind: e.kind, x: e.x * k, y: e.y * k, maxHp: e.hp ?? 0, hp: e.hp ?? 0, broken: false, body: (e.body ?? 0.25) * k,
         pattern: e.pattern ?? { length: 16, events: [] }, follow: e.follow, motion: e.motion, range: e.range,
         hidden: !!e.hidden, rot: e.rot ?? 0, weakTo: e.weakTo, onBreak: e.onBreak, onSpecial: e.onSpecial,
+        touch: e.touch, respawn: e.respawn, hx: e.x * k, hy: e.y * k, brokenAt: 0,
       });
     }
     for (const p of d.parts ?? []) s.parts.push({ layer: p.layer, x: p.x * k, y: p.y * k, guard: p.guard ?? '', taken: false });
