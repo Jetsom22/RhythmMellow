@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RhythmMellow 곡 작업실</title>
+<style>
+:root{--bg:#1d1f1e;--panel:#262928;--line:#3a3e3c;--ink:#f1e9d8;--dim:#9a988f;--hot:#e8584a}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.45 system-ui,'Noto Sans KR',sans-serif}
+body{display:grid;grid-template-rows:auto 1fr 150px;gap:8px;padding:10px}
+button,select,input[type=text],input[type=number],textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
+button{cursor:pointer}
+button:hover{border-color:var(--dim)}
+button.primary{background:var(--ink);color:var(--bg);font-weight:600;min-width:64px}
+button.on{background:var(--ink);color:var(--bg)}
+#top{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenes{display:flex;gap:4px;align-items:center;padding:0 8px}
+button.scene.view{border-color:var(--ink)}
+button.scene.live{background:#3d5a52}
+button.scene.queued{border-style:dashed;border-color:var(--hot)}
+.dim{color:var(--dim)}
+.num{font-variant-numeric:tabular-nums;min-width:52px;text-align:right;color:var(--dim)}
+main{display:grid;grid-template-columns:minmax(420px,5fr) minmax(380px,6fr);gap:10px;min-height:0}
+#tracks,#right{background:var(--panel);border-radius:8px;padding:10px;overflow:auto;min-height:0}
+#right{display:grid;grid-template-rows:auto 1fr;gap:8px}
+#tabs{display:flex;gap:4px}
+#page{overflow:auto;min-height:0;padding-right:6px}
+.track{border-bottom:1px solid var(--line);padding:8px 0}
+.track .head{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+button.layer{min-width:68px;font-weight:600;background:none}
+button.layer.on{background:#151716;border-color:var(--ink)}
+.fader{display:grid;grid-template-columns:1fr 90px;gap:8px;align-items:center;margin-top:4px}
+.row{display:grid;grid-template-columns:minmax(120px,210px) 1fr 56px;gap:8px;align-items:center;padding:2px 0}
+.row .name,.btns .name{color:var(--dim)}
+.btns .name.wide{min-width:120px;display:inline-block}
+input[type=range]{width:100%;accent-color:var(--ink)}
+.check{display:inline-flex;gap:4px;align-items:center;color:var(--dim)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+.band{border-left:2px solid var(--line);padding-left:8px;margin:8px 0}
+.note{color:var(--dim);margin:4px 0 8px}
+h3{margin:10px 0 2px;font-size:14px}
+textarea{width:100%;height:280px;font:12px ui-monospace,monospace}
+.meter{height:8px;background:#151716;border-radius:4px;overflow:hidden}
+.meter.master{width:120px}
+.meter i{display:block;height:100%;width:0;background:var(--ink)}
+.meter i.hot{background:var(--hot)}
+#notes{width:100%;height:150px;background:var(--panel);border-radius:8px;display:block}
+</style>
+</head>
+<body>
+<div id="top"></div>
+<main>
+  <div id="tracks"></div>
+  <div id="right"><div id="tabs"></div><div id="page"></div></div>
+</main>
+<canvas id="notes"></canvas>
+<script type="module" src="/src/studio/studio.ts"></script>
+</body>
+</html>

@@ -24,10 +24,7 @@ const DESK := {
 	"pad": {"eq": [["hp", 240.0, 0.7, 0.0], ["peak", 900.0, 0.8, -3.0], ["peak", 2600.0, 0.7, 1.5], ["lp", 5000.0, 0.7, 0.0]], "rms_db": -28.0, "room": 0.32},
 }
 
-## Samples a filter is run for before the loop starts. Enough for a 30 Hz filter to settle.
-const SETTLE := 8192
-
-## One second-order filter. Its state is settled on the end of the loop, so nothing clicks where the loop joins.
+## One second-order filter, run twice around the loop so its state has settled where the loop joins.
 static func biquad(buf: PackedFloat32Array, kind: String, hz: float, q: float, gain_db: float, sr: float) -> void:
 	var w := TAU * clampf(hz, 10.0, sr * 0.45) / sr
 	var cw := cos(w)
@@ -68,22 +65,16 @@ static func biquad(buf: PackedFloat32Array, kind: String, hz: float, q: float, g
 	var y1 := 0.0
 	var y2 := 0.0
 	var n := buf.size()
-	# Settle on the end of the loop first, so the filter is already ringing where the loop joins.
-	for i in range(maxi(0, n - SETTLE), n):
-		var x := buf[i]
-		var y := b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
-		x2 = x1
-		x1 = x
-		y2 = y1
-		y1 = y
-	for i in n:
-		var x := buf[i]
-		var y := b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
-		x2 = x1
-		x1 = x
-		y2 = y1
-		y1 = y
-		buf[i] = y
+	for lap in 2:
+		for i in n:
+			var x := buf[i]
+			var y := b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
+			x2 = x1
+			x1 = x
+			y2 = y1
+			y1 = y
+			if lap == 1:
+				buf[i] = y
 
 static func rms_db(buf: PackedFloat32Array) -> float:
 	var e := 0.0
@@ -102,10 +93,10 @@ static func scale(buf: PackedFloat32Array, k: float) -> void:
 		buf[i] *= k
 
 ## Push the buffer down each time the kick lands, and let it come back up: the kick gets the low end to itself for a moment.
-static func duck(buf: PackedFloat32Array, hits: Array, depth: float, sr: float, release_s: float = 0.16) -> void:
+static func duck(buf: PackedFloat32Array, hits: Array, depth: float, sr: float) -> void:
 	var n := buf.size()
 	var attack := int(0.004 * sr)
-	var release := release_s * sr
+	var release := 0.16 * sr
 	var span := int(release * 5.0)
 	var gain := PackedFloat32Array()
 	gain.resize(n)
@@ -126,41 +117,33 @@ static func room(buf: PackedFloat32Array, sr: float) -> PackedFloat32Array:
 	var wet := PackedFloat32Array()
 	wet.resize(n)
 	var k := sr / 44100.0
-	var tail := int(sr * 1.2)        # the room has died away well within this
 	for d in [1116, 1188, 1277, 1356]:
 		var size := int(d * k)
 		var line := PackedFloat32Array()
 		line.resize(size)
 		var pos := 0
 		var damp := 0.0
-		# The tail of the loop's end rings into its start: run the last stretch first.
-		for i in range(maxi(0, n - tail), n):
-			var out := line[pos]
-			damp = out * 0.72 + damp * 0.28       # the room swallows highs as the sound decays
-			line[pos] = buf[i] + damp * 0.8
-			pos = (pos + 1) % size
-		for i in n:
-			var out := line[pos]
-			damp = out * 0.72 + damp * 0.28
-			line[pos] = buf[i] + damp * 0.8
-			pos = (pos + 1) % size
-			wet[i] += out
+		for lap in 2:
+			for i in n:
+				var out := line[pos]
+				damp = out * 0.72 + damp * 0.28       # the room swallows highs as the sound decays
+				line[pos] = buf[i] + damp * 0.8
+				pos = (pos + 1) % size
+				if lap == 1:
+					wet[i] += out
 	for d in [556, 441]:
 		var size := int(d * k)
 		var line := PackedFloat32Array()
 		line.resize(size)
 		var pos := 0
-		for i in range(maxi(0, n - SETTLE), n):
-			var x := wet[i]
-			var delayed := line[pos]
-			line[pos] = x + delayed * 0.5
-			pos = (pos + 1) % size
-		for i in n:
-			var x := wet[i]
-			var delayed := line[pos]
-			line[pos] = x + delayed * 0.5
-			pos = (pos + 1) % size
-			wet[i] = delayed - x * 0.5
+		for lap in 2:
+			for i in n:
+				var x := wet[i]
+				var delayed := line[pos]
+				line[pos] = x + delayed * 0.5
+				pos = (pos + 1) % size
+				if lap == 1:
+					wet[i] = delayed - x * 0.5
 	scale(wet, 0.18)
 	biquad(wet, "hp", 350.0, 0.7, 0.0, sr)        # keep the low end dry and tight
 	biquad(wet, "lp", 6500.0, 0.7, 0.0, sr)
@@ -172,41 +155,21 @@ static func octave_of(voice: String) -> float:
 
 ## Run one voice through its chain. `kick_hits` are sample positions of the kick, for ducking.
 static func process(buf: PackedFloat32Array, voice: String, sr: float, kick_hits: Array) -> void:
-	if DESK.has(voice):
-		apply(buf, DESK[voice], sr, kick_hits)
-
-## Loudness of the sounding part only. Averaging over the whole loop would make a sparse line louder
-## than a busy one; this measures the notes and ignores the rests between them.
-static func sounding_db(buf: PackedFloat32Array) -> float:
-	var floor_level := peak(buf) * 0.03
-	var e := 0.0
-	var count := 0
-	for v in buf:
-		if absf(v) > floor_level:
-			e += v * v
-			count += 1
-	return 10.0 * log(maxf(e / maxi(1, count), 1e-12)) / log(10.0)
-
-## Run a buffer through a desk strip given as data (the same shape as one DESK entry).
-## Two more ways to set the level: `level_db` (loudness of the sounding part) and, after everything, `gain_db`.
-static func apply(buf: PackedFloat32Array, d: Dictionary, sr: float, kick_hits: Array) -> void:
-	for e in d.get("eq", []):
-		biquad(buf, str(e[0]), float(e[1]), float(e[2]), float(e[3]), sr)
-	if d.has("level_db"):
-		if peak(buf) > 0.0001:
-			scale(buf, pow(10.0, (float(d["level_db"]) - sounding_db(buf)) / 20.0))
-	elif d.has("rms_db"):
+	if not DESK.has(voice):
+		return
+	var d: Dictionary = DESK[voice]
+	for e in d["eq"]:
+		biquad(buf, e[0], e[1], e[2], e[3], sr)
+	if d.has("rms_db"):
 		scale(buf, pow(10.0, (float(d["rms_db"]) - rms_db(buf)) / 20.0))
 	elif d.has("peak"):
 		var top := peak(buf)
 		if top > 0.0001:
 			scale(buf, float(d["peak"]) / top)
-	if float(d.get("duck", 0.0)) > 0.0 and not kick_hits.is_empty():
-		duck(buf, kick_hits, float(d["duck"]), sr, float(d.get("duck_release", 0.16)))
-	if float(d.get("room", 0.0)) > 0.0:
+	if d.has("duck") and not kick_hits.is_empty():
+		duck(buf, kick_hits, float(d["duck"]), sr)
+	if d.has("room"):
 		var wet := room(buf, sr)
 		var send: float = d["room"]
 		for i in buf.size():
 			buf[i] += wet[i] * send / 0.18 * 0.5
-	if d.has("gain_db"):
-		scale(buf, pow(10.0, float(d["gain_db"]) / 20.0))
