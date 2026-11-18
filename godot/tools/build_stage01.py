@@ -124,7 +124,7 @@ encounters.append({"id": "boss", "kind": "boss", "emitter": "boss", "x": 0, "y":
         + [{"at": 48, "attack": "half", "anchor": "fixed", "x": -192 * PX, "y": 0}, {"at": 56, "attack": "half", "anchor": "fixed", "x": 192 * PX, "y": 0}]},
 ]})
 
-stage = {"id": "stage-01", "name": "첫 스테이지", "meter": {"bpm": 110, "stepsPerBeat": 4, "beatsPerBar": 4}, "seed": 7, "lives": 3,
+stage = {"id": "stage-01", "name": "첫 스테이지", "meter": {"bpm": 110, "stepsPerBeat": 4, "beatsPerBar": 4, "dashMs": 120, "justMs": 60}, "seed": 7, "lives": 3,
     "start": [0, 10.5], "map": {"ground": ground, "holes": holes}, "attacks": attacks, "emitters": emitters, "parts": parts,
     "plates": plates, "gates": gates, "checkpoints": checkpoints, "encounters": encounters}
 out = os.path.join(os.path.dirname(__file__), "..", "data", "stages", "stage-01.json")

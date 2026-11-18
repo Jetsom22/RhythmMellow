@@ -4,7 +4,9 @@
  "meter": {
   "bpm": 110,
   "stepsPerBeat": 4,
-  "beatsPerBar": 4
+  "beatsPerBar": 4,
+  "dashMs": 120,
+  "justMs": 60
  },
  "seed": 7,
  "lives": 3,

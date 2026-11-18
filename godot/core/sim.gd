@@ -122,39 +122,44 @@ func switch_instrument(dir: int) -> void:
 		return
 	equipped = owned[posmod(owned.find(equipped) + dir, owned.size())]
 
-## A dash always goes, and always the same distance. Its timing decides only how safe it is:
-## on the beat ("just") it is invulnerable for its whole length; otherwise only for an instant,
-## so the player has to actually leave the attack.
+## Two separate judgements:
+##  - dash: the key is pressed within the judgement time of a dodge beat -> the dash happens (always 1U)
+##  - just: the dodge starts within the just time of an attack landing on the player -> invulnerable for the whole dash
+## A dash that is not just is invulnerable only for an instant, so the player has to actually leave the attack.
 func _try_dash(move: Vector2, pressed_at: float) -> void:
 	if not dash.is_empty() or cooldown > 0.0 or not reform.is_empty():
 		return
-	var j := meter.judge(pressed_at - input_offset_ms / 1000.0)
-	# Off the beat there is no dash at all.
-	if j["grade"] == "miss":
+	var t := pressed_at - input_offset_ms / 1000.0
+	# Dash judgement: pressed within the judgement time of a dodge beat, the dash happens. Otherwise nothing does.
+	var j := meter.judge(t)
+	if not j["dash"]:
 		cooldown = 0.08
 		events.append({"type": "fizzle", "offset_ms": j["offset_ms"]})
 		return
 	var dir := move.normalized() if move.length() > 0.01 else face
-	# Just exists only against an attack: the press is on the beat, and an attack lands on that beat where the player stands.
-	# Pressed a moment early, the attack is still on its way; a moment late, its hit is waiting to be confirmed.
-	var just := false
-	if j["grade"] == "perfect" and grace_until <= int(j["step"]):
-		var hs: int = j["step"]
-		for p in pending:
-			if p["hit_step"] == hs:
-				just = true
-		if step < hs:
-			for a in active:
-				var since: int = hs - int(a["hit_step"])
-				if (since == 0 or (since > 0 and since <= int(a["hold"]) and since % meter.steps_per_beat == 0)) and hits(a, pos):
-					just = true
+	# Just judgement: the dodge starts within the just time of the moment an attack lands on the player.
+	# A moment early, the attack is still on its way; a moment late, its hit is waiting to be confirmed.
+	var sps := meter.sec_per_step()
+	var win := meter.just_ms / 1000.0
+	var answered: Array = []
+	for p in pending:
+		if absf(t - int(p["hit_step"]) * sps) <= win:
+			answered.append(int(p["hit_step"]))
+	for a in active:
+		var k := int(a["hit_step"])
+		var last := k + int(a["hold"])
+		while k <= last:
+			if k > step and k >= grace_until and absf(t - k * sps) <= win and hits(a, pos) and not answered.has(k):
+				answered.append(k)
+			k += meter.steps_per_beat if int(a["hold"]) > 0 else 1000000
+	var just := not answered.is_empty()
 	var from := pos
-	dash = {"t": 0.0, "dur": DASH_TIME, "vel": dir * dash_u * u / DASH_TIME, "just": just, "step": j["step"]}
+	dash = {"t": 0.0, "dur": DASH_TIME, "vel": dir * dash_u * u / DASH_TIME, "just": just}
 	iframe = maxf(iframe, SHORT_IFRAME)
 	cooldown = DASH_COOLDOWN
-	events.append({"type": "dash", "grade": j["grade"], "just": just, "offset_ms": j["offset_ms"], "from": from, "to": from + dir * dash_u * u})
+	events.append({"type": "dash", "just": just, "offset_ms": j["offset_ms"], "from": from, "to": from + dir * dash_u * u})
 	if just:
-		pending = pending.filter(func(p): return p["hit_step"] != j["step"])
+		pending = pending.filter(func(p): return not answered.has(int(p["hit_step"])))
 		_absorb()
 
 func _advance(dt: float, move: Vector2) -> void:
@@ -340,7 +345,7 @@ func _strike(inst: Dictionary, s: int) -> void:
 		return                      # already answered when the dash was pressed
 	if iframe > 0.0:
 		return
-	pending.append({"hit_step": s, "due": s * meter.sec_per_step() + (meter.perfect_ms + maxf(0.0, input_offset_ms)) / 1000.0 + 0.02})
+	pending.append({"hit_step": s, "due": s * meter.sec_per_step() + (meter.just_ms + maxf(0.0, input_offset_ms)) / 1000.0 + 0.02})
 
 func _schedule(em: Dictionary, events_list: Array, local: int, s: int) -> void:
 	for ev in events_list:

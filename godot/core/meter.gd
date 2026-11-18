@@ -10,14 +10,18 @@ var steps_per_beat := 4
 var beats_per_bar := 4
 var strike_steps: Array[int] = [0, 4, 8, 12]
 var dodge_steps: Array[int] = [0, 4, 8, 12]
-var perfect_ms := 60.0
-var near_ms := 120.0
+## Dash judgement: a dash happens only if the key is pressed within this time of a dodge beat.
+var dash_ms := 120.0
+## Just judgement: a dodge is "just" (invulnerable) if it starts within this time of the moment an attack lands.
+var just_ms := 60.0
 
 static func from_dict(d: Dictionary) -> Meter:
 	var m := Meter.new()
 	m.bpm = float(d.get("bpm", 110.0))
 	m.steps_per_beat = int(d.get("stepsPerBeat", 4))
 	m.beats_per_bar = int(d.get("beatsPerBar", 4))
+	m.dash_ms = float(d.get("dashMs", m.dash_ms))
+	m.just_ms = float(d.get("justMs", m.just_ms))
 	m.strike_steps.assign(d.get("strikeSteps", [0, 4, 8, 12]))
 	m.dodge_steps.assign(d.get("dodgeSteps", d.get("strikeSteps", [0, 4, 8, 12])))
 	return m
@@ -34,7 +38,7 @@ func sec_per_beat() -> float:
 func is_strike_step(step: int) -> bool:
 	return strike_steps.has(posmod(step, steps_per_bar()))
 
-## Judge song time `t` against the dodge grid. Returns { grade, offset_ms (positive = late), step }.
+## Dash judgement: song time `t` against the dodge grid. Returns { dash (bool), offset_ms (positive = late), step }.
 func judge(t: float) -> Dictionary:
 	var sps := sec_per_step()
 	var bar := steps_per_bar()
@@ -49,5 +53,4 @@ func judge(t: float) -> Dictionary:
 				best_off = off
 				best_step = st
 	var a := absf(best_off)
-	var grade := "perfect" if a <= perfect_ms else ("near" if a <= near_ms else "miss")
-	return {"grade": grade, "offset_ms": best_off, "step": best_step}
+	return {"dash": a <= dash_ms, "offset_ms": best_off, "step": best_step}

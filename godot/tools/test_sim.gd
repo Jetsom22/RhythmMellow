@@ -66,12 +66,11 @@ func run_all(tests: Object) -> void:
 	s = make()
 	var fizz := run(s, s.time + 0.3, {"dash_at": s.time + 0.2})
 	t.check("off the beat, the dash does not happen", of(fizz, "dash").is_empty() and of(fizz, "fizzle").size() == 1 and s.pos == Vector2.ZERO)
-	for case in [["on the beat", 0.0, "perfect"], ["a little off the beat", 0.09, "near"]]:
+	for case in [["on the beat", 0.0], ["a little off the beat", 0.09]]:
 		s = make()
 		var x0 := s.pos.x
 		var ev := run(s, s.time + 0.3, {"dash_at": s.time + case[1]})
 		t.check("a dash %s travels exactly 1U" % case[0], t.near(s.pos.x - x0, 120.0, 0.5), str(s.pos.x - x0))
-		t.check("a dash %s is graded %s" % [case[0], case[2]], of(ev, "dash")[0]["grade"] == case[2], str(of(ev, "dash")))
 	s = make()
 	var empty := run(s, s.time + 0.3, {"dash_at": s.time})
 	t.check("with no attack there is no just, however well timed the dash", not of(empty, "dash")[0]["just"] and of(empty, "absorb").is_empty() and not s.dash.get("just", false))
@@ -310,3 +309,12 @@ func run_all(tests: Object) -> void:
 	run(s, 40 * STEP - 0.03)
 	var beside := run(s, 40 * STEP + 0.3, {"dash_at": 40 * STEP - 0.02})
 	t.check("on the beat but outside the attack is not a just", not of(beside, "dash")[0]["just"] and of(beside, "absorb").is_empty())
+
+	# ── the two judgements are separate ──
+	s = make(device.call("big"))
+	run(s, 40 * STEP - 0.11)
+	var early := run(s, 40 * STEP + 0.4, {"dash_at": 40 * STEP - 0.10})
+	t.check("inside the dash time but outside the just time: the dash happens, it is not a just, and standing in the attack still hurts",
+		of(early, "dash").size() == 1 and not of(early, "dash")[0]["just"] and of(early, "absorb").is_empty())
+	var m2 := Meter.from_dict({"bpm": 110, "dashMs": 80, "justMs": 30})
+	t.check("both times come from the stage data", m2.dash_ms == 80.0 and m2.just_ms == 30.0 and m2.judge(0.07)["dash"] and not m2.judge(0.09)["dash"])
