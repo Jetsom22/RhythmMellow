@@ -143,6 +143,66 @@ const near = (m: Model, g: Grid, x: number, y: number, rU: number): number[] => 
   return out;
 };
 
+/* ---------------- density ---------------- */
+
+/** The planner's density targets (2026-11-18). One screen is 10.7U x 6U. */
+export const DENSITY = { screenW: 10.7, screenH: 6, perScreen: 2, quietBeats: 4, areaScreens: 3 };
+
+export interface Density {
+  paths: { layer: Instrument; lengthU: number; quietU: number; longestQuietU: number; perScreen: number; quietAt: { x: number; y: number } }[];
+  areas: { layer: Instrument; sizeU2: number; screens: number }[];
+}
+
+/** Walk the shortest way from the start to each instrument and count what reaches you on the way. */
+export function density(m: Model): Density {
+  const d = m.data, g = makeGrid(m, 0.5), cov = coverage(m, g), walk = walkable(m, g, []);
+  const start = g.index(d.start[0] * m.u, d.start[1] * m.u);
+  const offs: [number, number][] = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+  const dist = new Float64Array(g.n * g.n).fill(Infinity), prev = new Int32Array(g.n * g.n).fill(-1);
+  // straight-line Dijkstra on walkable cells (no dashing: this is the walk, not the shortcut)
+  const order: number[] = [start];
+  dist[start] = 0;
+  for (let h = 0; h < order.length; h++) {
+    const k = order[h], i = k % g.n, j = (k - i) / g.n;
+    for (const [di, dj] of offs) {
+      const a = i + di, b = j + dj;
+      if (a < 0 || b < 0 || a >= g.n || b >= g.n) continue;
+      const q = b * g.n + a, nd = dist[k] + Math.hypot(di, dj) * 0.5;
+      if (!walk[q] || nd >= dist[q] - 1e-9) continue;
+      dist[q] = nd; prev[q] = k; order.push(q);
+    }
+  }
+  const owner = new Map<number, string[]>();
+  for (const [id, cells] of cov.byEmitter) for (const c of cells) owner.set(c, [...(owner.get(c) ?? []), id]);
+  const paths: Density['paths'] = [];
+  for (const p of m.sim.parts) {
+    const path: number[] = [];
+    for (let k = g.index(p.x, p.y); k >= 0 && k !== start; k = prev[k]) path.push(k);
+    path.reverse();
+    let len = 0, quiet = 0, run = 0, longest = 0, quietAt = { x: p.x, y: p.y };
+    const met = new Set<string>();
+    for (let i = 1; i < path.length; i++) {
+      const a = path[i], b = path[i - 1];
+      const step = Math.hypot((a % g.n) - (b % g.n), Math.floor(a / g.n) - Math.floor(b / g.n)) * 0.5;
+      len += step;
+      const here = owner.get(a) ?? [];
+      for (const id of here) met.add(id);
+      if (!here.length && !(cov.enc[a])) {
+        quiet += step; run += step;
+        if (run > longest) { longest = run; quietAt = { x: g.x(a % g.n), y: g.y(Math.floor(a / g.n)) }; }
+      } else run = 0;
+    }
+    paths.push({ layer: p.layer, lengthU: len, quietU: quiet, longestQuietU: longest, perScreen: len ? (met.size / len) * DENSITY.screenW : 0, quietAt });
+  }
+  const areas: Density['areas'] = [];
+  for (const layer of INSTRUMENTS) {
+    let n = 0;
+    for (let k = 0; k < walk.length; k++) if (walk[k] && m.areaOf(g.x(k % g.n), g.y(Math.floor(k / g.n))) === layer) n++;
+    if (n) areas.push({ layer, sizeU2: n * 0.25, screens: (n * 0.25) / (DENSITY.screenW * DENSITY.screenH) });
+  }
+  return { paths, areas };
+}
+
 /* ---------------- the report ---------------- */
 
 export function check(m: Model): Finding[] {
@@ -307,6 +367,20 @@ export function check(m: Model): Finding[] {
       if (!enc.phrases.every(ph => (ph.advance?.answered ?? 0) > 0)) { bad.push(`${enc.id}: 악기 없이 통과하는 방법(회피 통과)이 없다`); where.push({ x: enc.x * m.u, y: enc.y * m.u }); }
     }
     add('dodge-pass', '악기가 없어도 수호자를 통과할 수 있는가', bad, where, '모든 수호자를 회피 통과(공격을 연속으로 저스트 회피)로 넘을 수 있다');
+  }
+
+  // 12. dense enough (planner, 2026-11-18): on the way to each instrument, 2 or more things per screen of walking
+  //     and at most 4 beats with nothing reaching; an instrument area at most 3 screens big
+  {
+    const bad: string[] = [], where: { x: number; y: number }[] = [];
+    const d0 = density(m);
+    for (const r of d0.paths) {
+      if (r.longestQuietU > DENSITY.quietBeats) { bad.push(`${r.layer} 악기까지: 아무 공격도 닿지 않는 구간이 ${r.longestQuietU.toFixed(1)}박 이어진다(${DENSITY.quietBeats}박 이하)`); where.push(r.quietAt); }
+      if (r.perScreen < DENSITY.perScreen) bad.push(`${r.layer} 악기까지: 걸어서 화면 하나(${DENSITY.screenW}U)에 ${r.perScreen.toFixed(1)}번 만난다(${DENSITY.perScreen}번 이상)`);
+    }
+    for (const a of d0.areas) if (a.screens > DENSITY.areaScreens) bad.push(`${a.layer} 구역의 땅이 화면 ${a.screens.toFixed(1)}장 크기다(${DENSITY.areaScreens}장 이하)`);
+    add('density', '맵이 촘촘한가 (기획자 결정 기준)', bad, where,
+      `악기까지 가는 길에서 화면 하나에 ${DENSITY.perScreen}번 이상 만나고, 아무 일 없이 걷는 구간이 ${DENSITY.quietBeats}박 이하이며, 구역마다 화면 ${DENSITY.areaScreens}장 이하다`);
   }
 
   // 11. a checkpoint near every attack on the road
