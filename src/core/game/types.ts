@@ -13,8 +13,8 @@ export interface Input {
   dodgeAt: number | null;
   switchDir: -1 | 0 | 1;
   switchTo: Instrument | null;
-  /** The special-attack key was pressed (stage build). */
-  special?: boolean;
+  /** Audio clock time of the special-attack key press (stage build), or null. */
+  specialAt?: number | null;
 }
 
 export interface Dash { t: number; dur: number; vx: number; vy: number; grade: Grade }

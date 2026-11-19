@@ -130,7 +130,7 @@ function frame(now: number): void {
   const heard = heardTime(engine.now(), tun) - t0;
   const input = kb.poll();
   const events = sim.stepTo(heard, {
-    moveX: input.moveX, moveY: input.moveY, switchDir: input.switchDir, switchTo: input.switchTo, special: input.special,
+    moveX: input.moveX, moveY: input.moveY, switchDir: input.switchDir, switchTo: input.switchTo, specialAt: input.specialAt == null ? null : inputTime(input.specialAt, tun) - t0,
     dashAt: input.dodgeAt === null ? null : inputTime(input.dodgeAt, tun) - t0,
   });
   for (const e of events) {
