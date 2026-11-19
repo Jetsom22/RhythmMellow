@@ -42,7 +42,7 @@ export interface StageData {
   attacks?: Record<string, AttackDef>;
   emitters?: (V & { id: string; kind: 'device' | 'monster' | 'guardian' | 'boss'; hp?: number; body?: number; pattern?: Pattern;
     follow?: { layer: LayerId; attack: string }; motion?: Motion;
-    range?: number; hidden?: boolean; rot?: number; weakTo?: Instrument; onBreak?: string; onSpecial?: { flag: string; layer?: Instrument };
+    range?: number; hidden?: boolean; rot?: number; weakTo?: Instrument; onBreak?: string; onSpecial?: { flag: string };
     touch?: boolean; respawn?: number })[];
   parts?: (V & { layer: Instrument; guard?: string })[];
   plates?: (V & { id: string; layer: Instrument; r?: number; flag?: string; encounter?: string })[];
@@ -62,8 +62,8 @@ export interface Emitter {
   maxHp: number; hp: number; broken: boolean; body: number; pattern: Pattern;
   follow?: { layer: LayerId; attack: string }; motion?: Motion;
   range?: number; hidden: boolean; rot: number; weakTo?: Instrument; onBreak?: string;
-  /** Hit by a special attack (of this instrument, if one is named), it sets a flag: a switch for gates. */
-  onSpecial?: { flag: string; layer?: Instrument };
+  /** Hit by a special attack, it sets a flag: a switch for gates. */
+  onSpecial?: { flag: string };
   /** Walking into its body is a hit (a dash passes through, as through any attack). */
   touch?: boolean;
   /** Bars after it is broken before it comes back at home, once the player is out of its sight. */
@@ -95,7 +95,7 @@ export type StageEvent =
   | { type: 'strike'; inst: Inst; step: number }
   | { type: 'attack'; layer: Instrument; from: V; to: V; hit: boolean }
   | { type: 'charge' }
-  | { type: 'special'; layer: Instrument; from: V; dirX: number; dirY: number; hits: number }
+  | { type: 'special'; from: V; hits: number }
   | { type: 'trigger'; id: string; flag: string; pos: V }
   | { type: 'hurt' | 'gameover'; kind: 'hit' | 'fall'; from: V; to: V; lives: number }
   | { type: 'part'; layer: Instrument; pos: V }
@@ -111,16 +111,11 @@ export interface StageInput { moveX: number; moveY: number; /** Song time of the
 export const DASH_TIME = 0.16;
 export const DASH_COOLDOWN = 0.25;
 /**
- * The special attack: a just dodge charges one, a key fires it. One strong shot, different for each instrument.
- * Lengths in U. These shapes and numbers are placeholders until the design is settled.
- *  - drum: a burst around the player
- *  - hat: a line through everything in the direction faced
- *  - bass: a pool where the player stands, which strikes on every beat for a while
+ * The special attack: a just dodge charges one, a key fires it on the beat. One strong burst around the player,
+ * the same whatever instrument is in hand, and it works with no instrument at all. Lengths in U.
+ * The shape and numbers are placeholders until the design is settled.
  */
-export const SPECIAL = {
-  drum: { r: 2.0, damage: 60 },
-  hat: { len: 6.0, w: 0.6, damage: 40 },
-  bass: { r: 2.5, damage: 15, beats: 4 },
+export const SPECIAL = { r: 2.0, damage: 60
 };
 /** Steps the player stays scattered after being hit or falling (two beats). */
 export const REFORM_STEPS = 8;
@@ -158,8 +153,6 @@ export class StageSim {
   streak = 0;
   /** A special attack is waiting to be fired. A just dodge charges it; only one can be held. */
   charged = false;
-  /** Pools left by the bass special: they strike on every beat until they end. */
-  pools: { x: number; y: number; r: number; damage: number; until: number }[] = [];
   /** Attacks cannot hurt before this step: one beat of grace after re-forming. */
   graceUntil = 0;
 
@@ -466,8 +459,6 @@ export class StageSim {
     this.active = this.active.filter(a => s < a.hitStep + a.hold);
     this.stepPlates();
     this.autoAttack(s);
-    if (mod(s, spb) === 0) for (const p of this.pools) if (s <= p.until) this.poolStrike(p);
-    this.pools = this.pools.filter(p => s < p.until);
   }
 
   // ───────── chasing monsters ─────────
@@ -589,29 +580,17 @@ export class StageSim {
   // ───────── the special attack ─────────
 
   /**
-   * Fire the charged special attack of the instrument in hand. Like the dash it only goes off on the beat:
-   * pressed outside the judgement time nothing happens and the charge is kept. Without a charge or an instrument nothing happens.
+   * Fire the charged special attack. Like the dash it only goes off on the beat: pressed outside the
+   * judgement time nothing happens and the charge is kept. It needs no instrument.
    */
   fireSpecial(pressedAt: number): void {
-    const eq = this.equipped;
-    if (!this.charged || !eq || this.reform) return;
+    if (!this.charged || this.reform) return;
     const j = this.meter.judge(pressedAt - this.inputOffsetMs / 1000);
     if (!j.dash) { this.events.push({ type: 'fizzle', offsetMs: j.offsetMs }); return; }
     this.charged = false;
-    const u = this.u, from = this.pos;
     let hits = 0;
-    if (eq === 'drum') {
-      for (const em of this.targets()) if (dist(this.x, this.y, em.x, em.y) - em.body <= SPECIAL.drum.r * u) { this.specialHit(em, SPECIAL.drum.damage); hits++; }
-    } else if (eq === 'hat') {
-      for (const em of this.targets()) {
-        const dx = em.x - this.x, dy = em.y - this.y, along = dx * this.faceX + dy * this.faceY, across = Math.abs(dx * this.faceY - dy * this.faceX);
-        if (along >= -em.body && along <= SPECIAL.hat.len * u + em.body && across <= (SPECIAL.hat.w / 2) * u + em.body) { this.specialHit(em, SPECIAL.hat.damage); hits++; }
-      }
-    } else {
-      this.pools.push({ x: this.x, y: this.y, r: SPECIAL.bass.r * u, damage: SPECIAL.bass.damage, until: this.step + SPECIAL.bass.beats * this.meter.stepsPerBeat });
-      hits = this.poolStrike(this.pools[this.pools.length - 1]);
-    }
-    this.events.push({ type: 'special', layer: eq, from, dirX: this.faceX, dirY: this.faceY, hits });
+    for (const em of this.targets()) if (dist(this.x, this.y, em.x, em.y) - em.body <= SPECIAL.r * this.u) { this.specialHit(em, SPECIAL.damage); hits++; }
+    this.events.push({ type: 'special', from: this.pos, hits });
   }
 
   /** Everything a special attack can reach: whatever can be hurt, and whatever reacts to a special. */
@@ -620,21 +599,15 @@ export class StageSim {
   }
 
   private specialHit(em: Emitter, amount: number): void {
-    // A device can react to a special attack (optionally only that of one instrument): this is how specials solve things.
+    // A device can react to a special attack: this is how specials solve things.
     const sp = em.onSpecial;
-    if (sp && !this.flags[sp.flag] && (!sp.layer || sp.layer === this.equipped)) {
+    if (sp && !this.flags[sp.flag]) {
       this.flags[sp.flag] = true;
       this.openGates();
       this.events.push({ type: 'trigger', id: em.id, flag: sp.flag, pos: { x: em.x, y: em.y } });
     }
     const enc = this.encounterOf(em);
     if (em.maxHp > 0 && (!enc || enc.running)) this.damage(em, amount, this.step);
-  }
-
-  private poolStrike(p: { x: number; y: number; r: number; damage: number }): number {
-    let n = 0;
-    for (const em of this.targets()) if (dist(p.x, p.y, em.x, em.y) - em.body <= p.r) { this.specialHit(em, p.damage); n++; }
-    return n;
   }
 
   private damage(em: Emitter, amount: number, s: number): void {
