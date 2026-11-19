@@ -96,17 +96,18 @@ for layer, c in ZONES.items():
     checkpoints.append({**at(24.5, c + 34), "r": 0.8})
     if layer == "bass":
         checkpoints.append({**at(15.4, c + 44), "r": 0.8})
-    # Inside: the guardian and the instrument. Three just dashes in a row pass it without an instrument.
+    # Inside: the guardian and the instrument. The guardian is passed only by going through one whole loop of its
+    # pattern without being hit (planner, 2026-11-19). It cannot be hurt.
     gx, gy = pol(26.0, c - 24)   # clear of every device on the way in
     phrase = {
-        "drum": {"id": "seung-drum", "bars": 4, "events": sweep(0) + sweep(2), "openBars": [1, 3], "weakTo": "hat"},
-        "hat": {"id": "seung-hat", "bars": 2, "weakTo": "drum", "events": beams(4, [0, 180]) + beams(8, [90, 270]) + beams(12, [0, 180])
+        "drum": {"id": "seung-drum", "bars": 4, "events": sweep(0) + sweep(2)},
+        "hat": {"id": "seung-hat", "bars": 2, "events": beams(4, [0, 180]) + beams(8, [90, 270]) + beams(12, [0, 180])
             + beams(20, [45, 135, 225, 315]) + beams(24, [0, 90, 180, 270]) + circles([28])},
         "bass": {"id": "bass-guard", "bars": 4, "events": [{"at": 8, "attack": "zone", "anchor": "target"}, {"at": 24, "attack": "circle"},
             {"at": 40, "attack": "zone", "anchor": "target"}, {"at": 56, "attack": "circle"}]},
     }[layer]
-    phrase["advance"] = {"hpBelow": 0, "answered": 3}
-    emitters.append({"id": layer + "-guardian", "kind": "guardian", "x": gx, "y": gy, "hp": 120, "body": 28 * PX})
+    phrase["advance"] = {"survived": True}
+    emitters.append({"id": layer + "-guardian", "kind": "guardian", "x": gx, "y": gy, "body": 28 * PX})
     encounters.append({"id": layer + "-guard", "kind": "guardian", "emitter": layer + "-guardian", "x": gx, "y": gy, "r": 4.0,
         "flag": layer + "-passed", "phrases": [phrase]})
     parts.append({"layer": layer, **at(27.5, c + 16), "guard": layer + "-guard"})

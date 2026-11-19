@@ -25,7 +25,11 @@ export type AttackShape =
 export interface AttackDef { shape: AttackShape; tele: number; hold?: number; anchor?: 'self' | 'target' | 'fixed'; layer?: LayerId }
 export interface PatternEvent { at: number; attack: string; anchor?: 'self' | 'target' | 'fixed'; x?: number; y?: number; rot?: number }
 export interface Pattern { length: number; rest?: number; phase?: number; events: PatternEvent[] }
-export interface Advance { hpBelow?: number; answered?: number; solved?: boolean }
+/**
+ * When a phrase is passed. survived: the player went through the whole phrase, every bar of it, without being hit
+ * (a hit sends the player back and the phrase starts over when they walk in again).
+ */
+export interface Advance { hpBelow?: number; answered?: number; solved?: boolean; survived?: boolean }
 export interface Phrase { id: string; bars: number; events: PatternEvent[]; advance?: Advance; openBars?: number[]; weakTo?: Instrument; shield?: boolean }
 export interface Requires { parts?: number; flag?: string; flags?: string[]; layer?: Instrument }
 
@@ -521,7 +525,8 @@ export class StageSim {
       const adv = ph.advance ?? {}, em = e.emitter;
       if (adv.answered !== undefined && this.streak >= adv.answered) e.streakOk = true;
       const last = e.index === e.phrases.length - 1;
-      const met = (adv.hpBelow !== undefined && em.hp <= adv.hpBelow * em.maxHp + 1e-6) || (adv.answered !== undefined && e.streakOk) || (!!adv.solved && this.solved(e));
+      const met = (adv.hpBelow !== undefined && em.hp <= adv.hpBelow * em.maxHp + 1e-6) || (adv.answered !== undefined && e.streakOk) || (!!adv.solved && this.solved(e))
+        || (!!adv.survived && s - e.phraseStart >= ph.bars * bar);
       // The last phrase ends the moment its condition is met; earlier ones change on the phrase line.
       if (last && met) { this.clear(e); continue; }
       if (s - e.phraseStart >= ph.bars * bar) {

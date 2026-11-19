@@ -36,7 +36,8 @@ describe('each level-design check catches its problem', () => {
   it('an order of collecting that gets stuck', () => {
     expect(failsAfter(d => { d.gates!.push({ id: 'wall', shape: { kind: 'circle', x: 0, y: 0, r: 0.01 }, requires: {} }); d.map.holes!.push({ kind: 'sector', x: 0, y: 0, r0: 13.6, r1: 17, a0: 214, a1: 326 }); })).toContain('any-order');
   });
-  it('a guardian that needs an instrument', () => {
-    expect(failsAfter(d => { for (const p of d.encounters!.find(e => e.id === 'hat-guard')!.phrases) delete p.advance!.answered; })).toContain('dodge-pass');
+  it('a guardian passed some other way than one loop of its pattern', () => {
+    expect(failsAfter(d => { for (const p of d.encounters!.find(e => e.id === 'hat-guard')!.phrases) p.advance = { hpBelow: 0 }; })).toContain('dodge-pass');
+    expect(failsAfter(d => { for (const p of d.encounters!.find(e => e.id === 'hat-guard')!.phrases) p.advance = { survived: true, answered: 3 }; })).toContain('dodge-pass');
   });
 });
