@@ -358,15 +358,16 @@ export function check(m: Model): Finding[] {
     add('any-order', '어느 순서로 모아도 악기 셋과 보스에 닿는가', bad, [], '악기 3개를 모으는 6가지 순서 모두 보스까지 걷기와 대시로 간다');
   }
 
-  // 10. a guardian can be passed without any instrument
+  // 10. a guardian is passed only by going through one whole loop of its pattern without being hit (planner, 2026-11-19)
   {
     const bad: string[] = [], where: { x: number; y: number }[] = [];
     for (const p of sim.parts) {
       const enc = d.encounters?.find(e => e.id === p.guard);
       if (!enc) { bad.push(`${p.layer} 악기를 지키는 수호자가 없다`); continue; }
-      if (!enc.phrases.every(ph => (ph.advance?.answered ?? 0) > 0)) { bad.push(`${enc.id}: 악기 없이 통과하는 방법(회피 통과)이 없다`); where.push({ x: enc.x * m.u, y: enc.y * m.u }); }
+      const other = (a: Record<string, unknown> | undefined): boolean => !!a && Object.keys(a).some(k => k !== 'survived');
+      if (!enc.phrases.every(ph => ph.advance?.survived && !other(ph.advance as Record<string, unknown>))) { bad.push(`${enc.id}: 패턴 한 바퀴를 맞지 않고 피하는 것 말고 다른 통과 조건이 있거나, 그 조건이 없다`); where.push({ x: enc.x * m.u, y: enc.y * m.u }); }
     }
-    add('dodge-pass', '악기가 없어도 수호자를 통과할 수 있는가', bad, where, '모든 수호자를 회피 통과(공격을 연속으로 저스트 회피)로 넘을 수 있다');
+    add('dodge-pass', '수호자를 패턴 한 바퀴 피해서만 통과하는가', bad, where, '모든 수호자는 패턴 한 바퀴를 맞지 않고 피해야 통과한다 (기획자 결정)');
   }
 
   // 12. dense enough (planner, 2026-11-18): on the way to each instrument, 2 or more things per screen of walking
