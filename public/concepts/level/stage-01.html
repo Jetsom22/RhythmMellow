@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>첫 스테이지 종이 설계</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap">
+<style>
+/* Layout: one reading column; the field map and the pattern sheet break out wider. Colours follow the game's rust palette (navy in dark). */
+:root{
+  --bg:#f1e9d8; --ink:#232524; --danger:#c4291c;
+  --e-drum:#c4291c; --e-hat:#e0662a; --e-bass:#8a1f33; --e-lead:#c4291c;
+  --p-drum:#2f6470; --p-hat:#6f9a8f; --p-bass:#3d4a6b;
+  --soft:color-mix(in srgb,var(--ink) 62%,var(--bg));
+  --rule:color-mix(in srgb,var(--ink) 16%,transparent);
+  --display:Jost,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --body:"Helvetica Neue",Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12303f; --ink:#f3ede0; --danger:#ff4b5c;
+  --e-drum:#ff4b5c; --e-hat:#ff8a4a; --e-bass:#c93a7a; --e-lead:#ff4b5c;
+  --p-drum:#4fd1c5; --p-hat:#b5f0e0; --p-bass:#5aa9ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12303f; --ink:#f3ede0; --danger:#ff4b5c;
+  --e-drum:#ff4b5c; --e-hat:#ff8a4a; --e-bass:#c93a7a; --e-lead:#ff4b5c;
+  --p-drum:#4fd1c5; --p-hat:#b5f0e0; --p-bass:#5aa9ff; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--body)}
+main{max-width:1120px;margin:0 auto;padding-block:48px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:56px}
+header{display:grid;gap:12px;max-width:72ch}
+.eyebrow{font:400 12px var(--display);letter-spacing:.22em;text-transform:uppercase;color:var(--soft)}
+h1{font:300 clamp(30px,5vw,46px)/1.1 var(--display);letter-spacing:.02em;margin:0;text-wrap:balance}
+h2{font:400 22px/1.3 var(--display);letter-spacing:.03em;margin:0;text-wrap:balance}
+h3{font:500 14px/1.4 var(--display);letter-spacing:.06em;margin:0}
+p{margin:0}
+section{display:grid;gap:16px;min-width:0}
+.prose{max-width:70ch;display:grid;gap:10px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 13px var(--display);letter-spacing:.06em;color:var(--soft)}
+.meta b{font-weight:500;color:var(--ink)}
+.u{font:500 13px var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+figure{margin:0;display:grid;gap:10px;min-width:0}
+figcaption{font-size:13px;color:var(--soft);max-width:80ch}
+.map-wrap{overflow-x:auto;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding-block:8px}
+.map-wrap svg{display:block;width:100%;max-width:900px;margin:0 auto;min-width:560px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12.5px;color:var(--soft)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend svg{flex:none}
+.changes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0 28px;border-top:1px solid var(--ink)}
+.changes div{padding:12px 0 14px;border-bottom:1px solid var(--rule);display:grid;gap:4px;align-content:start}
+.changes b{font:500 12px var(--display);letter-spacing:.1em}
+.changes .was{font-size:13px;color:var(--soft)}
+.changes .now{font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:28px 22px}
+.card{display:grid;gap:8px;align-content:start;min-width:0}
+.card canvas{display:block;width:100%;aspect-ratio:4/3.6;max-width:100%}
+.card .id{font:400 12px var(--display);letter-spacing:.12em;color:var(--soft)}
+.card p{font-size:13.5px}
+.card .road{font-size:13px;color:var(--soft);border-top:1px solid var(--rule);padding-top:6px}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button{font:400 12px var(--display);letter-spacing:.14em;padding:7px 14px;border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;border-radius:999px}
+button:focus-visible{outline:2px solid var(--p-drum);outline-offset:2px}
+.tempo{font:400 12px var(--display);letter-spacing:.12em;color:var(--soft);font-variant-numeric:tabular-nums}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:620px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px 9px 0;border-bottom:1px solid var(--rule)}
+th{font:500 12px var(--display);letter-spacing:.1em;color:var(--soft)}
+td:first-child{font-weight:500;white-space:nowrap}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px 40px}
+.two>div{display:grid;gap:10px;align-content:start;min-width:0}
+ul{margin:0;padding-left:1.1em;display:grid;gap:6px}
+.ask li::marker{content:"? ";font-family:var(--display);color:var(--soft)}
+.status{font-size:13px;color:var(--soft);border-left:2px solid var(--rule);padding-left:12px;max-width:72ch}
+dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;max-width:72ch}
+dt{font:500 13px var(--display);letter-spacing:.06em}
+dd{margin:0;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">RhythmMellow · 레벨디자인 · 2026-11-18 · 2판</div>
+  <h1>첫 스테이지 종이 설계</h1>
+  <p>4/4 킥+스네어 챕터의 첫 스테이지. 보스 무대를 가운데 둔 둥근 필드에서 악기 3개를 순서 없이 모은다. 길에 놓는 장치는 보스 패턴의 일부를 크기와 박을 바꾸지 않고 반복한다.</p>
+  <div class="meta"><span><b>110</b> BPM</span><span>마디 <b>16</b>스텝</span><span><b>1U</b> = 한 박 동안 걷는 거리 = 120px</span><span>대시 <b>1U</b></span><span>필드 반지름 <b>30U</b></span><span>목숨 <b>3</b></span><span>처음 하는 사람 <b>15분</b> 안팎</span></div>
+</header>
+
+<section aria-labelledby="h-chg">
+  <h2 id="h-chg">1판에서 바뀐 것</h2>
+  <div class="changes">
+    <div><b>구조</b><span class="was">갈래마다 방에 가서 악기 하나씩 얻어 오는 구조 (방탈출 같다)</span><span class="now">보스 무대를 가운데 둔 <b>열린 필드</b>. 악기 구역 3개가 무대를 둘러싸고, 필드 어디서든 무대가 보인다</span></div>
+    <div><b>말</b><span class="was">모티프, 악형, 방출원 같은 새 말과 비유</span><span class="now">검증 빌드의 말: <b>원·고리·빔·장판 공격</b>, <b>보스 패턴</b>. 누가, 몇 박에, 어떤 크기로, 플레이어가 무엇을 하면 되는지를 그대로 적는다</span></div>
+    <div><b>패턴 감각</b><span class="was">보스 패턴의 크기와 박을 새 규칙에 맞춰 바꿈</span><span class="now">검증 빌드의 보스 패턴 5개를 <b>그대로</b>. 길의 장치도 그 일부를 크기와 박을 바꾸지 않고 반복</span></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-map">
+  <h2 id="h-map">필드</h2>
+  <div class="prose">
+    <p>가운데 필드는 넓고 장치가 없다. 시작 위치에서 보스 무대, 보스 문(다리), 악기 구역 3개가 모두 보인다. 악기 구역은 가운데 필드와 맞닿은 쪽이 전부 열려 있어 어느 지점으로든 들어갈 수 있고, 바깥으로 갈수록 장치가 많아진다: <b>입구</b>(장치 1개) → <b>중간</b>(같은 장치 3~4개, 갈림길) → <b>안쪽</b>(수호자와 악기).</p>
+    <p>악기를 얻으면 <b>한 방향 지름길</b>이 열려 구역 가장자리를 따라 가운데 필드로 내려간다. 도착점은 옆 구역 쪽이다. 왔던 길로 돌아가지 않고 필드를 한 바퀴 돌며 셋을 모은다. 돌아오는 길에 그 악기의 공명판을 켜고, 3개가 모두 켜지면 다리가 생긴다.</p>
+  </div>
+  <figure>
+    <div class="map-wrap"><svg id="map" viewBox="0 0 900 900" role="img" aria-label="둥근 필드의 지도: 가운데 보스 무대와 그 둘레의 낭떠러지, 다리 하나, 가운데 필드에 시작 위치와 공명판 3개와 음표 몬스터 2마리, 위에 하이햇 구역, 오른쪽 아래에 베이스 구역, 왼쪽 아래에 드럼 구역, 구역 사이의 절벽, 각 구역 안쪽에서 가운데 필드로 내려오는 한 방향 지름길"></svg></div>
+    <figcaption>배치를 보여 주는 그림이다. 거리는 U에 맞췄지만 지형의 세부와 장치의 정확한 위치는 데이터를 쓸 때 정한다. 입구·중간·안쪽 표시는 하이햇 구역에만 적었고, 세 구역이 같다.</figcaption>
+    <div class="legend" id="legend"></div>
+  </figure>
+  <div class="table-wrap"><table>
+    <thead><tr><th>구역</th><th>지형</th><th>입구</th><th>중간</th><th>안쪽 수호자</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:var(--e-drum)"></span>드럼</td><td>낭떠러지 웅덩이가 큰 돌밭</td><td>북 장치 1개</td><td>북 장치 4개. 2개씩 2박 차이로 고리를 쏜다. 웅덩이 사이 길이 고리 범위보다 좁아서 어느 쪽으로 피할지 골라야 한다</td><td>드럼 수호자: <span class="u">seung-drum</span> 4마디 전체</td></tr>
+      <tr><td><span class="dot" style="background:var(--e-hat)"></span>하이햇</td><td>멀리까지 보이는 높은 평지</td><td>빔 장치 1개</td><td>빔 장치 3개. 한 마디씩 차이 나게 시작해서 빔이 끊이지 않는다. 빔 사이로 지나간다</td><td>하이햇 수호자: <span class="u">seung-hat</span> 2마디 전체</td></tr>
+      <tr><td><span class="dot" style="background:var(--e-bass)"></span>베이스</td><td>섬과 둑이 있는 늪</td><td>장판 장치 1개</td><td>장판 장치 4개와 밀물 둑. 둑은 베이스 음이 울리는 동안 매 박 판정한다. 베이스가 쉬는 동안 건넌다</td><td>베이스 수호자: 플레이어 위치에 장판 + 원 공격</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section aria-labelledby="h-pat">
+  <h2 id="h-pat">보스 패턴과 길의 장치</h2>
+  <div class="prose"><p>보스 패턴은 검증 빌드의 크기와 박 그대로다. 길의 장치는 그중 일부를 반복하고, 장치마다 다른 것은 놓는 위치와 시작 박뿐이다. 아래 그림은 110 BPM으로 움직인다. 공격 범위는 판정 전에 16분음마다 한 단계씩 진해지고, 판정은 정박에만 난다. 그림 아래 칸은 패턴 한 바퀴의 스텝이다(굵은 세로선 = 정박, 푸른 테두리 칸 = 보스가 약해지는 구간, 푸른 점 = 플레이어가 대시하는 스텝).</p></div>
+  <div class="controls"><button type="button" id="play" aria-pressed="true">멈춤</button><span class="tempo" id="clock">박 1 · 스텝 1</span></div>
+  <div class="cards">
+    <div class="card"><canvas data-pat="mark" aria-label="원 공격 애니메이션"></canvas><div class="id">gi-solo · 기 · 주고받기 · 4마디</div><h3>원 공격</h3><p>보스가 플레이어가 서 있는 자리에 반지름 70px 원을 표시하고, 2박 뒤에 그 원 안을 판정한다. 2박 간격으로 3번. 2박이면 240px를 걸을 수 있으니, 원이 보이면 걸어서 원 밖으로 나가면 된다. 3·4마디는 공격이 없고 보스가 약해진다.</p><p class="road">길: 음표 몬스터가 같은 공격을 2마디 공격, 2마디 쉼으로 반복한다. 가운데 필드에서 처음 본다.</p></div>
+    <div class="card"><canvas data-pat="sweep" aria-label="고리 공격 애니메이션"></canvas><div class="id">seung-drum · 승 · 주고받기 · 4마디</div><h3>고리 공격</h3><p>보스 둘레에 고리 3개가 2·3·4박에 차례로 판정한다(반지름 40–150, 150–260, 260–400px). 고리가 바깥으로 넓어지는 속도가 걷는 속도와 같아서 걸어서는 피할 수 없다. 고리가 내 위치에 오는 박에 맞춰 대시하면 대시하는 동안 무적이라 지나갈 수 있다. 그림의 플레이어는 3박에 대시로 가운데 고리를 지나고, 공격 없는 마디에 걸어서 원래 자리로 간다.</p><p class="road">길: 북 장치가 고리 공격 1마디, 쉼 1마디를 반복한다. 드럼 구역 입구에서 처음 본다.</p></div>
+    <div class="card"><canvas data-pat="beam" aria-label="빔 공격 애니메이션"></canvas><div class="id">seung-hat · 승 · 동시 · 2마디</div><h3>빔 공격</h3><p>보스에서 폭 70px 빔이 정박마다 나간다. 1마디는 가로 2개 → 세로 2개 → 가로 2개, 2마디는 대각선 4개 → 십자 4개 → 원 공격 1번. 빔 직전 엇박마다 하이햇 소리가 난다. 대각선과 십자 사이(22.5° 방향)에 서 있으면 어느 빔에도 맞지 않고, 마지막 원 공격만 걸어서 피하면 된다.</p><p class="road">길: 빔 장치가 1마디(가로 → 세로 → 가로), 쉼 1마디를 반복한다. 하이햇 구역 입구에서 처음 본다.</p></div>
+    <div class="card"><canvas data-pat="pool" aria-label="장판 공격 애니메이션"></canvas><div class="id">jeon-resolve의 장판 · 길의 장치</div><h3>장판 공격</h3><p>바닥에 150×150px 장판이 2박 동안 표시된 뒤 생기고, 2박 동안 남아서 매 박 판정한다(3번). 대시 한 번으로는 판정을 다 피할 수 없으니 걸어서 장판 밖으로 나가야 한다. 그림의 플레이어는 장판이 없는 4박 동안 걸어서 건너간다.</p><p class="road">길: 장판 장치가 표시 2박, 판정 2박, 쉼 4박을 반복한다. 베이스 구역 입구에서 처음 본다.</p></div>
+    <div class="card"><canvas data-pat="pad" aria-label="공명판 애니메이션"></canvas><div class="id">jeon-resolve · 전 · 풀이 · 4마디</div><h3>공명판</h3><p>반지름 40px. 그 악기를 든 채 16스텝(한 마디) 동안 위에 서 있으면 켜진다. 보스전에서는 그 마디가 끝나는 박에 공명판 위로 장판 공격이 온다. 그래서 켜지는 순간 바로 나와야 한다.</p><p class="road">길: 가운데 필드의 공명판 3개가 보스 문이다. 악기를 얻을 때마다 하나씩 켠다.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-teach">
+  <h2 id="h-teach">어디서 처음 보고, 어디서 다시 보는가</h2>
+  <p class="prose">보스가 쓰는 공격은 모두 길에서 먼저, 그 공격 하나만 있는 곳에서 처음 나온다. 보스 전에 다른 위치나 다른 공격과 함께 한 번 더 나오고, 수호자에서도 나온다.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>공격</th><th>처음 보는 곳 (그것 하나만)</th><th>다시 보는 곳</th><th>수호자</th><th>보스</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:var(--e-lead)"></span>원</td><td>가운데 필드의 음표 몬스터</td><td>세 구역의 중간 끝</td><td>셋 모두</td><td>기 · 승(하이햇) · 결</td></tr>
+      <tr><td><span class="dot" style="background:var(--e-drum)"></span>고리</td><td>드럼 구역 입구</td><td>드럼 구역 중간, 보스 직전 길</td><td>드럼 수호자</td><td>승(드럼) · 결</td></tr>
+      <tr><td><span class="dot" style="background:var(--e-hat)"></span>빔</td><td>하이햇 구역 입구</td><td>하이햇 구역 중간, 보스 직전 길</td><td>하이햇 수호자</td><td>승(하이햇) · 결</td></tr>
+      <tr><td><span class="dot" style="background:var(--e-bass)"></span>장판</td><td>베이스 구역 입구</td><td>베이스 구역 중간, 보스 직전 길</td><td>베이스 수호자</td><td>전 · 결</td></tr>
+      <tr><td><span class="dot" style="background:var(--p-drum)"></span>공명판</td><td>가운데 필드 (보스 문)</td><td>—</td><td>—</td><td>전</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section aria-labelledby="h-order" class="two">
+  <div>
+    <h2 id="h-order">순서 없이 모아도 통과하는 법</h2>
+    <dl>
+      <dt>악기 없음</dt><dd><b>회피 통과</b>: 수호자의 공격 3번을 연속으로 저스트 회피로 피하면 통과한다</dd>
+      <dt>드럼 <span class="u">0.6U</span></dt><dd>회피 통과, 또는 보스가 약해지는 마디에 0.6U까지 붙어서 정박마다 공격</dd>
+      <dt>하이햇 <span class="u">3.3U</span></dt><dd>회피 통과, 또는 3.3U 떨어진 곳에서 엇박마다 공격</dd>
+      <dt>베이스 <span class="u">1.8U</span></dt><dd>회피 통과, 또는 1.8U 안에 머물며 베이스 음이 울리는 동안 공격</dd>
+    </dl>
+  </div>
+  <div>
+    <h2>기획자에게 묻는 것</h2>
+    <ul class="ask">
+      <li>보스 무대를 가운데 둔 둥근 필드가 생각하신 열린 구조에 가까운가. 보스 무대가 필드 한쪽 끝에 있고 악기 셋이 흩어진 형태가 더 가까운가.</li>
+      <li>구역 사이를 절벽으로 나눴다. 나누지 않으면 더 열린 느낌이 되지만, 아직 안 본 공격을 먼저 만날 수 있다.</li>
+      <li>"패턴 감각"을 검증 빌드 보스 패턴의 크기와 박으로 이해했다. 다른 뜻이었는가.</li>
+      <li>웹 작업대를 누가 만드는가(<span class="u">docs/level/workbench.md</span> 의 세 가지 안).</li>
+    </ul>
+  </div>
+</section>
+
+<p class="status">종이 설계다. 보스 패턴 수치는 <span class="u">src/core/game/bossPatterns.ts</span> 와 대조했다. 실제로 통과할 수 있는지는 데이터가 생긴 뒤 봇과 검사기로, 난이도와 손맛은 기획자가 직접 해 보고 확인한다. 글로 된 원본: <span class="u">docs/level/stage-01.md</span></p>
+
+</main>
+<script>
+(() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const RAD = Math.PI / 180;
+
+  /* ---------------- field map ---------------- */
+  const svg = document.getElementById('map');
+  const U = 10, CX = 450, CY = 445, EDGE = 1.3;
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+  const P = (r, deg) => [CX + r * U * Math.cos(deg * RAD), CY + r * U * Math.sin(deg * RAD)];
+  const line = pts => 'M' + pts.map(p => p.map(v => v.toFixed(1)).join(',')).join('L');
+
+  const defs = el('defs', {});
+  const pat = el('pattern', { id: 'void', width: 9, height: 9, patternUnits: 'userSpaceOnUse' }, defs);
+  el('circle', { cx: 4.5, cy: 4.5, r: 0.9, fill: 'var(--danger)', 'fill-opacity': 0.24 }, pat);
+  el('rect', { x: 0, y: 0, width: 900, height: 900, fill: 'url(#void)' });
+
+  const SECT = { drum: 150, hat: -90, bass: 30 };
+  const BORDERS = [-30, 90, 210];
+  // the field: one big disc with a lobe at the heart of each land
+  const fieldShapes = [[0, 0, 29], ...Object.values(SECT).map(a => [...polar(23.5, a), 9])];
+  function polar(r, a) { return [r * Math.cos(a * RAD), r * Math.sin(a * RAD)]; }
+  const clip = el('clipPath', { id: 'field' }, defs);
+  fieldShapes.forEach(([x, y, r]) => el('circle', { cx: CX + x * U, cy: CY + y * U, r: r * U }, clip));
+
+  const gOut = el('g', { fill: 'var(--ink)' });
+  const gIn = el('g', { fill: 'var(--bg)' });
+  fieldShapes.forEach(([x, y, r]) => { el('circle', { cx: CX + x * U, cy: CY + y * U, r: r * U + EDGE }, gOut); el('circle', { cx: CX + x * U, cy: CY + y * U, r: r * U }, gIn); });
+
+  // holes inside the field: the moat, the ridges between lands, and pools
+  const hOut = el('g', { 'clip-path': 'url(#field)', fill: 'var(--ink)', stroke: 'var(--ink)', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const hBg = el('g', { 'clip-path': 'url(#field)', style: 'fill:color-mix(in srgb,var(--danger) 8%,var(--bg));stroke:color-mix(in srgb,var(--danger) 8%,var(--bg))', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const hDot = el('g', { 'clip-path': 'url(#field)', fill: 'url(#void)', stroke: 'url(#void)', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  const holeCircle = (r, a, rad) => { const [x, y] = P(r, a); el('circle', { cx: x, cy: y, r: rad * U + EDGE, stroke: 'none' }, hOut); el('circle', { cx: x, cy: y, r: rad * U, stroke: 'none' }, hBg); el('circle', { cx: x, cy: y, r: rad * U, stroke: 'none' }, hDot); };
+  const holePath = (d, w) => { el('path', { d, fill: 'none', 'stroke-width': w * U + 2 * EDGE }, hOut); el('path', { d, fill: 'none', 'stroke-width': w * U }, hBg); el('path', { d, fill: 'none', 'stroke-width': w * U }, hDot); };
+  // moat: a ring between 6U and 7.6U
+  { el('circle', { cx: CX, cy: CY, r: 6.8 * U, fill: 'none', 'stroke-width': 1.6 * U + 2 * EDGE }, hOut); el('circle', { cx: CX, cy: CY, r: 6.8 * U, fill: 'none', 'stroke-width': 1.6 * U }, hBg); el('circle', { cx: CX, cy: CY, r: 6.8 * U, fill: 'none', 'stroke-width': 1.6 * U }, hDot); }
+  for (const b of BORDERS) holePath(line([P(14.6, b), P(19, b + 3), P(24, b - 2.5), P(36, b + 1)]), 1.7);
+  [[19.4, 150, 1.9], [16.4, 128, 1.3], [23.6, 172, 1.5], [20.8, 136, 1.0],
+   [20.5, -104, 1.1],
+   [17.4, 16, 1.7], [19.8, 45, 1.8], [22.8, 23, 1.4], [16.8, 52, 1.0]].forEach(([r, a, rad]) => holeCircle(r, a, rad));
+
+  // the bridge over the moat (the boss door): ground drawn over the moat
+  const marks = el('g', {});
+  const labels = el('g', { 'font-family': 'Jost,"Apple SD Gothic Neo","Noto Sans KR",sans-serif', fill: 'var(--ink)' });
+  { const [x1, y1] = P(5.6, 90), [x2, y2] = P(8.1, 90);
+    el('rect', { x: x1 - 1 * U, y: y1, width: 2 * U, height: y2 - y1, fill: 'var(--bg)' }, marks);
+    el('line', { x1: x1 - 1 * U, y1, x2: x1 - 1 * U, y2, stroke: 'var(--ink)', 'stroke-width': EDGE }, marks);
+    el('line', { x1: x1 + 1 * U, y1, x2: x1 + 1 * U, y2, stroke: 'var(--ink)', 'stroke-width': EDGE }, marks);
+    el('line', { x1: x1 - 1 * U + 2, y1: y2 - 3, x2: x1 + 1 * U - 2, y2: y2 - 3, stroke: 'var(--ink)', 'stroke-width': 4, 'stroke-linecap': 'round' }, marks); }
+
+  const text = (x, y, s, o = {}) => { const t = el('text', Object.assign({ x, y, 'font-size': 12, 'text-anchor': 'middle', 'dominant-baseline': 'middle' }, o), labels); t.textContent = s; return t; };
+  const flag = (x, y) => el('path', { d: `M${x - 4},${y + 3.5}L${x + 4},${y + 3.5}L${x},${y - 4.5}Z`, fill: 'var(--ink)' }, marks);
+  const diamond = (x, y, c, s = 5) => el('path', { d: `M${x},${y - s}l${s},${s}l-${s},${s}l-${s},-${s}z`, fill: c }, marks);
+  const wanderer = (r, a) => { const [x, y] = P(r, a); diamond(x, y, 'var(--e-lead)'); el('circle', { cx: x + 12, cy: y + 6, r: 0.58 * U, fill: 'var(--e-lead)', 'fill-opacity': 0.25, stroke: 'var(--e-lead)', 'stroke-dasharray': '2 2' }, marks); };
+  const drumAt = (r, a, full) => { const [x, y] = P(r, a), c = 'var(--e-drum)';
+    if (full) [[0.33, 1.25], [1.25, 2.17], [2.17, 3.33]].forEach(([i, o], k) => el('circle', { cx: x, cy: y, r: (i + o) / 2 * U, fill: 'none', stroke: c, 'stroke-opacity': 0.16 + 0.08 * k, 'stroke-width': (o - i) * U }, marks));
+    else el('circle', { cx: x, cy: y, r: 3.33 * U, fill: 'none', stroke: c, 'stroke-opacity': 0.35, 'stroke-dasharray': '3 3' }, marks);
+    el('circle', { cx: x, cy: y, r: 4.5, fill: c }, marks); };
+  const hatAt = (r, a, rot = 0) => { const [x, y] = P(r, a), c = 'var(--e-hat)', L = 3.3 * U;
+    for (const k of [0, 1]) { const an = (rot + k * 90) * RAD; el('line', { x1: x - L * Math.cos(an), y1: y - L * Math.sin(an), x2: x + L * Math.cos(an), y2: y + L * Math.sin(an), stroke: c, 'stroke-opacity': 0.32, 'stroke-width': 0.58 * U }, marks); }
+    el('rect', { x: x - 4.5, y: y - 4.5, width: 9, height: 9, fill: c }, marks); };
+  const bassAt = (r, a) => { const [x, y] = P(r, a), c = 'var(--e-bass)', s = 1.25 * U;
+    el('rect', { x: x - s / 2, y: y - s / 2, width: s, height: s, fill: c, 'fill-opacity': 0.38 }, marks);
+    el('circle', { cx: x, cy: y, r: 3, fill: c }, marks); };
+  const heart = (a, col, pcol) => { const [x, y] = P(26.4, a);
+    el('circle', { cx: x, cy: y, r: 3.8 * U, fill: 'none', stroke: 'var(--ink)', 'stroke-opacity': 0.5, 'stroke-dasharray': '1 4', 'stroke-linecap': 'round', 'stroke-width': 1.6 }, marks);
+    el('circle', { cx: x, cy: y, r: 0.8 * U, fill: col }, marks);
+    const [ix, iy] = P(30.2, a); el('circle', { cx: ix, cy: iy, r: 0.8 * U, fill: pcol }, marks); };
+  const descent = (a, dir) => { const pts = [P(30.2, a + dir * 6), P(28, a + dir * 34), P(22, a + dir * 52), P(15.5, a + dir * 56), P(12.4, a + dir * 58)];
+    const d = 'M' + pts[0].join(',') + ' C' + pts[1].join(',') + ' ' + pts[2].join(',') + ' ' + pts[3].join(',');
+    el('path', { d, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.5, 'stroke-dasharray': '5 4', 'stroke-opacity': 0.75 }, marks);
+    const [ex, ey] = pts[3], [tx, ty] = P(13.6, a + dir * 57); const an = Math.atan2(ey - ty, ex - tx) + Math.PI;
+    el('path', { d: `M${ex + 6 * Math.cos(an + 2.6)},${ey + 6 * Math.sin(an + 2.6)}L${ex},${ey}L${ex + 6 * Math.cos(an - 2.6)},${ey + 6 * Math.sin(an - 2.6)}`, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.5 }, marks); };
+
+  // centre: stage (boss), ramp pairs, pads, wanderers, start
+  { const [bx, by] = P(0, 0);
+    el('circle', { cx: bx, cy: by, r: 4.2 * U, fill: 'none', stroke: 'var(--ink)', 'stroke-opacity': 0.45, 'stroke-dasharray': '1 4', 'stroke-linecap': 'round', 'stroke-width': 1.6 }, marks);
+    el('circle', { cx: bx, cy: by, r: 1.3 * U, fill: 'var(--e-lead)' }, marks);
+    const pair = (a, k1, k2) => [k1, k2].forEach((k, i) => { const [x, y] = P(5.1, a + (i ? 7 : -7)); if (k === 'ring') el('circle', { cx: x, cy: y, r: 3.2, fill: 'none', stroke: 'var(--e-drum)', 'stroke-width': 1.6 }, marks); if (k === 'beam') el('line', { x1: x - 3.5, y1: y - 3.5, x2: x + 3.5, y2: y + 3.5, stroke: 'var(--e-hat)', 'stroke-width': 2.2 }, marks); if (k === 'pool') el('rect', { x: x - 3, y: y - 3, width: 6, height: 6, fill: 'var(--e-bass)', 'fill-opacity': 0.65 }, marks); });
+    pair(45, 'ring', 'beam'); pair(-45, 'beam', 'pool'); pair(-135, 'pool', 'ring');
+    [['--p-hat', -90], ['--p-bass', 30], ['--p-drum', 150]].forEach(([c, a]) => { const [x, y] = P(10, a); el('circle', { cx: x, cy: y, r: 0.6 * U, fill: 'none', stroke: `var(${c})`, 'stroke-width': 2.4 }, marks); });
+    wanderer(11, 205); wanderer(11.2, -20);
+    const [sx, sy] = P(11.6, 90); el('circle', { cx: sx, cy: sy, r: 5, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.6 }, marks); flag(sx + 16, sy);
+    text(bx, by + 2.6 * U, '보스 무대', { 'font-size': 13 });
+        text(CX - 2.2 * U, CY + 9.4 * U, '다리 = 보스 문', { 'font-size': 10.5, fill: 'var(--soft)', 'text-anchor': 'end' });
+    text(sx - 9, sy + 1, '시작', { 'font-size': 11, fill: 'var(--soft)', 'text-anchor': 'end' });
+    text(...P(11.2, 245), '가운데 필드', { 'font-size': 12 });
+  }
+
+  // the three lands
+  // drum (lower left)
+  drumAt(14.6, 150, true);
+  drumAt(17.6, 136); drumAt(18.4, 165); drumAt(22.2, 143); drumAt(21.8, 160);
+  flag(...P(18.6, 122)); wanderer(23.2, 128); heart(150, 'var(--e-drum)', 'var(--p-drum)'); descent(150, 1); flag(...P(23.4, 150));
+  // hat (top)
+  hatAt(14.4, -90, 0);
+  hatAt(18, -112, 0); hatAt(19, -68, 0); hatAt(22.6, -90, 0);
+  flag(...P(18.5, -90)); wanderer(22, -62); heart(-90, 'var(--e-hat)', 'var(--p-hat)'); descent(-90, 1); flag(...P(23.2, -104));
+  // bass (lower right)
+  bassAt(14.4, 30);
+  bassAt(16.4, 38); bassAt(20.4, 10); bassAt(21, 33); bassAt(23.4, 46);
+  el('path', { d: line([P(18.4, 28), P(20.6, 21)]), stroke: 'var(--e-bass)', 'stroke-opacity': 0.42, 'stroke-width': 1 * U, 'stroke-dasharray': '3 3', fill: 'none' }, marks);
+  flag(...P(18.4, 31)); wanderer(22.6, 52); heart(30, 'var(--e-bass)', 'var(--p-bass)'); descent(30, 1); flag(...P(23.4, 18));
+
+  // land names and band names
+  text(...P(34.6, 150), '드럼 구역', { 'font-size': 15 });
+  text(...P(33.6, -90), '하이햇 구역', { 'font-size': 15 });
+  text(...P(34.6, 30), '베이스 구역', { 'font-size': 15 });
+  text(...P(14.2, -76), '입구', { 'font-size': 10.5, fill: 'var(--soft)' });
+  text(...P(17.4, -101), '중간', { 'font-size': 10.5, fill: 'var(--soft)' });
+  text(...P(27, -112), '안쪽', { 'font-size': 10.5, fill: 'var(--soft)' });
+  text(...P(27.6, -46), '한 방향 지름길', { 'font-size': 10.5, fill: 'var(--soft)' });
+  text(...P(33.4, -43), '구역 사이 절벽', { 'font-size': 10.5, fill: 'var(--soft)' });
+
+  // legend
+  const lg = document.getElementById('legend');
+  const item = (inner, label) => { const s = document.createElement('span'); s.innerHTML = `<svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true">${inner}</svg>${label}`; lg.appendChild(s); };
+  item('<path d="M2,12 Q11,0 20,12" fill="none" stroke="var(--ink)" stroke-width="1.3"/>', '땅의 끝');
+  item('<g fill="var(--danger)" fill-opacity=".45"><circle cx="4" cy="4" r="1.2"/><circle cx="11" cy="4" r="1.2"/><circle cx="18" cy="4" r="1.2"/><circle cx="7.5" cy="10" r="1.2"/><circle cx="14.5" cy="10" r="1.2"/></g>', '낭떠러지 (떨어지면 실패)');
+  item('<path d="M7,11L15,11L11,3Z" fill="var(--ink)"/>', '체크포인트');
+  item('<path d="M11,2l5,5l-5,5l-5,-5z" fill="var(--e-lead)"/>', '음표 몬스터 (원 공격)');
+  item('<circle cx="11" cy="7" r="5" fill="none" stroke="var(--e-drum)" stroke-opacity=".5" stroke-width="2.5"/><circle cx="11" cy="7" r="2.5" fill="var(--e-drum)"/>', '북 장치 (고리 공격)');
+  item('<line x1="3" y1="7" x2="19" y2="7" stroke="var(--e-hat)" stroke-opacity=".45" stroke-width="3"/><rect x="8" y="4" width="6" height="6" fill="var(--e-hat)"/>', '빔 장치');
+  item('<rect x="6" y="2" width="10" height="10" fill="var(--e-bass)" fill-opacity=".4"/><circle cx="11" cy="7" r="2" fill="var(--e-bass)"/>', '장판 장치');
+  item('<circle cx="11" cy="7" r="5.5" fill="none" stroke="var(--ink)" stroke-opacity=".5" stroke-dasharray="1 3" stroke-width="1.6"/><circle cx="11" cy="7" r="2.6" fill="var(--e-drum)"/>', '수호자 대결장');
+  item('<circle cx="11" cy="7" r="5" fill="var(--p-drum)"/>', '악기');
+  item('<circle cx="11" cy="7" r="4.5" fill="none" stroke="var(--p-hat)" stroke-width="2.2"/>', '공명판');
+  item('<path d="M2,7H19M14,3L19,7L14,11" fill="none" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1.4"/>', '한 방향 지름길');
+
+  /* ---------------- pattern cards (validation-build values, in px) ---------------- */
+  const BPM = 110, SPB = 60 / BPM, PXB = 120; // px walked per beat
+  const canvases = [...document.querySelectorAll('canvas[data-pat]')];
+  const STATIC = { mark: 13, sweep: 7.4, beam: 22.5, pool: 6, pad: 12 };
+  let playing = !reduce, t0 = performance.now(), pausedStep = null;
+  const playBtn = document.getElementById('play'), clock = document.getElementById('clock');
+  const setBtn = () => { playBtn.textContent = playing ? '멈춤' : '재생'; playBtn.setAttribute('aria-pressed', String(playing)); };
+  setBtn();
+  const curStep = () => playing ? (performance.now() - t0) / 1000 / SPB * 4 : (pausedStep ?? 0);
+  playBtn.addEventListener('click', () => {
+    if (playing) { pausedStep = curStep(); playing = false; }
+    else { t0 = performance.now() - (pausedStep ?? 0) * SPB / 4 * 1000; pausedStep = null; playing = true; requestAnimationFrame(loop); }
+    setBtn(); drawAll();
+  });
+
+  const alpha = (c, a) => `color-mix(in srgb, ${c} ${Math.round(a * 100)}%, transparent)`;
+  function phaseOf(step, teleStart, hit, linger = 3) {
+    if (step >= teleStart && step < hit) { const n = hit - teleStart, k = Math.floor(step - teleStart) + 1; return { kind: 'tele', a: 0.1 + 0.42 * k / n, grow: 0.35 + 0.65 * ((step - teleStart) / n) }; }
+    if (step >= hit && step < hit + 1) return { kind: 'hit' };
+    if (step >= hit + 1 && step < hit + 1 + linger) return { kind: 'after', f: (step - hit - 1) / linger };
+    return null;
+  }
+  /** As in the game: from the first moment of a telegraph the whole area shows as a faint plane with an outline; the fill spreads inside it. */
+  function teleArea(ctx, col, drawFn) { ctx.fillStyle = alpha(col, 0.1); drawFn(1, 'fill'); ctx.strokeStyle = alpha(col, 0.5); ctx.lineWidth = 1.25; drawFn(1, 'stroke'); }
+  function shape(ctx, ph, col, drawFn) {
+    if (!ph) return;
+    if (ph.kind === 'tele') { teleArea(ctx, col, drawFn); ctx.fillStyle = alpha(col, ph.a); drawFn(ph.grow, 'fill'); }
+    else if (ph.kind === 'hit') { ctx.fillStyle = col; drawFn(1, 'fill'); }
+    else { ctx.strokeStyle = alpha(col, 0.7 * (1 - ph.f)); ctx.lineWidth = 1.2; drawFn(1 + 0.2 * ph.f, 'stroke'); }
+  }
+  function setup(cv) {
+    const dpr = Math.min(2, devicePixelRatio || 1), w = cv.clientWidth, h = cv.clientHeight;
+    if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+    return { ctx, w, h };
+  }
+  // scene: arena px around the boss, scaled to fit the drawing area
+  function scene(ctx, w, sh, radiusPx) {
+    const k = (Math.min(w, sh) / 2 - 8) / radiusPx, cx = w / 2, cy = sh / 2;
+    ctx.strokeStyle = alpha(css('--ink'), 0.5); ctx.lineWidth = 1; ctx.strokeRect(4, 4, w - 8, sh - 8);
+    const u = PXB * k; ctx.strokeStyle = alpha(css('--ink'), 0.6); ctx.beginPath(); ctx.moveTo(12, sh - 14); ctx.lineTo(12 + u, sh - 14); ctx.moveTo(12, sh - 17); ctx.lineTo(12, sh - 11); ctx.moveTo(12 + u, sh - 17); ctx.lineTo(12 + u, sh - 11); ctx.stroke();
+    ctx.fillStyle = alpha(css('--ink'), 0.6); ctx.font = '10px Jost, sans-serif'; ctx.fillText('1U 120px', 18 + u, sh - 10.5);
+    return { k, cx, cy, X: x => cx + x * k, Y: y => cy + y * k };
+  }
+  function boss(ctx, S, open) { ctx.fillStyle = css('--e-lead'); ctx.beginPath(); ctx.arc(S.cx, S.cy, 36 * S.k, 0, 7); ctx.fill(); if (open) { ctx.strokeStyle = alpha(css('--p-drum'), 0.8); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(S.cx, S.cy, 36 * S.k + 5, 0, 7); ctx.stroke(); } }
+  function player(ctx, x, y) { ctx.fillStyle = css('--p-drum'); ctx.beginPath(); ctx.arc(x, y, 5.5, 0, 7); ctx.fill(); }
+  function dashTrail(ctx, x1, y1, x2, y2, f) { const c = css('--p-drum'); ctx.strokeStyle = alpha(c, 0.55 * (1 - f)); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x1, y1, 6 + 10 * f, 0, 7); ctx.stroke(); ctx.lineWidth = 2; ctx.strokeStyle = alpha(c, 0.35 * (1 - f)); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+
+  function strip(ctx, w, y, n, rows, step) {
+    const ink = css('--ink'), x0 = 2, cw = (w - 4) / n, rh = 9;
+    rows.forEach((row, ri) => {
+      const ry = y + ri * (rh + 3), col = row.col;
+      for (let i = 0; i < n; i++) {
+        const x = x0 + i * cw; let fill = null;
+        const inR = rs => rs && rs.find(([a, b]) => i >= a && i < b);
+        if (row.hits && row.hits.includes(i)) fill = col;
+        else if (inR(row.tele)) { const [a, b] = inR(row.tele); fill = alpha(col, 0.12 + 0.4 * (i - a + 1) / (b - a)); }
+        else if (inR(row.hold)) fill = alpha(col, 0.45);
+        else if (inR(row.fill)) { const [a, b] = inR(row.fill); fill = alpha(col, 0.15 + 0.6 * (i - a + 1) / (b - a)); }
+        if (fill) { ctx.fillStyle = fill; ctx.fillRect(x + 0.5, ry, cw - 1, rh); }
+        if (inR(row.open)) { ctx.strokeStyle = alpha(css('--p-drum'), 0.55); ctx.lineWidth = 1; ctx.strokeRect(x + 1, ry + 1, cw - 2, rh - 2); }
+        if (row.ticks && row.ticks.includes(i)) { ctx.fillStyle = alpha(col, 0.7); ctx.fillRect(x + cw / 2 - 1, ry + rh / 2 - 1, 2, 2); }
+        if (row.dash && row.dash.includes(i)) { ctx.fillStyle = css('--p-drum'); ctx.beginPath(); ctx.arc(x + cw / 2, ry + rh + 5, 2.6, 0, 7); ctx.fill(); }
+      }
+    });
+    const hRows = rows.length * (rh + 3) - 3;
+    for (let i = 0; i <= n; i++) { const x = x0 + i * cw; ctx.strokeStyle = alpha(ink, i % 4 === 0 ? (i % 16 === 0 ? 0.6 : 0.3) : 0.12); ctx.lineWidth = i % 16 === 0 ? 1.6 : i % 4 === 0 ? 1.1 : 0.5; ctx.beginPath(); ctx.moveTo(x, y - (i % 4 === 0 ? 3 : 0)); ctx.lineTo(x, y + hRows); ctx.stroke(); }
+    const cur = Math.floor(step) % n;
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.strokeRect(x0 + cur * cw + 0.5, y - 2, Math.max(2, cw - 1), hRows + 4);
+  }
+
+  const PATS = {
+    // gi-solo: marks at the player, hits 8/16/24, telegraph 8; bars 3-4 open
+    mark(ctx, w, h, T) {
+      const sh = h - 40, S = scene(ctx, w, sh, 330), s = T % 64, col = css('--e-lead');
+      boss(ctx, S, s >= 32);
+      const pos = st => { const a = (st / 4) * PXB / 220; return [220 * Math.cos(a), 220 * Math.sin(a)]; };
+      const base = T - s;
+      for (const hit of [8, 16, 24]) { const [mx, my] = pos(base + hit - 8);
+        shape(ctx, phaseOf(s, hit - 8, hit, 4), col, (g, mode) => { ctx.beginPath(); ctx.arc(S.X(mx), S.Y(my), 70 * S.k * g, 0, 7); mode === 'fill' ? ctx.fill() : ctx.stroke(); });
+        if (s >= hit - 8 && s < hit) { ctx.strokeStyle = alpha(col, 0.8); ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(S.X(mx), S.Y(my), 70 * S.k, 0, 7); ctx.stroke(); ctx.setLineDash([]); } }
+      const [x, y] = pos(T); player(ctx, S.X(x), S.Y(y));
+      strip(ctx, w, sh + 14, 64, [{ col, hits: [8, 16, 24], tele: [[0, 8], [8, 16], [16, 24]], open: [[32, 64]] }], T);
+    },
+    // seung-drum: rings 40-150 / 150-260 / 260-400 on beats 2,3,4 of bars 1 and 3; bars 2 and 4 open
+    sweep(ctx, w, h, T) {
+      const sh = h - 48, S = scene(ctx, w, sh, 410), s = T % 64, col = css('--e-drum');
+      const bands = [[40, 150], [150, 260], [260, 400]];
+      for (const off of [0, 32]) bands.forEach(([ri, ro], i) => { const hit = off + 4 * (i + 1);
+        shape(ctx, phaseOf(s, hit - 4, hit, 3), col, (g, mode) => { if (mode === 'fill') { ctx.beginPath(); ctx.arc(S.cx, S.cy, ro * S.k * (0.88 + 0.12 * g), 0, 7); ctx.arc(S.cx, S.cy, ri * S.k, 0, 7, true); ctx.fill('evenodd'); } else { ctx.beginPath(); ctx.arc(S.cx, S.cy, ro * S.k * g, 0, 7); ctx.stroke(); } }); });
+      boss(ctx, S, (s >= 16 && s < 32) || s >= 48);
+      const b = s % 32; let r;
+      if (b < 8) r = 200; else if (b < 9.2) r = 200 - 120 * (b - 8) / 1.2; else if (b < 16) r = 80; else if (b < 20) r = 80 + 120 * (b - 16) / 4; else r = 200;
+      const ang = -0.5;
+      if (b >= 8 && b < 12) dashTrail(ctx, S.X(200 * Math.cos(ang)), S.Y(200 * Math.sin(ang)), S.X(r * Math.cos(ang)), S.Y(r * Math.sin(ang)), (b - 8) / 4);
+      player(ctx, S.X(r * Math.cos(ang)), S.Y(r * Math.sin(ang)));
+      strip(ctx, w, sh + 14, 64, [{ col, hits: [4, 8, 12, 36, 40, 44], tele: [[0, 4], [4, 8], [8, 12], [32, 36], [36, 40], [40, 44]], open: [[16, 32], [48, 64]], dash: [8, 40] }], T);
+    },
+    // seung-hat: beam pairs at 4/8/12, four diagonals at 20, four cardinals at 24, mark at 28
+    beam(ctx, w, h, T) {
+      const sh = h - 52, S = scene(ctx, w, sh, 400), s = T % 32, col = css('--e-hat'), lead = css('--e-lead');
+      const shots = [[4, [0, 180]], [8, [90, 270]], [12, [0, 180]], [20, [45, 135, 225, 315]], [24, [0, 90, 180, 270]]];
+      for (const [hit, angs] of shots) shape(ctx, phaseOf(s, hit - 4, hit, 2), col, (g, mode) => { for (const a of angs) { ctx.save(); ctx.translate(S.cx, S.cy); ctx.rotate(a * RAD); mode === 'fill' ? ctx.fillRect(0, -35 * S.k, 400 * S.k * g, 70 * S.k) : ctx.strokeRect(0, -35 * S.k * g, 400 * S.k, 70 * S.k * g); ctx.restore(); } });
+      if (Math.floor(s) % 4 !== 0 && s < 26) { ctx.fillStyle = alpha(col, 0.8); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + (Math.floor(s) % 4) * 0.25; ctx.beginPath(); ctx.arc(S.cx + 52 * S.k * Math.cos(a), S.cy + 52 * S.k * Math.sin(a), 1.6, 0, 7); ctx.fill(); } }
+      const pa = 22.5 * RAD; let r;
+      if (s < 21) r = 200; else if (s < 25) r = 200 + 120 * (s - 21) / 4; else if (s < 28.5) r = 320; else r = 320 - 120 * Math.min(1, (s - 28.5) / 3.5);
+      const mx = 200 * Math.cos(pa), my = 200 * Math.sin(pa);
+      shape(ctx, phaseOf(s, 20, 28, 3), lead, (g, mode) => { ctx.beginPath(); ctx.arc(S.X(mx), S.Y(my), 70 * S.k * g, 0, 7); mode === 'fill' ? ctx.fill() : ctx.stroke(); });
+      boss(ctx, S, false);
+      player(ctx, S.X(r * Math.cos(pa)), S.Y(r * Math.sin(pa)));
+      strip(ctx, w, sh + 14, 32, [{ col, hits: [4, 8, 12, 20, 24], tele: [[0, 4], [4, 8], [8, 12], [16, 20], [20, 24]], ticks: [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21, 22, 23] }, { col: lead, hits: [28], tele: [[20, 28]] }], T);
+    },
+    // road fragment of jeon-resolve: one 150x150 zone, telegraph 8, strikes 8/12/16, rest to 32
+    pool(ctx, w, h, T) {
+      const sh = h - 40, S = scene(ctx, w, sh, 300), s = T % 32, col = css('--e-bass');
+      const sq = (g, mode) => { const hs = 75 * S.k * g; mode === 'fill' ? ctx.fillRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs) : ctx.strokeRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs); };
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(S.cx, S.cy, 3.5, 0, 7); ctx.fill();
+      if (s < 8) { const ph = phaseOf(s, 0, 8); teleArea(ctx, col, sq); ctx.fillStyle = alpha(col, ph.a); sq(ph.grow, 'fill'); }
+      else if (s < 17) { const ib = (s - 8) % 4; ctx.fillStyle = alpha(col, ib < 1 ? 1 : 0.18 + 0.5 * Math.floor(ib) / 3); sq(1, 'fill'); }
+      else if (s < 21) { const f = (s - 17) / 4; ctx.fillStyle = alpha(col, 0.22 * (1 - f)); sq(1 + 0.3 * f, 'fill'); }
+      const dir = Math.floor(T / 32) % 2 ? -1 : 1;
+      const px = s < 17 ? -225 * dir : (-225 + 450 * Math.min(1, (s - 17) / 15)) * dir;
+      player(ctx, S.X(px), S.cy);
+      strip(ctx, w, sh + 14, 32, [{ col, hits: [8, 12, 16], tele: [[0, 8]], hold: [[9, 12], [13, 16]] }], T);
+    },
+    // jeon-resolve pad: hold 16 steps with the right instrument, a zone lands on the pad at the bar line
+    pad(ctx, w, h, T) {
+      const sh = h - 52, S = scene(ctx, w, sh, 300), s = T % 32, col = css('--e-bass'), pc = css('--p-hat');
+      const on = s < 15.6, prog = Math.min(16, Math.floor(s) + 1);
+      ctx.strokeStyle = pc; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(S.cx, S.cy, 40 * S.k, 0, 7); ctx.stroke();
+      if (s < 16) { ctx.fillStyle = alpha(pc, 0.55); ctx.beginPath(); ctx.moveTo(S.cx, S.cy); ctx.arc(S.cx, S.cy, 40 * S.k - 3, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * prog / 16); ctx.closePath(); ctx.fill(); }
+      else if (s < 28) { ctx.fillStyle = alpha(pc, 0.55); ctx.beginPath(); ctx.arc(S.cx, S.cy, 40 * S.k - 3, 0, 7); ctx.fill(); }
+      const sq = (g, mode) => { const hs = 75 * S.k * g; mode === 'fill' ? ctx.fillRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs) : ctx.strokeRect(S.cx - hs, S.cy - hs, 2 * hs, 2 * hs); };
+      if (s >= 8 && s < 16) { const ph = phaseOf(s, 8, 16); teleArea(ctx, col, sq); ctx.fillStyle = alpha(col, ph.a); sq(ph.grow, 'fill'); }
+      else if (s >= 16 && s < 25) { const ib = (s - 16) % 4; ctx.fillStyle = alpha(col, ib < 1 ? 1 : 0.18 + 0.5 * Math.floor(ib) / 3); sq(1, 'fill'); }
+      let px = 0; if (!on) px = s < 17 ? 130 * (s - 15.6) / 1.4 : s < 28 ? 130 : 130 * (1 - (s - 28) / 4);
+      player(ctx, S.X(px), S.cy);
+      strip(ctx, w, sh + 14, 32, [{ col: pc, fill: [[0, 16]] }, { col, hits: [16, 20, 24], tele: [[8, 16]], hold: [[17, 20], [21, 24]] }], T);
+    },
+  };
+
+  function drawAll() {
+    const T = curStep();
+    for (const cv of canvases) { const { ctx, w, h } = setup(cv); const st = (!playing && pausedStep === null) ? STATIC[cv.dataset.pat] : T; PATS[cv.dataset.pat](ctx, w, h, st); }
+    clock.textContent = playing || pausedStep !== null ? `박 ${(Math.floor(T / 4) % 4) + 1} · 스텝 ${(Math.floor(T) % 16) + 1}` : '멈춘 그림';
+  }
+  function loop() { if (!playing) return; drawAll(); requestAnimationFrame(loop); }
+  addEventListener('resize', drawAll);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', drawAll);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
+  drawAll(); if (playing) requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

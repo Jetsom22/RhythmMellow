@@ -1,0 +1,164 @@
+{
+  "id": "lab-monster",
+  "name": "몬스터 시험장",
+  "meter": {
+    "bpm": 110,
+    "stepsPerBeat": 4,
+    "beatsPerBar": 4,
+    "dashMs": 120,
+    "justMs": 60
+  },
+  "seed": 7,
+  "lives": 9,
+  "start": [
+    0.0,
+    6.5
+  ],
+  "map": {
+    "ground": [
+      {
+        "kind": "circle",
+        "x": 0,
+        "y": 0,
+        "r": 10.5
+      }
+    ],
+    "holes": [
+      {
+        "kind": "circle",
+        "x": 0,
+        "y": 1.2,
+        "r": 1.4
+      }
+    ]
+  },
+  "attacks": {
+    "slam": {
+      "shape": {
+        "kind": "ring",
+        "r0": 0.3333333333333333,
+        "r1": 1.25
+      },
+      "tele": 4,
+      "layer": "drum"
+    },
+    "circle": {
+      "shape": {
+        "kind": "circle",
+        "r": 0.5833333333333334
+      },
+      "tele": 8,
+      "anchor": "target",
+      "layer": "lead"
+    }
+  },
+  "emitters": [
+    {
+      "id": "A-ring",
+      "kind": "monster",
+      "x": -5.0,
+      "y": -1.5,
+      "hp": 30,
+      "body": 0.12,
+      "touch": true,
+      "respawn": 2,
+      "range": 2.0,
+      "motion": {
+        "kind": "chase",
+        "by": 0.8,
+        "min": 0.7,
+        "sight": 6.0
+      },
+      "pattern": {
+        "length": 16,
+        "events": [
+          {
+            "at": 4,
+            "attack": "slam"
+          },
+          {
+            "at": 12,
+            "attack": "slam"
+          }
+        ]
+      }
+    },
+    {
+      "id": "B-circle",
+      "kind": "monster",
+      "x": 5.0,
+      "y": -1.5,
+      "hp": 30,
+      "body": 0.12,
+      "touch": true,
+      "respawn": 2,
+      "range": 5.0,
+      "motion": {
+        "kind": "chase",
+        "by": 0.8,
+        "min": 1.2,
+        "sight": 6.0
+      },
+      "pattern": {
+        "length": 16,
+        "events": [
+          {
+            "at": 8,
+            "attack": "circle"
+          }
+        ]
+      }
+    },
+    {
+      "id": "C-now",
+      "kind": "monster",
+      "x": 0.0,
+      "y": -7.0,
+      "body": 0.22,
+      "range": 6.0,
+      "motion": {
+        "kind": "approach",
+        "every": 4,
+        "by": 0.5,
+        "min": 2.5,
+        "sight": 6.0
+      },
+      "pattern": {
+        "length": 32,
+        "rest": 32,
+        "phase": 0,
+        "events": [
+          {
+            "at": 8,
+            "attack": "circle"
+          },
+          {
+            "at": 16,
+            "attack": "circle"
+          },
+          {
+            "at": 24,
+            "attack": "circle"
+          }
+        ]
+      }
+    }
+  ],
+  "checkpoints": [
+    {
+      "x": 0.0,
+      "y": 6.5,
+      "r": 0.8
+    },
+    {
+      "x": -3.0,
+      "y": 3.0,
+      "r": 0.8
+    },
+    {
+      "x": 3.0,
+      "y": 3.0,
+      "r": 0.8
+    }
+  ]
+}
