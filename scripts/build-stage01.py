@@ -34,8 +34,10 @@ emitters, parts, plates, gates, checkpoints, encounters = [], [], [], [], [], []
 checkpoints.append({"x": 0, "y": 10.5, "r": 1.0})
 
 # The centre: start, two note monsters, three plates, the bridge to the boss.
-for i, a in enumerate([52, 128]):
-    emitters.append({"id": "note-%d" % i, "kind": "monster", **at(10.0, a + (2 if i else -2)), "body": 0.22, "range": 6.0,
+# The note monsters stand towards the cliffs between areas (330 and 210 degrees), so their circle attacks
+# never reach an entrance device: each attack is first met alone (checked by the level workbench).
+for i, a in enumerate([330, 210]):
+    emitters.append({"id": "note-%d" % i, "kind": "monster", **at(10.0, a), "body": 0.22, "range": 6.0,
         "motion": {"kind": "approach", "every": 4, "by": 0.5, "min": 2.5, "sight": 6.0},
         "pattern": {"length": 32, "rest": 32, "phase": 32 * i, "events": circles([8, 16, 24])}})
 for layer, a in ZONES.items():
@@ -43,6 +45,9 @@ for layer, a in ZONES.items():
 gates.append({"id": "boss-bridge", "shape": {"kind": "rect", "x": 0, "y": 5.8, "w": 1.6, "h": 2.8},
     "requires": {"flags": ["plate-drum", "plate-hat", "plate-bass"]}})
 checkpoints.append({"x": 0, "y": 7.8, "r": 0.8})
+# One beside each note monster, on the far side of the centre from the start.
+for a in (300, 240):
+    checkpoints.append({**at(11.5, a), "r": 0.8})
 
 def device(id, r, a, pattern, **extra):
     emitters.append({"id": id, "kind": "device", **at(r, a), "body": 0.2, "pattern": pattern, **extra})
@@ -87,6 +92,10 @@ for layer, c in ZONES.items():
         "motion": {"kind": "approach", "every": 4, "by": 0.5, "min": 2.5, "sight": 6.0},
         "pattern": {"length": 32, "rest": 32, "events": circles([8, 16, 24])}})
     checkpoints.append({**at(21.4, c - 22), "r": 0.8})
+    # Near the mixed place, and (bass) near the left causeway: every device within 8U of a checkpoint.
+    checkpoints.append({**at(24.5, c + 34), "r": 0.8})
+    if layer == "bass":
+        checkpoints.append({**at(15.4, c + 44), "r": 0.8})
     # Inside: the guardian and the instrument. Three just dashes in a row pass it without an instrument.
     gx, gy = pol(26.0, c - 24)   # clear of every device on the way in
     phrase = {
