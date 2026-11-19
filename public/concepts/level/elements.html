@@ -157,16 +157,15 @@ textarea{width:100%;min-height:58px;font:14px/1.5 var(--body);color:var(--ink);b
           opts: [['keep', '둔다'], ['drop', '안 둔다']], rec: 'keep' },
       ] },
     { id: 'special', name: '특수 공격으로 여는 장치', who: '새 제안 (지금 맵에는 없다) · 규칙: 시스템 세션 (onSpecial)',
-      now: '지금 맵에는 없다. 규칙은 있다: 장치가 특수 공격에 맞으면(악기를 정하면 그 악기의 특수 공격에만) 깃발이 서고, 그 깃발을 기다리던 다리가 열린다. 특수 공격(임시 수치): 드럼은 몸 둘레 2U에 피해 60, 하이햇은 바라보는 쪽으로 길이 6U·폭 0.6U의 선에 피해 40, 베이스는 선 자리에 반지름 2.5U 웅덩이가 4박 동안 박마다 피해 15.',
-      trains: '저스트 회피로 특수 공격을 충전하고, 맞는 악기로 바꿔서 쓰기.',
-      size: '그림: 원 공격을 저스트로 피해 충전하고(1마디 2박), 낭떠러지 건너 장치에 하이햇 특수 공격(길이 6U)을 쓴다. 다리가 열린다.',
+      now: '지금 맵에는 없다. 규칙은 있다: 장치가 특수 공격에 맞으면 깃발이 서고, 그 깃발을 기다리던 다리가 열린다. 특수 공격은 악기와 상관없이 하나이고 악기가 없어도 쓴다: 몸 둘레 2U에 피해 60 (임시 수치, 2026-11-19).',
+      decided: '둔다. 장치 앞에 저스트로 피할 장치 공격을 둔다 (기획자가 고름). 특수 공격이 하나가 되어 "어느 악기의 특수 공격에 열리는가"는 없어졌다.',
+      trains: '저스트 회피로 특수 공격을 충전하고, 장치 가까이(2U 안)에서 쓰기.',
+      size: '그림: 원 공격을 저스트로 피해 충전하고(1마디 3박), 낭떠러지 가장자리로 걸어가 특수 공격(몸 둘레 2U)을 쓴다. 건너편 장치에 닿아 다리가 열린다.',
       qs: [
         { id: 'keep', q: '특수 공격으로 여는 장치를 둘까', why: '기획자: 특수 공격은 기믹 풀이와 큰 피해에 쓴다.',
           opts: [['keep', '둔다'], ['drop', '안 둔다']], rec: 'keep' },
-        { id: 'which', q: '어느 특수 공격에 열리는가', why: '악기를 정하면 그 악기를 얻은 뒤 다시 와서 여는 곳이 된다. 순서 없이 모으기를 지키려면 악기 셋과 보스로 가는 길에는 악기를 정한 장치를 두지 않는다.',
-          opts: [['any', '아무 악기의 특수 공격'], ['one', '정해진 악기의 특수 공격만'], ['both', '둘 다 쓰고 자리마다 고른다']], rec: 'both' },
         { id: 'charge', q: '충전할 곳', why: '특수 공격은 저스트 회피로만 충전된다. 충전 없이 오면 풀 수 없다.',
-          opts: [['monster', '충전하는 상대(음표 몬스터)를 장치 앞에 둔다'], ['near', '장치 앞에 저스트로 피할 장치 공격을 둔다'], ['none', '따로 두지 않는다. 미리 충전해 온다']], rec: 'monster' },
+          opts: [['near', '장치 앞에 저스트로 피할 장치 공격을 둔다'], ['none', '따로 두지 않는다. 미리 충전해 온다']], rec: 'near' },
       ] },
     { id: 'bridge', name: '악기를 얻은 뒤의 길', who: '설계: 레벨디자인 · 지금 맵: 시스템 세션',
       now: '악기를 얻으면 옆 구역으로 건너는 다리가 열린다. 다리는 옆 구역의 안쪽, 수호자 근처로 이어져서 그 구역 입구 장치보다 수호자를 먼저 만날 수 있다.',
@@ -617,9 +616,10 @@ textarea{width:100%;min-height:58px;font:14px/1.5 var(--body);color:var(--ink);b
       label(c, '폭 0.7U: 박에 맞춰 대시(1U)로 건넌다', -4.8 * U, -2.6 * U);
     },
     special(c, S) {
-      // a circle on the player, dodged just on its hit (charges the special); then the hat special at the device across the gap; the bridge opens
-      const s = ((S % 32) + 32) % 32, g = c.g, pal = c.pal, open = s >= 17;
-      const px = s < 8 ? -3 : s < 8 + DASH_STEPS ? -3 + (s - 8) / DASH_STEPS : -2, P = { x: px * U, y: U };
+      // a circle on the player, dodged just on its hit (charges the special); walk to the edge, fire the special
+      // (one burst around the player, 2U); it reaches the device across the gap and the bridge opens
+      const s = ((S % 32) + 32) % 32, g = c.g, pal = c.pal, open = s >= 22;
+      const px = s < 8 ? -3 : s < 8 + DASH_STEPS ? -3 + (s - 8) / DASH_STEPS : s < 12 ? -2 : Math.min(.35, -2 + (s - 12) / 4), P = { x: px * U, y: U };
       const hole = (x, y) => (open && Math.abs(y - U) < .4 * U + 4 ? -1 : inRect(x, y, .6 * U, -9 * U, 1.6 * U, 9 * U));
       deadDots(c, P, hole);
       if (open) {
@@ -631,18 +631,19 @@ textarea{width:100%;min-height:58px;font:14px/1.5 var(--body);color:var(--ink);b
         g.beginPath(); g.moveTo(.6 * U, .6 * U); g.lineTo(1.6 * U, .6 * U); g.moveTo(.6 * U, 1.4 * U); g.lineTo(1.6 * U, 1.4 * U); g.stroke(); g.restore();
       }
       for (const a of looped(S, 32, [{ at: 8, attack: 'circle' }], (ev, st) => inst('circle', st, -3 * U, U))) attack(c, a, S);
-      const D = { x: 3.4 * U, y: -1.2 * U };
-      device(c, D.x, D.y, 'hat', [], S);
-      dashFx(c, -3 * U, U, -2 * U, U, (s - 8) / 4, pal.player.hat);
-      const age = (s - 16) / 4;
+      const D = { x: 1.9 * U, y: .2 * U };
+      device(c, D.x, D.y, 'drum', [], S);
+      dashFx(c, -3 * U, U, -2 * U, U, (s - 8) / 4, pal.ink);
+      // the special as the game draws it: one burst around the player in the just colour
+      const age = (s - 21) / 4;
       if (age >= 0 && age < 1.2) {
-        const k = age / 1.2, L = 6 * U * easeOut(clamp(age / .15)), hw = .3 * U * (1 - k), dx = D.x - P.x, dy = D.y - P.y, l = Math.hypot(dx, dy), fx = dx / l, fy = dy / l;
-        g.save(); g.fillStyle = pal.player.hat; g.strokeStyle = pal.just;
-        g.globalAlpha = .7 * (1 - k) ** 1.5; g.beginPath(); g.moveTo(P.x - fy * hw, P.y + fx * hw); g.lineTo(P.x + fx * L, P.y + fy * L); g.lineTo(P.x + fy * hw, P.y - fx * hw); g.closePath(); g.fill();
-        g.globalAlpha = (1 - k) ** 1.3; g.lineWidth = 2 * c.lw; g.beginPath(); g.moveTo(P.x, P.y); g.lineTo(P.x + fx * L, P.y + fy * L); g.stroke(); g.restore();
+        const k = age / 1.2, R = 2 * U * easeOut(clamp(age / .2));
+        g.save(); g.fillStyle = g.strokeStyle = pal.just;
+        g.globalAlpha = .4 * (1 - k) ** 2; g.beginPath(); g.arc(P.x, P.y, R, 0, TAU); g.fill();
+        g.globalAlpha = (1 - k) ** 1.3; g.lineWidth = (3 - 2 * k) * c.lw; g.beginPath(); g.arc(P.x, P.y, R + 14 * k, 0, TAU); g.stroke(); g.restore();
       }
-      player(c, P.x, P.y, S, { ring: 'hat', just: s >= 8 && s < 8 + DASH_STEPS, charged: s >= 8 + DASH_STEPS && s < 16 });
-      label(c, s >= 8 && s < 16 ? '저스트 회피: 특수 공격 충전' : s >= 16 && s < 21 ? '특수 공격 (F)' : '', -4.4 * U, 1.5 * U);
+      player(c, P.x, P.y, S, { just: s >= 8 && s < 8 + DASH_STEPS, charged: s >= 8 + DASH_STEPS && s < 21 });
+      label(c, s >= 8 && s < 21 ? '저스트 회피: 특수 공격 충전' : s >= 21 && s < 26 ? '특수 공격 (F), 몸 둘레 2U' : '', -4.4 * U, 1.5 * U);
       label(c, open ? '다리가 열렸다' : '닫힌 다리', 1.8 * U, .75 * U);
     },
     bridge(c) {
